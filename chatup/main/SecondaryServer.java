@@ -6,16 +6,16 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
-public class SecondaryServer{
+public class SecondaryServer {
 
-    private static ArrayList<ServerInfo> primaryServers = new ArrayList<>();
-
-    public static void main(String[] args) {
+    public static void main(String[] args) throws UnknownHostException {
 
         if (args.length < 1) {
             System.out.println("USAGE: SecondaryServer ip:port (ip:port...)");
             System.exit(1);
         }
+
+        final ArrayList<ServerInfo> primaryServers = new ArrayList<>();
 
         for (int i = 0; i < args.length; i++) {
 
@@ -38,7 +38,7 @@ public class SecondaryServer{
                 System.exit(1);
             }
 
-            primaryServers.add(new ServerInfo(serverAddress, serverPort));
+            //primaryServers.add(new ServerInfo(serverAddress, serverPort, 0));
         }
 
         for (final ServerInfo server : primaryServers) {

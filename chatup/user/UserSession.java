@@ -6,38 +6,64 @@ import java.util.Set;
 
 public class UserSession {
 
-    private short myPort;
+    private short userPort;
 
-    public UserSession(final InetAddress paramAddress, short paramPort) {
-        myAddress = paramAddress;
-        myPort = paramPort;
-        myRooms = new HashSet<Integer>();
+    public UserSession(final InetAddress userAddress, short userPort) {
+        setAddress(userAddress);
+        setPort(userPort);
+        setRooms(new HashSet<>());
     }
 
-    private InetAddress myAddress;
-    private Set<Integer> myRooms;
+    private InetAddress userAddress;
+    private Set<Integer> userRooms;
 
-    public final int getCount() {
-        return myRooms.size();
+    public boolean enterRoom(int roomId) {
+
+        if (userRooms.contains(roomId)) {
+            return false;
+        }
+
+        userRooms.add(roomId);
+
+        return true;
     }
 
-    public final short getPort() {
-        return myPort;
+    public boolean leaveRoom(int roomId) {
+
+        if (!userRooms.contains(roomId)) {
+            return false;
+        }
+
+        userRooms.remove(roomId);
+
+        return true;
     }
 
-    public final void setPort(short paramPort) {
-        myPort = paramPort;
+    public int getCount() {
+        return userRooms.size();
+    }
+
+    public short getPort() {
+        return userPort;
+    }
+
+    public void setPort(short paramPort) {
+        userPort = paramPort;
     }
 
     public final InetAddress getAddress() {
-        return myAddress;
+        return userAddress;
     }
 
-    public final void setAddress(final InetAddress paramAddress) {
-        myAddress = paramAddress;
+    public void setAddress(final InetAddress paramAddress) {
+        userAddress = paramAddress;
+    }
+
+    public void setRooms(final Set<Integer> paramRooms) {
+        userRooms = paramRooms;
     }
 
     public final Set<Integer> getRooms() {
-        return myRooms;
+        return userRooms;
     }
 }

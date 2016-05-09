@@ -1,7 +1,6 @@
 package chatup.room;
 
 import chatup.rest.HttpRequest;
-
 import com.eclipsesource.json.Json;
 
 public class DeleteRoom implements HttpRequest{

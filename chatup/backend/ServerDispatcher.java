@@ -1,38 +1,44 @@
 package chatup.backend;
 
+import com.eclipsesource.json.Json;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 
 public abstract class ServerDispatcher implements HttpHandler {
 
-    protected final String parseRequestBody(final InputStream in) {
-
-        try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-
-            byte buf[] = new byte[4096];
-
-            for (int n = in.read(buf); n > 0; n = in.read(buf)) {
-                out.write(buf, 0, n);
-            }
-
-            return new String(out.toByteArray(), "utf-8");
-        }
-        catch (IOException ex) {
-            return null;
-        }
-    }
-
-    protected void sendResponse(final HttpExchange httpExchange, final String serverResponse, int statusCode) throws IOException {
+    private void sendResponse(final HttpExchange httpExchange, final String serverResponse, int statusCode) throws IOException {
 
         httpExchange.sendResponseHeaders(statusCode, serverResponse.length());
 
         try (final OutputStream os = httpExchange.getResponseBody()) {
             os.write(serverResponse.getBytes());
         }
+    }
+
+    protected boolean sendError(final HttpExchange httpExchange, final String requestCommand) {
+
+        try {
+            sendResponse(httpExchange, Json.object().add("error", requestCommand).toString(), 404);
+        }
+        catch (IOException ex) {
+            return false;
+        }
+
+        return true;
+    }
+
+    protected boolean sendSuccess(final HttpExchange httpExchange, final String requestCommand) {
+
+        try {
+            sendResponse(httpExchange, Json.object().add("success", requestCommand).toString(), 200);
+        }
+        catch (IOException ex) {
+            return false;
+        }
+
+        return true;
     }
 }

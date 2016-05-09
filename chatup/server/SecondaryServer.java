@@ -2,19 +2,15 @@ package chatup.server;
 
 import chatup.backend.SecondaryDispatcher;
 import chatup.rest.HttpRequest;
-import chatup.room.Room;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.sql.SQLException;
-import java.util.HashMap;
 
 public class SecondaryServer extends Server {
 
-	private final HashMap<Integer, ServerInfo> servers = new HashMap<>();
-	private final HashMap<Integer, Room> rooms = new HashMap<>();
 	private final Database serverDatabase = Database.getInstance();
 
 	public SecondaryServer(short paramPort, short tcpPort) throws SQLException {
@@ -49,39 +45,8 @@ public class SecondaryServer extends Server {
 		return true;
 	}
 
-	public void createRoom(int roomId, final String roomName, final String roomPassword) {
-
-		final Room newRoom = rooms.put(roomId, new Room(roomName, roomPassword));
-
-		if (newRoom == null) {
-
-		}
-		else {
-
-			if (serverDatabase.insertRoom(roomId, newRoom)) {
-
-			}
-			else {
-
-			}
-		}
-	}
-
-	public void deleteRoom(int roomId) {
-
-		final Room oldRoom = rooms.remove(roomId);
-
-		if (oldRoom == null) {
-
-		}
-		else {
-
-			if (serverDatabase.deleteRoom(roomId)) {
-
-			}
-			else {
-
-			}
-		}
+	@Override
+	public ServerType getType() {
+		return ServerType.SECONDARY;
 	}
 }

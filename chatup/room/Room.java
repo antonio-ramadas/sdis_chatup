@@ -1,9 +1,7 @@
 package chatup.room;
 
-import chatup.user.UserSession;
+import javafx.util.Pair;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -12,32 +10,75 @@ public class Room {
 	
 	private String roomName;
 	private String roomPassword;
+	private String roomOwner;
+	private HashMap<String, String> roomUsers;
+	private Set<Integer> roomServers;
 
-	private HashMap<String, String> users;
-	private Set<Integer> servers;
-
-	public Room(final String roomName, final String roomPassword) {
-		this.roomName = roomName;
-		this.roomPassword = roomPassword;
-		this.users = new HashMap<>();
-		this.servers = new HashSet<>();
+	public Room(final String paramName, final String paramPassword,final String paramOwner) {
+		roomName = paramName;
+		roomOwner = paramOwner;
+		roomPassword = paramPassword;
+		roomUsers = new HashMap<>();
+		roomServers = new HashSet<>();
 	}
 
-	public Room(final String roomName) {
-		this(roomName, null);
+	public Room(final String roomName, final String roomOwner) {
+		this(roomName, null, roomOwner);
 	}
 
-	public final void registerUser(final UserSession paramUser) {
-	}
+	public boolean registerServer(int serverId) {
 
-	public final void removeUser(final String userToken) {
-
-		if (users.containsKey(userToken)) {
-			users.remove(userToken);
+		if (roomServers.contains(serverId)) {
+			return false;
 		}
+
+		roomServers.add(serverId);
+
+		return true;
 	}
 
-	public final boolean isPrivate() {
+	public boolean removeServer(int serverId) {
+
+		if (!roomServers.contains(serverId)) {
+			return false;
+		}
+
+		roomServers.remove(serverId);
+
+		return true;
+	}
+
+	public boolean registerUser(final Pair<String, String> userAccount) {
+
+		final String userToken = userAccount.getKey();
+
+		if (roomUsers.containsKey(userToken)) {
+			return false;
+		}
+
+		roomUsers.put(userToken, userAccount.getValue());
+
+		return true;
+	}
+
+	public boolean removeUser(final Pair<String, String> userAccount)  {
+
+		final String userToken = userAccount.getKey();
+
+		if (!roomUsers.containsKey(userToken)) {
+			return false;
+		}
+
+		roomUsers.remove(userToken);
+
+		return true;
+	}
+
+	public boolean isEmpty() {
+		return roomUsers.size() == 0;
+	}
+
+	public boolean isPrivate() {
 		return roomPassword != null;
 	}
 
@@ -45,7 +86,15 @@ public class Room {
 		return roomName;
 	}
 
+	public final String getOwner() {
+		return roomOwner;
+	}
+
 	public final String getPassword() {
 		return roomPassword;
+	}
+
+	public final HashMap<String, String> getUsers() {
+		return roomUsers;
 	}
 }

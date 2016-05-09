@@ -1,7 +1,7 @@
 package chatup.server;
 
 import chatup.room.Room;
-import chatup.user.Message;
+import chatup.user.UserMessage;
 
 import java.net.UnknownHostException;
 import java.sql.*;
@@ -36,7 +36,7 @@ public class Database{
         return true;
     }
 
-    public boolean insertMessage(final Message paramMessage) {
+    public boolean insertMessage(final UserMessage paramMessage) {
 
         final String sqlQuery = "INSERT INTO Messsages(id, room, username, epoch, message) VALUES(DEFAULT, ?, ?, ?, ?)";
 
@@ -91,7 +91,7 @@ public class Database{
         return true;
     }
 
-    public boolean deleteMessage(final Message paramMessage) {
+    public boolean deleteMessage(final UserMessage paramMessage) {
 
         return true;
     }
