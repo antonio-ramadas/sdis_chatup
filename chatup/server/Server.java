@@ -37,10 +37,13 @@ public abstract class Server {
         try {
             // TODO: verify if 'TLSv1' is what we really want
             // TODO: clean up this mess (and understand it as well)
-            KeyManagerFactory kmf = serverKeystore.getKeyManager();
-            TrustManagerFactory tmf = serverKeystore.getTrustManager();
+            final KeyManagerFactory kmf = serverKeystore.getKeyManager();
+            final TrustManagerFactory tmf = serverKeystore.getTrustManager();
+
             httpServer = HttpsServer.create(new InetSocketAddress(httpPort), 0);
-            SSLContext sslContext = SSLContext.getInstance("TLSv1");
+
+            final SSLContext sslContext = SSLContext.getInstance("TLSv1");
+
             sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
             httpServer.setHttpsConfigurator(new HttpsConfigurator(sslContext) {
                 public void configure(HttpsParameters params) {

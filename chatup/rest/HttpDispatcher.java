@@ -1,10 +1,9 @@
 package chatup.rest;
 
-import chatup.server.Server;
-
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
+
 import com.sun.net.httpserver.HttpExchange;
 
 import java.io.ByteArrayOutputStream;
@@ -12,12 +11,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public abstract class HttpDispatcher {
+public abstract class HttpDispatcher{
 
-    private HttpExchange httpExchange;
-    private String httpParameters;
+    private final HttpExchange httpExchange;
+    private final String httpParameters;
 
-    public HttpDispatcher(final HttpExchange paramExchange) {
+    HttpDispatcher(final HttpExchange paramExchange) {
         httpExchange = paramExchange;
         httpParameters = parseRequestBody(httpExchange.getRequestBody());
     }
@@ -94,7 +93,7 @@ public abstract class HttpDispatcher {
         return null;
     }
 
-    protected final String parseRequestBody(final InputStream in) {
+    private String parseRequestBody(final InputStream in) {
 
         try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 

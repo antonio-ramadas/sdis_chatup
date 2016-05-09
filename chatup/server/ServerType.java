@@ -1,6 +1,6 @@
 package chatup.server;
 
-public enum ServerType {
+public enum ServerType{
 
     PRIMARY("Primary"),
     SECONDARY("Secondary");
