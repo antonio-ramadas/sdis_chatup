@@ -12,7 +12,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 
-public class ServerKeystore{
+public class ServerKeystore {
 
     private final String keystorePath;
     private final String keystorePassword;

@@ -3,7 +3,7 @@ package chatup.room;
 import chatup.rest.HttpRequest;
 import com.eclipsesource.json.Json;
 
-public class DeleteRoom implements HttpRequest{
+public class DeleteRoom implements HttpRequest {
 
     private final int roomId;
     private final String userToken;

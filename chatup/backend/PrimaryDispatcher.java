@@ -6,7 +6,7 @@ import com.sun.net.httpserver.HttpExchange;
 
 import java.io.IOException;
 
-public class PrimaryDispatcher extends ServerDispatcher{
+public class PrimaryDispatcher extends ServerDispatcher {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {

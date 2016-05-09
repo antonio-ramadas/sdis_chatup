@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public abstract class HttpDispatcher{
+public abstract class HttpDispatcher {
 
     private final HttpExchange httpExchange;
     private final String httpParameters;

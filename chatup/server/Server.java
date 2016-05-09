@@ -16,7 +16,7 @@ import java.security.*;
 import java.util.HashMap;
 import java.util.concurrent.Executors;
 
-public abstract class Server{
+public abstract class Server {
 
     private HttpsServer httpServer;
     private SSLServerSocket tcpSocket;

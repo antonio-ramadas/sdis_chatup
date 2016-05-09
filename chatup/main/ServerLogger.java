@@ -7,7 +7,7 @@ import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class ServerLogger{
+public class ServerLogger {
 
     private static ServerLogger instance;
 
