@@ -15,7 +15,7 @@ public class Message implements Comparable<Message> {
     private String messageSender;
     private String messageBody;
 
-    public final int getRoom() {
+    public final int getRoomId() {
         return messageRoom;
     }
 
@@ -34,7 +34,7 @@ public class Message implements Comparable<Message> {
     @Override
     public boolean equals(final Object other) {
         return other instanceof Message
-            && ((Message) other).getRoom() == messageRoom
+            && ((Message) other).getRoomId() == messageRoom
             && ((Message) other).getTimestamp() == messageTimestamp
             && ((Message) other).getSender().equals(messageSender);
     }

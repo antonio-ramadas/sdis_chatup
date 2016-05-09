@@ -42,7 +42,7 @@ public class SecondaryServer{
         }
 
         for (final ServerInfo server : primaryServers) {
-            System.out.println("server address : " + server.getAddress() + ", server port : " + server.getPort());
+            System.out.println("server address : " + server.getAddress() + ", server port : " + server.getTcpPort());
         }
 
         final ServerLogger loggerInstance = ServerLogger.getInstance("myServer");

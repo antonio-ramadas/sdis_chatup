@@ -41,7 +41,7 @@ public class Database{
         final String sqlQuery = "INSERT INTO Messsages(id, room, username, epoch, message) VALUES(DEFAULT, ?, ?, ?, ?)";
 
         try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
-            stmt.setInt(1, paramMessage.getRoom());
+            stmt.setInt(1, paramMessage.getRoomId());
             stmt.setString(2, paramMessage.getSender());
             stmt.setLong(3, paramMessage.getTimestamp());
             stmt.setString(4, paramMessage.getMessage());
@@ -107,7 +107,7 @@ public class Database{
         try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
             stmt.setInt(1, paramServer.getId());
             stmt.setString(2, paramServer.getAddress().getHostAddress());
-            stmt.setShort(3, paramServer.getPort());
+            stmt.setShort(3, paramServer.getTcpPort());
             stmt.executeUpdate();
         }
         catch (SQLException ex) {
@@ -123,7 +123,7 @@ public class Database{
 
         try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
             stmt.setString(1, paramServer.getAddress().getHostAddress());
-            stmt.setShort(2, paramServer.getPort());
+            stmt.setShort(2, paramServer.getTcpPort());
             stmt.setInt(3, paramServer.getId());
             stmt.executeUpdate();
         }
