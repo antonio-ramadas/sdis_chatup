@@ -1,13 +1,9 @@
 package chatup.server;
 
 import chatup.room.Room;
-<<<<<<< HEAD
 import chatup.user.Message;
 import chatup.user.UserLogin;
 import jdk.internal.cmm.SystemResourcePressureImpl;
-=======
-import chatup.user.UserMessage;
->>>>>>> refs/remotes/origin/master
 
 import java.net.UnknownHostException;
 import java.sql.*;
@@ -53,23 +49,12 @@ public class Database{
         return true;
     }
 
-<<<<<<< HEAD
     public boolean deleteRoom(int roomId) {
-=======
-    public boolean insertMessage(final UserMessage paramMessage) {
->>>>>>> refs/remotes/origin/master
 
         final String sqlQuery = "DELETE FROM Rooms WHERE id = ?";
 
         try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
-<<<<<<< HEAD
             stmt.setInt(1, roomId);
-=======
-            stmt.setInt(1, paramMessage.getRoomId());
-            stmt.setString(2, paramMessage.getSender());
-            stmt.setLong(3, paramMessage.getTimestamp());
-            stmt.setString(4, paramMessage.getMessage());
->>>>>>> refs/remotes/origin/master
             stmt.executeUpdate();
         }
         catch (SQLException ex) {
@@ -139,7 +124,6 @@ public class Database{
         return true;
     }
 
-<<<<<<< HEAD
     public boolean deleteMessage(int messageId) {
 
         final String sqlQuery = "DELETE FROM Messages WHERE id = ?";
@@ -151,9 +135,6 @@ public class Database{
         catch (SQLException ex) {
             return false;
         }
-=======
-    public boolean deleteMessage(final UserMessage paramMessage) {
->>>>>>> refs/remotes/origin/master
 
         return true;
     }
@@ -238,7 +219,7 @@ public class Database{
         try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
             stmt.setInt(1, paramServer.getId());
             stmt.setString(2, paramServer.getAddress().getHostAddress());
-            stmt.setShort(3, paramServer.getTcpPort());
+            stmt.setShort(3, paramServer.getPort());
             stmt.executeUpdate();
         }
         catch (SQLException ex) {
@@ -253,13 +234,7 @@ public class Database{
         final String sqlQuery = "DELETE FROM Servers WHERE id = ?";
 
         try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
-<<<<<<< HEAD
             stmt.setInt(1, serverId);
-=======
-            stmt.setString(1, paramServer.getAddress().getHostAddress());
-            stmt.setShort(2, paramServer.getTcpPort());
-            stmt.setInt(3, paramServer.getId());
->>>>>>> refs/remotes/origin/master
             stmt.executeUpdate();
         }
         catch (SQLException ex) {
