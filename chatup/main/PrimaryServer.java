@@ -17,7 +17,7 @@ public class PrimaryServer{
         chatup.server.PrimaryServer primaryServer = null;
 
         try {
-            serverKeystore = new ServerKeystore("/home/pedro/Desktop/SDIS/chatup.jks", "sdis1516", "sdis1516");
+            serverKeystore = new ServerKeystore("/home/pedro/Desktop/SDIS/chatup.jks", "sdis1516");
             primaryServer = new chatup.server.PrimaryServer(serverKeystore, (short) 8085, (short) 8087);
         } catch (IOException e) {
             e.printStackTrace();

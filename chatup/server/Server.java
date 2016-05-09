@@ -25,6 +25,7 @@ public abstract class Server {
 
         try {
             // TODO: verify if 'TLSv1' is what we really want
+            // TODO: clean up this mess (and understand it as well)
             KeyManagerFactory kmf = serverKeystore.getKeyManager();
             TrustManagerFactory tmf = serverKeystore.getTrustManager();
             httpServer = HttpsServer.create(new InetSocketAddress(httpPort), 0);
@@ -45,7 +46,6 @@ public abstract class Server {
                     }
                 }
             });
-
             httpServer.createContext("/", httpHandler);
             httpServer.setExecutor(Executors.newCachedThreadPool());
             httpServer.start();
@@ -59,6 +59,8 @@ public abstract class Server {
         }
 
         try {
+            System.setProperty("javax.net.ssl.keyStore", serverKeystore.getPath());
+            System.setProperty("javax.net.ssl.keyStorePassword", serverKeystore.getPassword());
             SSLServerSocketFactory socketFactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
             tcpSocket = (SSLServerSocket) socketFactory.createServerSocket(tcpPort);
         }

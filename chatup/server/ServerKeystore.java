@@ -12,18 +12,22 @@ import java.security.cert.CertificateException;
 
 public class ServerKeystore {
 
+    private String filePath;
+    private String keystorePassword;
     private KeyManagerFactory kmf;
     private TrustManagerFactory tmf;
 
-    public ServerKeystore(final String filePath, final String storePass, final String keyPass)
+    public ServerKeystore(final String filePath, final String keystorePassword)
             throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
 
-        FileInputStream fileIn = new FileInputStream(filePath);
+        this.filePath = filePath;
+        this.keystorePassword = keystorePassword;
         KeyStore keystore = KeyStore.getInstance("JKS");
-        keystore.load(fileIn, storePass.toCharArray());
+        FileInputStream fileIn = new FileInputStream(filePath);
+        keystore.load(fileIn, keystorePassword.toCharArray());
 
         kmf = KeyManagerFactory.getInstance("SunX509");
-        kmf.init(keystore, keyPass.toCharArray());
+        kmf.init(keystore, keystorePassword.toCharArray());
 
         tmf = TrustManagerFactory.getInstance("SunX509");
         tmf.init(keystore);
@@ -31,5 +35,7 @@ public class ServerKeystore {
 
     public KeyManagerFactory getKeyManager() { return kmf; }
     public TrustManagerFactory getTrustManager() { return tmf; }
+    public String getPassword() { return keystorePassword; }
+    public String getPath() { return filePath; }
 
 }
