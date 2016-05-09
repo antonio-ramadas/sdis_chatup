@@ -3,12 +3,12 @@ package chatup.server;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
-import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.*;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
-import java.io.InputStreamReader;
+import javax.net.ssl.SSLSocketFactory;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
@@ -49,6 +49,17 @@ public abstract class Server {
     public short getHttpPort() { return httpPort; }
     public short getTcpPort() { return tcpPort; }
     public SSLServerSocket getServerSocket() { return tcpSocket; }
+
+    protected void sendTCPMessage(String message, InetAddress hostAddress, short hostPort){
+        try(SSLSocket socket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(hostAddress, hostPort)) {
+            OutputStreamWriter out = new OutputStreamWriter(socket.getOutputStream());
+            BufferedWriter bw = new BufferedWriter(out);
+            bw.write(message);
+            bw.flush();
+        } catch (IOException ex) {
+            System.out.println("Exception caught: " + ex.getMessage() + " in Server.contructor");
+        }
+    }
 
     private class ReceiveThread extends Thread {
         private SSLServerSocket tcpSocket;
