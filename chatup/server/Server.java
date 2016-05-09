@@ -12,7 +12,7 @@ import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
-public abstract class Server{
+public abstract class Server {
 
     private HttpServer httpServer;
     private SSLServerSocket tcpSocket;
@@ -42,55 +42,49 @@ public abstract class Server{
             System.out.println("Exception caught: " + ex.getMessage() + " in Server.contructor");
         }
 
-        final ReceiveThread receiveThread = new ReceiveThread(tcpSocket);
+        ReceiveThread receiveThread = new ReceiveThread(tcpSocket);
+        receiveThread.run();
+    }
 
-        try {
-            receiveThread.start();
-            receiveThread.join();
-        }
-        catch (InterruptedException ex) {
+    public short getHttpPort() { return httpPort; }
+    public short getTcpPort() { return tcpPort; }
+    public SSLServerSocket getServerSocket() { return tcpSocket; }
+
+    protected void sendTCPMessage(String message, InetAddress hostAddress, short hostPort){
+        try(SSLSocket socket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(hostAddress, hostPort)) {
+            OutputStreamWriter out = new OutputStreamWriter(socket.getOutputStream());
+            BufferedWriter bw = new BufferedWriter(out);
+            bw.write(message);
+            bw.flush();
+        } catch (IOException ex) {
             System.out.println("Exception caught: " + ex.getMessage() + " in Server.contructor");
         }
     }
 
-    public short getHttpPort() {
-        return httpPort;
-    }
-
-    public short getTcpPort() {
-        return tcpPort;
-    }
-
-    public final SSLServerSocket getSocket() {
-        return tcpSocket;
-    }
-
+    private class ReceiveThread extends Thread {
     private class ReceiveThread extends Thread{
 
         private SSLServerSocket tcpSocket;
 
-        public ReceiveThread(SSLServerSocket paramSocket) {
-            tcpSocket = paramSocket;
+        public ReceiveThread(SSLServerSocket tcpSocket){
+            this.tcpSocket = tcpSocket;
         }
 
-        public void run() {
-
+        public void run(){
             System.out.println("Server is now listening for TCP messages: ");
-
-            while (true) {
-                try (final SSLSocket socket = (SSLSocket) tcpSocket.accept();
-                     final InputStreamReader in = new InputStreamReader(socket.getInputStream());
-                     final BufferedReader br = new BufferedReader(in)) {
-                    String message = null;
-
-                    while ((message = br.readLine()) != null) {
-                        // TODO: redirect message to dispatcher
-                    }
-                }
-                catch (IOException ex) {
+            while(true) {
+                try (SSLSocket socket = (SSLSocket) tcpSocket.accept();
+                     InputStreamReader in = new InputStreamReader(socket.getInputStream());
+                     BufferedReader br = new BufferedReader(in)) {
+                        String message = null;
+                        while ((message = br.readLine()) != null) {
+                           // TODO: redirect message to dispatcher
+                        }
+                } catch (IOException ex) {
                     System.out.println("Exception caught: " + ex.getMessage() + " in ReceiveThread.run");
                 }
             }
         }
+
     }
 }

@@ -13,7 +13,6 @@ public class ServerMessage {
         if (instance == null) {
             instance = new ServerMessage();
         }
-
         return instance;
     }
 
