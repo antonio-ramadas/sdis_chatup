@@ -1,5 +1,6 @@
 package chatup.server;
 
+import com.sun.net.httpserver.*;
 import chatup.room.Room;
 import com.eclipsesource.json.Json;
 import com.sun.net.httpserver.HttpHandler;
@@ -7,20 +8,19 @@ import com.sun.net.httpserver.HttpServer;
 import javafx.util.Pair;
 
 import java.io.*;
-import javax.net.ssl.SSLServerSocket;
-import javax.net.ssl.SSLServerSocketFactory;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.*;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.security.*;
 import java.util.HashMap;
 import java.util.concurrent.Executors;
 
 public abstract class Server {
 
-    private HttpServer httpServer;
+    private HttpsServer httpServer;
     private SSLServerSocket tcpSocket;
 
+    private ServerKeystore serverKeystore;
     private short httpPort;
     private short tcpPort;
     private int sequenceRoom = 0;
@@ -28,22 +28,50 @@ public abstract class Server {
     protected final HashMap<Integer, Room> rooms = new HashMap<>();
     protected final HashMap<Integer, ServerInfo> servers = new HashMap<>();
 
-    public Server(final HttpHandler httpHandler, short httpPort, short tcpPort) {
+    public Server(final ServerKeystore serverKeystore, final HttpHandler httpHandler, short httpPort, short tcpPort) {
 
         this.httpPort = httpPort;
         this.tcpPort = tcpPort;
+        this.serverKeystore = serverKeystore;
 
         try {
-            httpServer = HttpServer.create(new InetSocketAddress(httpPort), 0);
+            // TODO: verify if 'TLSv1' is what we really want
+            // TODO: clean up this mess (and understand it as well)
+            KeyManagerFactory kmf = serverKeystore.getKeyManager();
+            TrustManagerFactory tmf = serverKeystore.getTrustManager();
+            httpServer = HttpsServer.create(new InetSocketAddress(httpPort), 0);
+            SSLContext sslContext = SSLContext.getInstance("TLSv1");
+            sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+            httpServer.setHttpsConfigurator(new HttpsConfigurator(sslContext) {
+                public void configure(HttpsParameters params) {
+                    try {
+                        SSLContext c = SSLContext.getDefault();
+                        SSLEngine engine = c.createSSLEngine();
+                        params.setNeedClientAuth(false);
+                        params.setCipherSuites(engine.getEnabledCipherSuites());
+                        params.setProtocols(engine.getEnabledProtocols());
+                        SSLParameters defaultSSLParameters = c.getDefaultSSLParameters();
+                        params.setSSLParameters(defaultSSLParameters);
+                    } catch (NoSuchAlgorithmException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
             httpServer.createContext("/", httpHandler);
             httpServer.setExecutor(Executors.newCachedThreadPool());
             httpServer.start();
         }
         catch (IOException ex) {
             System.out.println("Exception caught: " + ex.getMessage() + " in Server.contructor");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
         }
 
         try {
+            System.setProperty("javax.net.ssl.keyStore", serverKeystore.getPath());
+            System.setProperty("javax.net.ssl.keyStorePassword", serverKeystore.getPassword());
             SSLServerSocketFactory socketFactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
             tcpSocket = (SSLServerSocket) socketFactory.createServerSocket(tcpPort);
         }

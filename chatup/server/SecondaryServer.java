@@ -13,8 +13,8 @@ public class SecondaryServer extends Server {
 
 	private final Database serverDatabase = Database.getInstance();
 
-	public SecondaryServer(short paramPort, short tcpPort) throws SQLException {
-		super(new SecondaryDispatcher(), paramPort, tcpPort);
+	public SecondaryServer(ServerKeystore serverKeystore, short paramPort, short tcpPort) throws SQLException {
+		super(serverKeystore, new SecondaryDispatcher(), paramPort, tcpPort);
 	}
 
 	public boolean sendHttpRequest(final HttpRequest myRequest) {

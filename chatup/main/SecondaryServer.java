@@ -8,7 +8,9 @@ import java.util.ArrayList;
 
 public class SecondaryServer {
 
-    public static void main(String[] args) throws UnknownHostException {
+    private static ArrayList<ServerInfo> primaryServers = new ArrayList<>();
+
+    public static void main(String[] args) {
 
         if (args.length < 1) {
             System.out.println("USAGE: SecondaryServer ip:port (ip:port...)");
@@ -37,8 +39,8 @@ public class SecondaryServer {
                 System.err.println("invalid primary server address, terminating application...");
                 System.exit(1);
             }
-
-            //primaryServers.add(new ServerInfo(serverAddress, serverPort, 0));
+            // TODO : change 5 as first argument -> should be id
+           // primaryServers.add(new ServerInfo((int)5, serverAddress, serverPort));
         }
 
         for (final ServerInfo server : primaryServers) {
