@@ -4,18 +4,17 @@ import chatup.room.Room;
 import chatup.user.UserMessage;
 import chatup.user.UserLogin;
 
-import java.net.UnknownHostException;
 import java.sql.*;
+import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
-public class Database{
+public class Database {
 
     private static Database instance;
     private Connection dbConnection = null;
 
-    // Database
     private Database() throws SQLException {
         dbConnection = DriverManager.getConnection("jdbc:sqlite:test.db");
         dbConnection.setAutoCommit(true);
@@ -30,7 +29,9 @@ public class Database{
         return instance;
     }
 
-    //Rooms
+    /**********************
+     * ROOMS
+     **********************/
     public boolean insertRoom(int roomId, final Room paramRoom) {
 
         final String sqlQuery = "INSERT INTO Rooms(id, name, password) VALUES(?, ?, ?)";
@@ -103,7 +104,9 @@ public class Database{
         return myRooms;
     }
 
-    //Messages
+    /**********************
+     * MESSAGES
+     **********************/
     public boolean insertMessage(final UserMessage paramMessage) {
 
         final String sqlQuery = "INSERT INTO Messages(room, token, epoch, message) VALUES(?, ?, ?, ?)";
@@ -116,7 +119,6 @@ public class Database{
             stmt.executeUpdate();
         }
         catch (SQLException ex) {
-            System.out.println(ex);
             return false;
         }
 
@@ -138,7 +140,7 @@ public class Database{
         return true;
     }
 
-    public UserMessage getMessage(int messageId){
+    public UserMessage getMessage(int messageId) {
 
         final String sqlQuery = "SELECT * FROM Messages WHERE id = ?";
 
@@ -147,8 +149,12 @@ public class Database{
             stmt.setInt(1, messageId);
 
             try (final ResultSet rs = stmt.executeQuery()) {
+
                 if (rs.next()) {
-                    return new UserMessage(rs.getString("message"), rs.getString("token"), rs.getInt("room"), rs.getLong("epoch"));
+                    return new UserMessage(rs.getString("message"),
+                                           rs.getString("token"),
+                                           rs.getInt("room"),
+                                           rs.getLong("epoch"));
                 }
             }
 
@@ -156,9 +162,9 @@ public class Database{
         catch (SQLException ex) {
             return null;
         }
+
         return null;
     }
-
 
     public LinkedList<UserMessage> getMessagesByRoomId(int roomId) {
 
@@ -172,13 +178,17 @@ public class Database{
             try (final ResultSet rs = stmt.executeQuery()) {
 
                 while (rs.next()) {
-                    myMessages.add(new UserMessage(rs.getString("message"), rs.getString("token"), rs.getInt("room"), rs.getLong("epoch")));
+                    myMessages.add(new UserMessage(rs.getString("message"),
+                                                   rs.getString("token"),
+                                                   rs.getInt("room"),
+                                                   rs.getLong("epoch")));
                 }
             }
         }
         catch (SQLException ex) {
             return null;
         }
+
         return myMessages;
     }
 
@@ -206,7 +216,9 @@ public class Database{
         return myMessages;
     }*/
 
-    //Servers
+    /**********************
+     * SERVERS
+     **********************/
     public boolean insertServer(final ServerInfo paramServer) {
 
         if (serverExists(paramServer.getId())) {
@@ -302,7 +314,6 @@ public class Database{
         return null;
     }
 
-
     public LinkedList<ServerInfo> getServers() throws UnknownHostException {
 
         final LinkedList<ServerInfo> myServers = new LinkedList<>();
@@ -321,8 +332,9 @@ public class Database{
         return myServers;
     }
 
-
-    //ServerRooms
+    /**********************
+     * SERVER ROOMS
+     **********************/
     public boolean insertServerRooms(int serverId, int roomId) {
 
         final String sqlQuery = "INSERT INTO ServerRooms(server, room) VALUES(?, ?)";
@@ -378,7 +390,9 @@ public class Database{
         return myServers;
     }
 
-    //Users
+    /**********************
+     * USERS
+     **********************/
     public boolean insertUser(String token, String email) {
 
         final String sqlQuery = "INSERT INTO Users(token, email) VALUES(?, ?)";

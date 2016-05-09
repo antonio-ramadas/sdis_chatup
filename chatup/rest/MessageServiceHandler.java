@@ -4,6 +4,8 @@ import chatup.main.ChatupServer;
 import chatup.server.Server;
 import chatup.user.UserMessage;
 
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.sun.net.httpserver.HttpExchange;
@@ -29,7 +31,14 @@ public class MessageServiceHandler extends HttpDispatcher {
             final UserMessage[] userMessages = serverInstance.retrieveMessages(userToken, roomId);
 
             if (userMessages == null) {
-                sendSuccess("insertMessagesHere");
+
+                final JsonValue jsonObject = Json.array();
+
+                for (int i = 0; i < userMessages.length; i++) {
+                    jsonObject.asArray().add(userMessages[i].getRoomId());
+                }
+
+                sendSuccess(jsonObject.toString());
             }
             else {
                 sendError(ResponseMessages.msgOperationFailed);
