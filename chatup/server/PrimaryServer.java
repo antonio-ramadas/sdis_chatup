@@ -10,7 +10,7 @@ public class PrimaryServer extends Server {
     private final HashMap<String, UserSession> users = new HashMap<>();
     private final HashMap<Integer, ServerInfo> servers = new HashMap<>();
 
-    public PrimaryServer(short paramPort) {
-        super(new PrimaryDispatcher(), paramPort);
+    public PrimaryServer(short paramPort, short tcpPort) {
+        super(new PrimaryDispatcher(), paramPort, tcpPort);
     }
 }

@@ -6,20 +6,23 @@ import java.net.UnknownHostException;
 public class ServerInfo{
 
     private int serverId;
-    private short serverPort;
+    private short httpPort;
+    private short tcpPort;
 
-    public ServerInfo(final InetAddress serverAddress, short serverPort) {
+    public ServerInfo(final InetAddress serverAddress, short httpPort, short tcpPort) {
         setId(0);
         setAddress(serverAddress);
-        setPort(serverPort);
+        setHttpPort(httpPort);
+        setTcpPort(tcpPort);
     }
 
     private InetAddress serverAddress;
 
-    public ServerInfo(int serverId, final String serverAddress, short serverPort) throws UnknownHostException {
+    public ServerInfo(int serverId, final String serverAddress, short httpPort, short tcpPort) throws UnknownHostException {
         setId(serverId);
         setAddress(InetAddress.getByName(serverAddress));
-        setPort(serverPort);
+        setHttpPort(httpPort);
+        setTcpPort(tcpPort);
     }
 
     public InetAddress getAddress() {
@@ -30,13 +33,17 @@ public class ServerInfo{
         this.serverAddress = ipAddress;
     }
 
-    public short getPort() {
-        return serverPort;
+    public short getHttpPort() {
+        return httpPort;
     }
 
-    public void setPort(short serverPort) {
-        this.serverPort = serverPort;
+    public void setHttpPort(short httpPort) {
+        this.httpPort = httpPort;
     }
+
+    public short getTcpPort() { return tcpPort; }
+
+    public void setTcpPort(short tcpPort) { this.tcpPort = tcpPort; }
 
     public int getId() {
         return serverId;

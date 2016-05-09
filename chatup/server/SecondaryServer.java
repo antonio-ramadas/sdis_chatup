@@ -17,8 +17,8 @@ public class SecondaryServer extends Server {
 	private final HashMap<Integer, Room> rooms = new HashMap<>();
 	private final Database serverDatabase = Database.getInstance();
 
-	public SecondaryServer(short paramPort) throws SQLException {
-		super(new SecondaryDispatcher(), paramPort);
+	public SecondaryServer(short paramPort, short tcpPort) throws SQLException {
+		super(new SecondaryDispatcher(), paramPort, tcpPort);
 	}
 
 	public boolean sendHttpRequest(final HttpRequest myRequest) {
