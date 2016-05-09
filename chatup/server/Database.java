@@ -1,9 +1,8 @@
 package chatup.server;
 
 import chatup.room.Room;
-import chatup.user.Message;
+import chatup.user.UserMessage;
 import chatup.user.UserLogin;
-import jdk.internal.cmm.SystemResourcePressureImpl;
 
 import java.net.UnknownHostException;
 import java.sql.*;
@@ -105,12 +104,12 @@ public class Database{
     }
 
     //Messages
-    public boolean insertMessage(final Message paramMessage) {
+    public boolean insertMessage(final UserMessage paramMessage) {
 
         final String sqlQuery = "INSERT INTO Messages(room, token, epoch, message) VALUES(?, ?, ?, ?)";
 
         try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
-            stmt.setInt(1, paramMessage.getRoom());
+            stmt.setInt(1, paramMessage.getRoomId());
             stmt.setString(2, paramMessage.getSender());
             stmt.setLong(3, paramMessage.getTimestamp());
             stmt.setString(4, paramMessage.getMessage());
@@ -139,7 +138,7 @@ public class Database{
         return true;
     }
 
-    public Message getMessage(int messageId){
+    public UserMessage getMessage(int messageId){
 
         final String sqlQuery = "SELECT * FROM Messages WHERE id = ?";
 
@@ -149,7 +148,7 @@ public class Database{
 
             try (final ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    return new Message(rs.getString("message"), rs.getString("token"), rs.getInt("room"), rs.getLong("epoch"));
+                    return new UserMessage(rs.getString("message"), rs.getString("token"), rs.getInt("room"), rs.getLong("epoch"));
                 }
             }
 
@@ -161,9 +160,9 @@ public class Database{
     }
 
 
-    public LinkedList<Message> getMessagesByRoomId(int roomId) {
+    public LinkedList<UserMessage> getMessagesByRoomId(int roomId) {
 
-        final LinkedList<Message> myMessages = new LinkedList<>();
+        final LinkedList<UserMessage> myMessages = new LinkedList<>();
         final String sqlQuery = "SELECT * FROM Messages WHERE room = ? ORDER BY epoch DESC";
 
         try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
@@ -173,7 +172,7 @@ public class Database{
             try (final ResultSet rs = stmt.executeQuery()) {
 
                 while (rs.next()) {
-                    myMessages.add(new Message(rs.getString("message"), rs.getString("token"), rs.getInt("room"), rs.getLong("epoch")));
+                    myMessages.add(new UserMessage(rs.getString("message"), rs.getString("token"), rs.getInt("room"), rs.getLong("epoch")));
                 }
             }
         }
@@ -219,7 +218,7 @@ public class Database{
         try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
             stmt.setInt(1, paramServer.getId());
             stmt.setString(2, paramServer.getAddress().getHostAddress());
-            stmt.setShort(3, paramServer.getPort());
+            stmt.setShort(3, paramServer.getTcpPort());
             stmt.executeUpdate();
         }
         catch (SQLException ex) {
@@ -272,7 +271,7 @@ public class Database{
 
         try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
             stmt.setString(1, paramServer.getAddress().getHostAddress().toString());
-            stmt.setShort(2, paramServer.getPort());
+            stmt.setShort(2, paramServer.getTcpPort());
             stmt.setInt(3, paramServer.getId());
             stmt.executeUpdate();
         }
