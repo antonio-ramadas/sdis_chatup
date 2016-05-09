@@ -14,10 +14,10 @@ public class PrimaryDispatcher extends ServerDispatcher{
         final String[] urlQuery = httpExchange.getRequestURI().getPath().split("/");
 
         switch (urlQuery[1]) {
-        case "roomService":
+        case "RoomService":
             new RoomServiceHandler(httpExchange).processRequest();
             break;
-        case "userService":
+        case "UserService":
             new UserServiceHandler(httpExchange).processRequest();
             break;
         default:

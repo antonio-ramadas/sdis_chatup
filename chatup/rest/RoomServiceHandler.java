@@ -15,16 +15,8 @@ public class RoomServiceHandler extends HttpDispatcher {
     }
 
     @Override
-    protected void parseGetRequest(JsonValue jsonValue) {
-
-        final Server serverInstance = ChatupServer.getInstance();
-
-        if (extractCommand(jsonValue, "GetRooms") == null) {
-            sendError(ResponseMessages.msgInvalidCommand);
-        }
-        else {
-            sendSuccess(serverInstance.getRooms());
-        }
+    protected void parseGetRequest(String[] getValues) {
+        sendSuccess(ChatupServer.getInstance().getRooms());
     }
 
     @Override

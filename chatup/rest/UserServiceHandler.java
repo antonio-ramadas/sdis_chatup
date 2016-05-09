@@ -15,7 +15,7 @@ public class UserServiceHandler extends HttpDispatcher {
     }
 
     @Override
-    protected void parseGetRequest(JsonValue jsonValue) {
+    protected void parseGetRequest(String[] getValues) {
         sendError(ResponseMessages.msgInvalidMethod);
     }
 

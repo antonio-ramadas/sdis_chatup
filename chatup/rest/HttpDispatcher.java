@@ -27,7 +27,7 @@ public abstract class HttpDispatcher{
 
         switch (requestMethod) {
         case "GET":
-            parseGetRequest(Json.parse(httpParameters));
+            parseGetRequest(extractGetCommand(httpParameters));
             break;
         case "POST":
             parsePostRequest(Json.parse(httpParameters));
@@ -93,6 +93,41 @@ public abstract class HttpDispatcher{
         return null;
     }
 
+    protected final String[] extractGetCommand(final String requestBody) {
+        return requestBody.substring(1).split("&");
+    }
+
+    protected final String parseString(final String parameterString, final String commandName) {
+
+        final String[] parameterValues  = parameterString.split("=");
+
+        if (parameterValues.length != 2) {
+            return null;
+        }
+
+        if (parameterValues[0].equals(commandName)) {
+            return parameterValues[1];
+        }
+
+        return null;
+    }
+
+    protected int parseInteger(final String parameterString, final String commandName) {
+
+        final String integerString = parseString(parameterString, commandName);
+
+        if (integerString == null) {
+            return -1;
+        }
+
+        try {
+            return Integer.parseInt(integerString);
+        }
+        catch (NumberFormatException ex) {
+            return -1;
+        }
+    }
+
     private String parseRequestBody(final InputStream in) {
 
         try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
@@ -110,7 +145,7 @@ public abstract class HttpDispatcher{
         }
     }
 
-    protected abstract void parseGetRequest(final JsonValue jsonValue);
+    protected abstract void parseGetRequest(final String[] getValues);
     protected abstract void parsePostRequest(final JsonValue jsonValue);
     protected abstract void parsePutRequest(final JsonValue jsonValue);
     protected abstract void parseDeleteRequest(final JsonValue jsonValue);

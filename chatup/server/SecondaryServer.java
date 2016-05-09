@@ -2,6 +2,8 @@ package chatup.server;
 
 import chatup.backend.SecondaryDispatcher;
 import chatup.rest.HttpRequest;
+import chatup.room.Room;
+import chatup.user.UserMessage;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -13,7 +15,7 @@ public class SecondaryServer extends Server {
 
 	private final Database serverDatabase = Database.getInstance();
 
-	public SecondaryServer(ServerKeystore serverKeystore, short paramPort, short tcpPort) throws SQLException {
+	public SecondaryServer(final ServerKeystore serverKeystore, short paramPort, short tcpPort) throws SQLException {
 		super(serverKeystore, new SecondaryDispatcher(), paramPort, tcpPort);
 	}
 
@@ -43,6 +45,40 @@ public class SecondaryServer extends Server {
 		}
 
 		return true;
+	}
+
+	@Override
+	public boolean registerMessage(final String userToken, int roomId, final String messageBody) {
+
+		if (!rooms.containsKey(roomId)) {
+			return false;
+		}
+
+		final Room selectedRoom = rooms.get(roomId);
+
+		if (!selectedRoom.hasUser(userToken)) {
+			return false;
+		}
+
+		selectedRoom.registerMessage(userToken, roomId, messageBody);
+
+		return true;
+	}
+
+	@Override
+	public UserMessage[] retrieveMessages(final String userToken, int roomId) {
+
+		if (!rooms.containsKey(roomId)) {
+			return null;
+		}
+
+		final Room selectedRoom = rooms.get(roomId);
+
+		if (!selectedRoom.hasUser(userToken)) {
+			return null;
+		}
+
+		return selectedRoom.getMessages();
 	}
 
 	@Override

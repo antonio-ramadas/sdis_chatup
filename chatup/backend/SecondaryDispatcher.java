@@ -1,7 +1,6 @@
 package chatup.backend;
 
 import chatup.rest.MessageServiceHandler;
-import chatup.rest.RoomServiceHandler;
 import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
 

@@ -1,16 +1,17 @@
 package chatup.room;
 
+import chatup.user.UserMessage;
 import javafx.util.Pair;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class Room {
 	
 	private String roomName;
 	private String roomPassword;
 	private String roomOwner;
+
+	private TreeSet<UserMessage> roomMessages;
 	private HashMap<String, String> roomUsers;
 	private Set<Integer> roomServers;
 
@@ -18,12 +19,21 @@ public class Room {
 		roomName = paramName;
 		roomOwner = paramOwner;
 		roomPassword = paramPassword;
+		roomMessages = new TreeSet<>();
 		roomUsers = new HashMap<>();
 		roomServers = new HashSet<>();
 	}
 
 	public Room(final String roomName, final String roomOwner) {
 		this(roomName, null, roomOwner);
+	}
+
+	public void registerMessage(final String userToken, int roomId, final String messageBody) {
+		roomMessages.add(new UserMessage(messageBody, userToken, roomId, (new Date()).getTime()));
+	}
+
+	public UserMessage[] getMessages() {
+		return (UserMessage[]) roomMessages.toArray();
 	}
 
 	public boolean registerServer(int serverId) {
@@ -96,5 +106,9 @@ public class Room {
 
 	public final HashMap<String, String> getUsers() {
 		return roomUsers;
+	}
+
+	public boolean hasUser(final String userToken) {
+		return roomUsers.containsKey(userToken);
 	}
 }

@@ -1,5 +1,6 @@
 package chatup.server;
 
+import chatup.user.UserMessage;
 import com.sun.net.httpserver.*;
 import chatup.room.Room;
 import com.eclipsesource.json.Json;
@@ -15,7 +16,7 @@ import java.security.*;
 import java.util.HashMap;
 import java.util.concurrent.Executors;
 
-public abstract class Server {
+public abstract class Server{
 
     private HttpsServer httpServer;
     private SSLServerSocket tcpSocket;
@@ -45,7 +46,7 @@ public abstract class Server {
             final SSLContext sslContext = SSLContext.getInstance("TLSv1");
 
             sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-            httpServer.setHttpsConfigurator(new HttpsConfigurator(sslContext) {
+            httpServer.setHttpsConfigurator(new HttpsConfigurator(sslContext){
                 public void configure(HttpsParameters params) {
                     try {
                         SSLContext c = SSLContext.getDefault();
@@ -55,7 +56,8 @@ public abstract class Server {
                         params.setProtocols(engine.getEnabledProtocols());
                         SSLParameters defaultSSLParameters = c.getDefaultSSLParameters();
                         params.setSSLParameters(defaultSSLParameters);
-                    } catch (NoSuchAlgorithmException e) {
+                    }
+                    catch (NoSuchAlgorithmException e) {
                         e.printStackTrace();
                     }
                 }
@@ -66,9 +68,11 @@ public abstract class Server {
         }
         catch (IOException ex) {
             System.out.println("Exception caught: " + ex.getMessage() + " in Server.contructor");
-        } catch (NoSuchAlgorithmException e) {
+        }
+        catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
-        } catch (KeyManagementException e) {
+        }
+        catch (KeyManagementException e) {
             e.printStackTrace();
         }
 
@@ -86,9 +90,17 @@ public abstract class Server {
         receiveThread.run();
     }
 
-    public short getHttpPort() { return httpPort; }
-    public short getTcpPort() { return tcpPort; }
-    public SSLServerSocket getServerSocket() { return tcpSocket; }
+    public short getHttpPort() {
+        return httpPort;
+    }
+
+    public short getTcpPort() {
+        return tcpPort;
+    }
+
+    public SSLServerSocket getServerSocket() {
+        return tcpSocket;
+    }
 
     protected void sendTCPMessage(final InetAddress hostAddress, short hostPort, final String message) {
 
@@ -193,6 +205,14 @@ public abstract class Server {
 
     public final String getRooms() {
         return Json.object().add("nothing", 0).toString();
+    }
+
+    public UserMessage[] retrieveMessages(final String userToken, int roomId) {
+        return null;
+    }
+
+    public boolean registerMessage(final String userToken, int roomId, final String msgContents) {
+        return false;
     }
 
     private class ReceiveThread extends Thread {
