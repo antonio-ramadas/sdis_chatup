@@ -1,36 +1,17 @@
 package chatup.user;
 
-import chatup.rest.HttpRequest;
+import chatup.http.HttpCommands;
+import chatup.http.HttpFields;
+import chatup.http.HttpRequest;
 import com.eclipsesource.json.Json;
 
-public class UserLogin implements HttpRequest {
-
-    private String userToken;
-    private String userEmail;
-
-    public UserLogin(final String paramEmail, final String paramToken) {
-        userToken = paramToken;
-        userEmail = paramEmail;
-    }
-
-    public final String getEmail() {
-        return userEmail;
-    }
-
-    public final String getToken() {
-        return userToken;
-    }
-
-    @Override
-    public final String getMethod() {
-        return "PUT";
-    }
-
-    @Override
-    public final String getMessage() {
-        return Json.object()
-            .add("UserLogin", Json.object()
-            .add("email", userEmail)
-            .add("token", userToken)).toString();
+public class UserLogin extends HttpRequest
+{
+    public UserLogin(final String userEmail, final String userToken)
+    {
+        super("POST", Json.object()
+            .add(HttpCommands.UserLogin, Json.object()
+            .add(HttpFields.UserEmail, userEmail)
+            .add(HttpFields.UserToken, userToken)).toString());
     }
 }

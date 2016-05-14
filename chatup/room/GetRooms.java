@@ -1,19 +1,14 @@
 package chatup.room;
 
-import chatup.rest.HttpRequest;
+import chatup.http.HttpCommands;
+import chatup.http.HttpRequest;
+
 import com.eclipsesource.json.Json;
 
-public class GetRooms implements HttpRequest {
-
-    public GetRooms() {}
-
-    @Override
-    public String getMethod() {
-        return "GET";
-    }
-
-    @Override
-    public String getMessage() {
-        return Json.object().add("CreateRoom", Json.object()).toString();
+public class GetRooms extends HttpRequest
+{
+    public GetRooms()
+    {
+        super("GET", Json.object().add(HttpCommands.CreateRoom, "").toString());
     }
 }

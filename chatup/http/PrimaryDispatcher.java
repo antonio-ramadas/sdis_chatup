@@ -1,27 +1,24 @@
-package chatup.backend;
+package chatup.http;
 
-import chatup.rest.RoomServiceHandler;
-import chatup.rest.UserServiceHandler;
+import chatup.main.ChatupGlobals;
 import com.sun.net.httpserver.HttpExchange;
-
-import java.io.IOException;
 
 public class PrimaryDispatcher extends ServerDispatcher {
 
     @Override
-    public void handle(HttpExchange httpExchange) throws IOException {
+    public void handle(HttpExchange httpExchange) {
 
         final String[] urlQuery = httpExchange.getRequestURI().getPath().split("/");
 
         switch (urlQuery[1]) {
-        case "RoomService":
+        case ChatupGlobals.RoomServiceUrl:
             new RoomServiceHandler(httpExchange).processRequest();
             break;
-        case "UserService":
+        case ChatupGlobals.UserServiceUrl:
             new UserServiceHandler(httpExchange).processRequest();
             break;
         default:
-            sendError(httpExchange, "invalidService");
+            sendError(httpExchange, HttpResponses.InvalidService);
             break;
         }
     }

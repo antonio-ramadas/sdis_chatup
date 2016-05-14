@@ -22,7 +22,7 @@ public class ChatupServer {
     static void initialize(final ServerType paramType, short httpPort, short tcpPort) {
 
         try {
-            serverKeystore = new ServerKeystore("/home/pedro/Desktop/SDIS/chatup.jks", "sdis1516");
+            serverKeystore = new ServerKeystore("server.jks", "123456");
             serverType = paramType;
 
             if (serverType == ServerType.PRIMARY) {

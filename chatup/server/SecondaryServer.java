@@ -1,7 +1,7 @@
 package chatup.server;
 
-import chatup.backend.SecondaryDispatcher;
-import chatup.rest.HttpRequest;
+import chatup.http.SecondaryDispatcher;
+import chatup.http.HttpRequest;
 import chatup.room.Room;
 import chatup.user.UserMessage;
 
@@ -15,8 +15,8 @@ public class SecondaryServer extends Server {
 
 	private final Database serverDatabase = Database.getInstance();
 
-	public SecondaryServer(final ServerKeystore serverKeystore, short paramPort, short tcpPort) throws SQLException {
-		super(serverKeystore, new SecondaryDispatcher(), paramPort, tcpPort);
+	public SecondaryServer(final ServerKeystore serverKeystore, short httpPort, short tcpPort) throws SQLException {
+		super(serverKeystore, new SecondaryDispatcher(), httpPort, tcpPort);
 	}
 
 	public boolean sendHttpRequest(final HttpRequest myRequest) {

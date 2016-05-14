@@ -1,6 +1,8 @@
 package chatup.main;
 
+import chatup.http.RoomServiceHandler;
 import chatup.server.ServerType;
+import com.eclipsesource.json.Json;
 
 class PrimaryServer {
 
@@ -9,7 +11,8 @@ class PrimaryServer {
 
     public static void main(String[] args) {
 
-        if (args.length > 2) {
+        final RoomServiceHandler roomService = new RoomServiceHandler(null);
+       if (args.length > 2) {
             System.err.println("USAGE: chatup.PrimaryServer (<tcpPort>) (<httpPort>)");
             System.exit(1);
         }
@@ -38,6 +41,6 @@ class PrimaryServer {
             }
         }
 
-        ChatupServer.initialize(ServerType.PRIMARY, tcpPort, httpPort);
+        ChatupServer.initialize(ServerType.PRIMARY, httpPort, tcpPort);
     }
 }

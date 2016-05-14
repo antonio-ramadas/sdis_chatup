@@ -1,0 +1,76 @@
+package chatup.http;
+
+import chatup.main.ChatupGlobals;
+import chatup.main.ChatupServer;
+import chatup.server.Server;
+import chatup.user.UserMessage;
+
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
+
+import com.sun.net.httpserver.HttpExchange;
+
+public class MessageServiceHandler extends HttpDispatcher {
+
+    public MessageServiceHandler(final HttpExchange httpExchange) {
+        super(ChatupGlobals.MessageServiceUrl, httpExchange);
+    }
+
+    @Override
+    public void parseGetRequest(final String[] getValues) {
+
+        final Server serverInstance = ChatupServer.getInstance();
+        final String userToken = parseString(getValues[0], HttpFields.UserToken);
+        int roomId = parseInteger(getValues[1], HttpFields.RoomId);
+
+        if (userToken == null || roomId == -1) {
+            sendError(HttpResponses.MissingParameters);
+        }
+        else {
+
+            final UserMessage[] userMessages = serverInstance.retrieveMessages(userToken, roomId);
+
+            if (userMessages == null) {
+
+                final JsonValue jsonObject = Json.array();
+
+                for (int i = 0; i < userMessages.length; i++) {
+                    jsonObject.asArray().add(userMessages[i].getRoomId());
+                }
+
+                sendSuccess(jsonObject.toString());
+            }
+            else {
+                sendError(HttpResponses.OperationFailed);
+            }
+        }
+    }
+
+    @Override
+    public void parsePostRequest(final JsonValue jsonValue) {
+
+        final Server serverInstance = ChatupServer.getInstance();
+        final JsonObject jsonObject = extractCommand(jsonValue, HttpCommands.SendMessage);
+
+        if (jsonObject != null) {
+
+            int roomId = jsonObject.getInt(HttpFields.RoomId, -1);
+            final String userToken = jsonObject.getString(HttpFields.UserToken, null);
+            final String userMessage = jsonObject.getString(HttpFields.UserMessage, null);
+
+            if (roomId == -1 || userToken == null || userMessage == null) {
+                sendError(HttpResponses.MissingParameters);
+            }
+            else if (serverInstance.registerMessage(userToken, roomId, userMessage)) {
+                sendSuccess(HttpCommands.SendMessage);
+            }
+            else {
+                sendError(HttpResponses.OperationFailed);
+            }
+        }
+        else {
+            sendError(HttpResponses.InvalidCommand);
+        }
+    }
+}

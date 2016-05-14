@@ -74,6 +74,6 @@ public class SecondaryServer {
         // TODO : change 5 as first argument -> should be id
        // primaryServers.add(new ServerInfo((int)5, serverAddress, serverPort));
 
-        ChatupServer.initialize(ServerType.SECONDARY, tcpPort, httpPort);
+        ChatupServer.initialize(ServerType.SECONDARY, httpPort, tcpPort);
     }
 }

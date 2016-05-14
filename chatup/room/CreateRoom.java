@@ -1,43 +1,26 @@
 package chatup.room;
 
-import chatup.rest.HttpRequest;
+import chatup.http.HttpFields;
+import chatup.http.HttpRequest;
+import chatup.http.HttpCommands;
+
 import com.eclipsesource.json.Json;
 
-public class CreateRoom implements HttpRequest {
-
-    private final String roomName;
-    private final String roomPassword;
-    private final String userToken;
-
-    public CreateRoom(final String paramToken, final String paramName, final String paramPassword) {
-        roomName = paramName;
-        roomPassword = paramPassword;
-        userToken = paramToken;
-    }
-
-    public final String getName() {
-        return roomName;
-    }
-
-    public final String getPassword() {
-        return roomPassword;
-    }
-
-    public final String getToken() {
-        return userToken;
-    }
-
-    @Override
-    public final String getMethod() {
-        return "PUT";
-    }
-
-    @Override
-    public final String getMessage() {
-        return Json.object()
-            .add("CreateRoom", Json.object()
-            .add("token", userToken)
-            .add("name", roomName)
-            .add("password", roomPassword)).toString();
+public class CreateRoom extends HttpRequest
+{
+    public CreateRoom(final String userToken, final String roomName, final String roomPassword)
+    {
+        super("PUT", roomPassword == null ?
+            Json.object()
+                .add(HttpCommands.CreateRoom, Json.object()
+                .add(HttpFields.UserToken, userToken)
+                .add(HttpFields.RoomName, roomName)).toString()
+            :
+            Json.object()
+                .add(HttpCommands.CreateRoom, Json.object()
+                .add(HttpFields.UserToken, userToken)
+                .add(HttpFields.RoomName, roomName)
+                .add(HttpFields.RoomPassword, roomPassword)).toString()
+            );
     }
 }

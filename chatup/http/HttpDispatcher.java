@@ -1,5 +1,6 @@
-package chatup.rest;
+package chatup.http;
 
+import chatup.main.ChatupGlobals;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
@@ -10,36 +11,39 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 
 public abstract class HttpDispatcher {
 
+    private final String httpService;
     private final HttpExchange httpExchange;
-    private final String httpParameters;
 
-    HttpDispatcher(final HttpExchange paramExchange) {
+    HttpDispatcher(final String paramService, final HttpExchange paramExchange) {
+        httpService = paramService;
         httpExchange = paramExchange;
-        httpParameters = parseRequestBody(httpExchange.getRequestBody());
     }
 
     public void processRequest() {
 
         final String requestMethod = httpExchange.getRequestMethod();
 
+        System.out.println(httpService + " received " + requestMethod + " request from " + httpExchange.getRemoteAddress() + "...");
+
         switch (requestMethod) {
         case "GET":
-            parseGetRequest(extractGetCommand(httpParameters));
+            parseGetRequest(httpExchange.getRequestURI().getQuery().split("&"));
             break;
         case "POST":
-            parsePostRequest(Json.parse(httpParameters));
+            parsePostRequest(Json.parse(parseRequestBody(httpExchange.getRequestBody())));
             break;
         case "PUT":
-            parsePutRequest(Json.parse(httpParameters));
+            parsePutRequest(Json.parse(parseRequestBody(httpExchange.getRequestBody())));
             break;
         case "DELETE":
-            parseDeleteRequest(Json.parse(httpParameters));
+            parseDeleteRequest(Json.parse(parseRequestBody(httpExchange.getRequestBody())));
             break;
         default:
-            sendError(ResponseMessages.msgInvalidMethod);
+            sendError(HttpResponses.InvalidMethod);
             break;
         }
     }
@@ -47,7 +51,7 @@ public abstract class HttpDispatcher {
     protected boolean sendError(final String serverResponse) {
 
         try {
-            sendResponse(Json.object().add("error", serverResponse).toString(), 404);
+            sendResponse(Json.object().add(HttpResponses.ErrorResponse, serverResponse).toString(), HttpURLConnection.HTTP_OK);
         }
         catch (IOException ex) {
             return false;
@@ -58,17 +62,37 @@ public abstract class HttpDispatcher {
 
     private void sendResponse(final String serverResponse, int statusCode) throws IOException {
 
+        System.out.println(httpService +  " sending response: " + serverResponse);
         httpExchange.sendResponseHeaders(statusCode, serverResponse.length());
 
         try (final OutputStream os = httpExchange.getResponseBody()) {
             os.write(serverResponse.getBytes());
+            os.close();
         }
     }
 
     protected boolean sendSuccess(final String requestCommand) {
 
         try {
-            sendResponse(Json.object().add("success", requestCommand).toString(), 200);
+            sendResponse(
+                Json.object().add(HttpResponses.SuccessResponse, requestCommand).toString(),
+                HttpURLConnection.HTTP_OK
+            );
+        }
+        catch (IOException ex) {
+            return false;
+        }
+
+        return true;
+    }
+
+    protected boolean sendJsonSuccess(final JsonValue requestParameters) {
+
+        try {
+            sendResponse(
+                Json.object().add(HttpResponses.SuccessResponse, requestParameters).toString(),
+                HttpURLConnection.HTTP_OK
+            );
         }
         catch (IOException ex) {
             return false;
@@ -93,8 +117,20 @@ public abstract class HttpDispatcher {
         return null;
     }
 
-    protected final String[] extractGetCommand(final String requestBody) {
-        return requestBody.substring(1).split("&");
+    private String[] extractGetCommand(final String requestBody) {
+
+        if (requestBody == null) {
+            return null;
+        }
+
+        final String[] requestArray = requestBody.substring(1).split("&");
+
+        if (requestArray == null)
+        {
+            return new String[]{};
+        }
+
+        return requestArray;
     }
 
     protected final String parseString(final String parameterString, final String commandName) {
@@ -134,19 +170,35 @@ public abstract class HttpDispatcher {
 
             byte buf[] = new byte[4096];
 
+
             for (int n = in.read(buf); n > 0; n = in.read(buf)) {
                 out.write(buf, 0, n);
             }
 
-            return new String(out.toByteArray(), "utf-8");
+            System.out.println( new String(out.toByteArray(), ChatupGlobals.DefaultEncoding));
+
+            return new String(out.toByteArray(), ChatupGlobals.DefaultEncoding);
         }
         catch (IOException ex) {
-            return null;
+            ex.printStackTrace();
         }
+
+        return null;
     }
 
-    protected abstract void parseGetRequest(final String[] getValues);
-    protected abstract void parsePostRequest(final JsonValue jsonValue);
-    protected abstract void parsePutRequest(final JsonValue jsonValue);
-    protected abstract void parseDeleteRequest(final JsonValue jsonValue);
+    public void parseGetRequest(final String[] getValues) {
+        sendError(HttpResponses.InvalidMethod);
+    }
+
+    public void parsePostRequest(final JsonValue jsonValue) {
+        sendError(HttpResponses.InvalidMethod);
+    }
+
+    public void parsePutRequest(final JsonValue jsonValue) {
+        sendError(HttpResponses.InvalidMethod);
+    }
+
+    public void parseDeleteRequest(final JsonValue jsonValue) {
+        sendError(HttpResponses.InvalidMethod);
+    }
 }
