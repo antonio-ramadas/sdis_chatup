@@ -1,7 +1,6 @@
 package chatup.http;
 
 class HttpCommands {
-    static final String RetrieveMessages = "GetMessages";
     static final String SendMessage = "SendMessage";
     static final String CreateRoom = "CreateRoom";
     static final String JoinRoom = "JoinRoom";

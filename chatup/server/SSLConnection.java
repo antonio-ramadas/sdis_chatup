@@ -30,7 +30,7 @@ class SSLConnection {
         return tcpSocket;
     }
 
-    private class ReceiveThread extends Thread {
+    class ReceiveThread extends Thread {
 
         private SSLServerSocket tcpSocket;
 
@@ -58,7 +58,7 @@ class SSLConnection {
         }
     }
 
-    void sendMessage(final ServerInfo paramServer, final Message paramObject) {
+    void sendObject(final ServerInfo paramServer, final Message paramObject) {
 
         try (final SSLSocket socket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(paramServer.getAddress(), paramServer.getPort());
              final ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream()))

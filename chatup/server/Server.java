@@ -13,7 +13,6 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 import java.io.*;
-import javax.net.ssl.*;
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -31,11 +30,11 @@ public abstract class Server {
     private short httpPort;
     private int sequenceRoom = 0;
 
-    protected final HashMap<Integer, Room> rooms = new HashMap<>();
-    protected final HashMap<Integer, ServerInfo> servers = new HashMap<>();
-    protected final HashMap<String, String> users = new HashMap<>();
+    final HashMap<Integer, Room> rooms = new HashMap<>();
+    final HashMap<Integer, ServerInfo> servers = new HashMap<>();
+    final HashMap<String, String> users = new HashMap<>();
 
-    public Server(final ServerKeystore serverKeystore, final HttpHandler httpHandler, short httpPort, short tcpPort) throws SQLException {
+    Server(final ServerKeystore serverKeystore, final HttpHandler httpHandler, short httpPort, short tcpPort) throws SQLException {
 
         this.httpPort = httpPort;
         this.serverKeystore = serverKeystore;
@@ -94,10 +93,6 @@ public abstract class Server {
         createRoom("XXX NAZIS XXX", "femnazi", "bca7cd6bdaf6efaf7ae8g5130ae76f8a");
         createRoom("MigaxPraSempre", null, "bca7cd6bdaf6efaf7ae8g5130ae76f8a");
         tcpConnection.getThread().start();
-    }
-
-    public SSLServerSocket getServerSocket() {
-        return tcpConnection.getSocket();
     }
 
     public abstract ServerResponse insertServer(int serverId, final String newIp, short newPort);
