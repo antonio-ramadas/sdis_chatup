@@ -1,4 +1,4 @@
-package chatup.server;
+package chatup.model;
 
 public class DatabaseFields {
     public static final String ServerId = "id";

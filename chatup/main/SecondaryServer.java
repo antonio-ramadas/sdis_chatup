@@ -1,18 +1,11 @@
 package chatup.main;
 
 import chatup.server.ServerInfo;
-import chatup.server.ServerType;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 
 public class SecondaryServer {
-
-    private static final int defaultHttpPort = 8080;
-    private static final int defaultTcpPort = 8085;
-
-    private static ArrayList<ServerInfo> primaryServers = new ArrayList<>();
 
     public static void main(String[] args) {
 
@@ -22,7 +15,7 @@ public class SecondaryServer {
         }
 
         int primaryIndex = 0;
-        short tcpPort = defaultTcpPort;
+        short tcpPort = ChatupGlobals.DefaultTcpPort;
 
         if (args.length > 1) {
 
@@ -30,13 +23,13 @@ public class SecondaryServer {
                 tcpPort = Short.parseShort(args[0]);
             }
             catch (NumberFormatException ex) {
-                tcpPort = defaultTcpPort;
+                tcpPort = ChatupGlobals.DefaultTcpPort;
             }
 
             primaryIndex++;
         }
 
-        short httpPort = defaultHttpPort;
+        short httpPort = ChatupGlobals.DefaultHttpPort;
 
         if (args.length == 3) {
 
@@ -44,24 +37,23 @@ public class SecondaryServer {
                 httpPort = Short.parseShort(args[1]);
             }
             catch (NumberFormatException ex) {
-                httpPort = defaultHttpPort;
+                httpPort = ChatupGlobals.DefaultHttpPort;
             }
 
             primaryIndex++;
         }
 
-        // final ArrayList<ServerInfo> primaryServers = new ArrayList<>();
-        // for (int i = 0; i < args.length; i++) {
-
         int separatorPosition = args[primaryIndex].indexOf(':');
-        short primaryPort = 0;
-
-        String addressString = args[primaryIndex].substring(0, separatorPosition);
-        InetAddress serverAddress = null;
+        final String addressString = args[primaryIndex].substring(0, separatorPosition);
 
         try {
-            serverAddress = InetAddress.getByName(addressString);
-            primaryPort = Short.parseShort(args[primaryIndex].substring(separatorPosition + 1));
+
+            final ServerInfo primaryServer = new ServerInfo(
+                InetAddress.getByName(addressString),
+                Short.parseShort(args[primaryIndex].substring(separatorPosition + 1))
+            );
+
+           ChatupServer.initializeSecondary(primaryServer, httpPort, tcpPort);
         }
         catch (final NumberFormatException ex) {
             System.err.println("invalid primary server port, terminating application...");
@@ -71,9 +63,5 @@ public class SecondaryServer {
             System.err.println("invalid primary server address, terminating application...");
             System.exit(1);
         }
-        // TODO : change 5 as first argument -> should be id
-       // primaryServers.add(new ServerInfo((int)5, serverAddress, serverPort));
-
-        ChatupServer.initialize(ServerType.SECONDARY, httpPort, tcpPort);
     }
 }

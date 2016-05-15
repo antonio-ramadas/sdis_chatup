@@ -1,4 +1,4 @@
-package chatup.user;
+package chatup.model;
 
 import java.net.InetAddress;
 import java.util.HashSet;

@@ -3,8 +3,8 @@ package chatup.server;
 import chatup.http.SecondaryDispatcher;
 import chatup.http.HttpRequest;
 import chatup.http.ServerResponse;
-import chatup.room.Room;
-import chatup.user.UserMessage;
+import chatup.model.Room;
+import chatup.model.Message;
 
 import java.io.*;
 import java.net.*;
@@ -13,10 +13,11 @@ import java.time.Instant;
 
 public class SecondaryServer extends Server {
 
-	private final Database serverDatabase = Database.getInstance();
+	private final ServerInfo primaryServer;
 
-	public SecondaryServer(final ServerKeystore serverKeystore, short httpPort, short tcpPort) throws SQLException {
+	public SecondaryServer(final ServerKeystore serverKeystore, final ServerInfo paramPrimary, short httpPort, short tcpPort) throws SQLException {
 		super(serverKeystore, new SecondaryDispatcher(), httpPort, tcpPort);
+		primaryServer = paramPrimary;
 	}
 
 	public boolean sendHttpRequest(final HttpRequest myRequest) {
@@ -60,13 +61,13 @@ public class SecondaryServer extends Server {
 			return ServerResponse.OperationFailed;
 		}
 
-		selectedRoom.insertMessage(new UserMessage(roomId, userToken, Instant.now().toEpochMilli(), messageBody));
+		selectedRoom.insertMessage(new Message(roomId, userToken, Instant.now().toEpochMilli(), messageBody));
 
 		return ServerResponse.SuccessResponse;
 	}
 
 	@Override
-	public UserMessage[] retrieveMessages(final String userToken, int roomId) {
+	public Message[] retrieveMessages(final String userToken, int roomId) {
 
 		if (!rooms.containsKey(roomId)) {
 			return null;

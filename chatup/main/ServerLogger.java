@@ -1,6 +1,6 @@
 package chatup.main;
 
-import chatup.room.Room;
+import chatup.model.Room;
 
 import java.io.*;
 import java.nio.file.*;

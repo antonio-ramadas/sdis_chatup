@@ -5,11 +5,15 @@ import java.net.UnknownHostException;
 
 public class ServerInfo {
 
-    private int serverId;
     private short tcpPort;
 
     public ServerInfo(final String serverAddress, short tcpPort) throws UnknownHostException {
         setAddress(InetAddress.getByName(serverAddress));
+        setTcpPort(tcpPort);
+    }
+
+    public ServerInfo(final InetAddress serverAddress, short tcpPort) throws UnknownHostException {
+        setAddress(serverAddress);
         setTcpPort(tcpPort);
     }
 

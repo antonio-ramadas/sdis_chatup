@@ -1,7 +1,6 @@
-package chatup.server;
+package chatup.model;
 
-import chatup.room.Room;
-import chatup.user.UserMessage;
+import chatup.server.ServerInfo;
 
 import java.sql.*;
 import java.net.UnknownHostException;
@@ -116,7 +115,7 @@ public class Database {
     /**********************
      * MESSAGES
      **********************/
-    public boolean insertMessage(final UserMessage paramMessage) {
+    public boolean insertMessage(final Message paramMessage) {
 
         final String sqlQuery = "INSERT INTO Messages(room, token, epoch, message) VALUES(?, ?, ?, ?)";
 
@@ -149,7 +148,7 @@ public class Database {
         return true;
     }
 
-    public UserMessage getMessage(int messageId) {
+    public Message getMessage(int messageId) {
 
         final String sqlQuery = "SELECT * FROM Messages WHERE id = ?";
 
@@ -160,7 +159,7 @@ public class Database {
             try (final ResultSet rs = stmt.executeQuery()) {
 
                 if (rs.next()) {
-                    return new UserMessage(rs.getInt("room"), rs.getString("token"), rs.getLong("epoch"), rs.getString("message")
+                    return new Message(rs.getInt("room"), rs.getString("token"), rs.getLong("epoch"), rs.getString("message")
                     );
                 }
             }
@@ -173,9 +172,9 @@ public class Database {
         return null;
     }
 
-    public LinkedList<UserMessage> getMessagesByRoomId(int roomId) {
+    public LinkedList<Message> getMessagesByRoomId(int roomId) {
 
-        final LinkedList<UserMessage> myMessages = new LinkedList<>();
+        final LinkedList<Message> myMessages = new LinkedList<>();
         final String sqlQuery = "SELECT * FROM Messages WHERE room = ? ORDER BY epoch DESC";
 
         try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
@@ -185,7 +184,7 @@ public class Database {
             try (final ResultSet rs = stmt.executeQuery()) {
 
                 while (rs.next()) {
-                    myMessages.add(new UserMessage(rs.getInt("room"), rs.getString("token"), rs.getLong("epoch"), rs.getString("message")
+                    myMessages.add(new Message(rs.getInt("room"), rs.getString("token"), rs.getLong("epoch"), rs.getString("message")
                     ));
                 }
             }

@@ -1,8 +1,4 @@
-package chatup.room;
-
-import chatup.user.MessageCache;
-import chatup.user.UserMessage;
-import javafx.util.Pair;
+package chatup.model;
 
 import java.util.*;
 
@@ -11,7 +7,7 @@ public class Room {
 	private String roomName;
 	private String roomPassword;
 	private String roomOwner;
-	private MessageCache<Integer, UserMessage> roomMessages;
+	private MessageCache<Integer, Message> roomMessages;
 	private Set<String> roomUsers;
 	private Set<Integer> roomServers;
 
@@ -28,11 +24,11 @@ public class Room {
 		this(roomName, null, roomOwner);
 	}
 
-	public UserMessage[] getMessages() {
-		return (UserMessage[]) roomMessages.getArray();
+	public Message[] getMessages() {
+		return (Message[]) roomMessages.getArray();
 	}
 
-	public int generateHash(final UserMessage paramMessage) {
+	public int generateHash(final Message paramMessage) {
 
 		int hash = 7;
 
@@ -42,7 +38,7 @@ public class Room {
 		return hash;
 	}
 
-	public boolean insertMessage(final UserMessage paramMessage) {
+	public boolean insertMessage(final Message paramMessage) {
 
 		if (roomUsers.contains(paramMessage.getSender())) {
 

@@ -2,9 +2,10 @@ package chatup.server;
 
 import chatup.http.HttpFields;
 import chatup.http.ServerResponse;
-import chatup.user.UserMessage;
+import chatup.model.Database;
+import chatup.model.Message;
 import com.eclipsesource.json.JsonValue;
-import chatup.room.Room;
+import chatup.model.Room;
 import com.eclipsesource.json.Json;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -12,11 +13,14 @@ import com.sun.net.httpserver.HttpServer;
 import java.io.*;
 import javax.net.ssl.*;
 import java.net.InetSocketAddress;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.Executors;
 
 public abstract class Server {
+
+    private final Database serverDatabase = Database.getInstance();
 
     private HttpServer httpServer;
     protected SSLConnection tcpConnection;
@@ -29,7 +33,7 @@ public abstract class Server {
     protected final HashMap<Integer, ServerInfo> servers = new HashMap<>();
     protected final HashMap<String, String> users = new HashMap<>();
 
-    public Server(final ServerKeystore serverKeystore, final HttpHandler httpHandler, short httpPort, short tcpPort) {
+    public Server(final ServerKeystore serverKeystore, final HttpHandler httpHandler, short httpPort, short tcpPort) throws SQLException {
 
         this.httpPort = httpPort;
         this.serverKeystore = serverKeystore;
@@ -212,7 +216,7 @@ public abstract class Server {
         return newArray;
     }
 
-    public UserMessage[] retrieveMessages(final String userToken, int roomId) {
+    public Message[] retrieveMessages(final String userToken, int roomId) {
         return null;
     }
 

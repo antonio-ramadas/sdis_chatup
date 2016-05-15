@@ -3,7 +3,7 @@ package chatup.http;
 import chatup.main.ChatupGlobals;
 import chatup.main.ChatupServer;
 import chatup.server.Server;
-import chatup.user.UserMessage;
+import chatup.model.Message;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
@@ -29,7 +29,7 @@ public class MessageServiceHandler extends HttpDispatcher {
         }
         else {
 
-            final UserMessage[] userMessages = serverInstance.retrieveMessages(userToken, roomId);
+            final Message[] userMessages = serverInstance.retrieveMessages(userToken, roomId);
 
             if (userMessages == null) {
 
@@ -57,7 +57,7 @@ public class MessageServiceHandler extends HttpDispatcher {
 
             int roomId = jsonObject.getInt(HttpFields.RoomId, -1);
             final String userToken = jsonObject.getString(HttpFields.UserToken, null);
-            final String userMessage = jsonObject.getString(HttpFields.UserMessage, null);
+            final String userMessage = jsonObject.getString(HttpFields.MessageContents, null);
 
             if (roomId < 0 || userToken == null || userMessage == null) {
                 sendError(ServerResponse.MissingParameters);

@@ -1,6 +1,7 @@
 package chatup.main;
 
 import chatup.server.Server;
+import chatup.server.ServerInfo;
 import chatup.server.ServerKeystore;
 import chatup.server.ServerType;
 
@@ -19,37 +20,66 @@ public class ChatupServer {
     private static ServerKeystore serverKeystore;
     private static ServerType serverType;
 
-    static void initialize(final ServerType paramType, short httpPort, short tcpPort) {
+    static boolean initializePrimary(short httpPort, short tcpPort) {
+
+        boolean exceptionThrown = false;
 
         try {
             serverKeystore = new ServerKeystore("server.jks", "123456");
-            serverType = paramType;
+            serverType = ServerType.PRIMARY;
+            serverInstance = new chatup.server.PrimaryServer(serverKeystore, httpPort, tcpPort);
+        }
+        catch (IOException ex) {
+            ex.printStackTrace();
+            exceptionThrown = true;
+        }
+        catch (SQLException ex) {
+            ex.printStackTrace();
+            exceptionThrown = true;
+        }
+        catch (KeyStoreException | UnrecoverableKeyException | CertificateException ex) {
+            ex.printStackTrace();
+            exceptionThrown = true;
+        }
+        catch (NoSuchAlgorithmException ex) {
+            ex.printStackTrace();
+            exceptionThrown = true;
+        }
 
-            if (serverType == ServerType.PRIMARY) {
-                serverInstance = new chatup.server.PrimaryServer(serverKeystore, httpPort, tcpPort);
-            }
-            else {
-                serverInstance = new chatup.server.SecondaryServer(serverKeystore, httpPort, tcpPort);
-            }
+        return exceptionThrown;
+    }
+
+    static boolean initializeSecondary(final ServerInfo primaryServer, short httpPort, short tcpPort) {
+
+        boolean exceptionThrown = false;
+
+        try {
+            serverKeystore = new ServerKeystore("server.jks", "123456");
+            serverType = ServerType.PRIMARY;
+            serverInstance = new chatup.server.SecondaryServer(serverKeystore, primaryServer, httpPort, tcpPort);
         }
-        catch (IOException e) {
-            e.printStackTrace();
+        catch (IOException ex) {
+            ex.printStackTrace();
+            exceptionThrown = true;
         }
-        catch (SQLException e) {
-            e.printStackTrace();
+        catch (SQLException ex) {
+            ex.printStackTrace();
+            exceptionThrown = true;
         }
-        catch (KeyStoreException e) {
-            e.printStackTrace();
+        catch (KeyStoreException | UnrecoverableKeyException | CertificateException ex) {
+            ex.printStackTrace();
+            exceptionThrown = true;
         }
-        catch (CertificateException e) {
-            e.printStackTrace();
+        catch (NoSuchAlgorithmException ex) {
+            ex.printStackTrace();
+            exceptionThrown = true;
         }
-        catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        catch (UnrecoverableKeyException e) {
-            e.printStackTrace();
-        }
+
+        return exceptionThrown;
+    }
+
+    public static ServerType getType() {
+        return serverType;
     }
 
     public static Server getInstance() {

@@ -1,6 +1,7 @@
 package chatup.http;
 
 import chatup.main.ChatupGlobals;
+
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
@@ -11,6 +12,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
 import java.net.HttpURLConnection;
 
 public abstract class HttpDispatcher {
@@ -23,7 +25,7 @@ public abstract class HttpDispatcher {
         httpExchange = paramExchange;
     }
 
-    public void processRequest() {
+    void processRequest() {
 
         final String requestMethod = httpExchange.getRequestMethod();
 
@@ -48,7 +50,7 @@ public abstract class HttpDispatcher {
         }
     }
 
-    protected boolean sendError(final ServerResponse serverResponse) {
+    boolean sendError(final ServerResponse serverResponse) {
 
         try {
             sendResponse(
@@ -74,7 +76,7 @@ public abstract class HttpDispatcher {
         }
     }
 
-    protected boolean sendTextResponse(final ServerResponse httpResponse, final String httpParameters) {
+    boolean sendTextResponse(final ServerResponse httpResponse, final String httpParameters) {
 
         if (httpResponse == ServerResponse.SuccessResponse) {
 
@@ -94,7 +96,7 @@ public abstract class HttpDispatcher {
         return true;
     }
 
-    protected boolean sendJsonResponse(final ServerResponse httpResponse, final JsonValue httpParameters) {
+    boolean sendJsonResponse(final ServerResponse httpResponse, final JsonValue httpParameters) {
 
         if (httpResponse == ServerResponse.SuccessResponse) {
 
@@ -115,7 +117,7 @@ public abstract class HttpDispatcher {
         return true;
     }
 
-    protected final JsonObject extractCommand(final JsonValue jsonObject, final String commandName) {
+    final JsonObject extractCommand(final JsonValue jsonObject, final String commandName) {
 
         final JsonValue extractedCommand = jsonObject.asObject().get(commandName);
 
@@ -131,23 +133,7 @@ public abstract class HttpDispatcher {
         return null;
     }
 
-    private String[] extractGetCommand(final String requestBody) {
-
-        if (requestBody == null) {
-            return null;
-        }
-
-        final String[] requestArray = requestBody.substring(1).split("&");
-
-        if (requestArray == null)
-        {
-            return new String[]{};
-        }
-
-        return requestArray;
-    }
-
-    protected final String parseString(final String parameterString, final String commandName) {
+    final String parseString(final String parameterString, final String commandName) {
 
         final String[] parameterValues  = parameterString.split("=");
 
@@ -162,7 +148,7 @@ public abstract class HttpDispatcher {
         return null;
     }
 
-    protected int parseInteger(final String parameterString, final String commandName) {
+    int parseInteger(final String parameterString, final String commandName) {
 
         final String integerString = parseString(parameterString, commandName);
 

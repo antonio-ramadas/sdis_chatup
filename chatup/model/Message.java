@@ -1,11 +1,11 @@
-package chatup.user;
+package chatup.model;
 
-public class UserMessage implements Comparable<UserMessage> {
+public class Message implements Comparable<Message> {
 
     private long messageTimestamp;
     private int messageRoom;
 
-    public UserMessage(int roomId, final String messageAuthor, long messageTimestamp, final String messageContents) {
+    public Message(int roomId, final String messageAuthor, long messageTimestamp, final String messageContents) {
         setRoomId(roomId);
         setAuthor(messageAuthor);
         setMessage(messageContents);
@@ -49,14 +49,14 @@ public class UserMessage implements Comparable<UserMessage> {
 
     @Override
     public boolean equals(final Object other) {
-        return other instanceof UserMessage
-            && ((UserMessage) other).getRoomId() == messageRoom
-            && ((UserMessage) other).getTimestamp() == messageTimestamp
-            && ((UserMessage) other).getSender().equals(messageAuthor);
+        return other instanceof Message
+            && ((Message) other).getRoomId() == messageRoom
+            && ((Message) other).getTimestamp() == messageTimestamp
+            && ((Message) other).getSender().equals(messageAuthor);
     }
 
     @Override
-    public int compareTo(final UserMessage other) {
+    public int compareTo(final Message other) {
         return Long.compare(messageTimestamp, other.getTimestamp());
     }
 }

@@ -1,6 +1,6 @@
 package chatup.server;
 
-import chatup.user.UserMessage;
+import chatup.model.Message;
 
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -65,7 +65,7 @@ public class SSLConnection {
         }
     }
 
-    public void sendMessage(final ServerInfo paramServer, final UserMessage paramObject) {
+    public void sendMessage(final ServerInfo paramServer, final Message paramObject) {
 
         try (final SSLSocket socket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(paramServer.getAddress(), paramServer.getPort());
              final ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream()))
