@@ -18,7 +18,7 @@ public class PrimaryDispatcher extends ServerDispatcher {
             new UserServiceHandler(httpExchange).processRequest();
             break;
         default:
-            sendError(httpExchange, HttpResponses.InvalidService);
+            sendError(httpExchange, ServerResponse.InvalidService);
             break;
         }
     }

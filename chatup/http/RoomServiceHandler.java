@@ -18,7 +18,7 @@ public class RoomServiceHandler extends HttpDispatcher {
 
     @Override
     public void parseGetRequest(String[] getValues) {
-        sendJsonSuccess(Json.object().add(HttpCommands.RetrieveRooms, ChatupServer.getInstance().getRooms()));
+        sendJsonResponse(ServerResponse.SuccessResponse, Json.object().add(HttpCommands.RetrieveRooms, ChatupServer.getInstance().getRooms()));
     }
 
     @Override
@@ -33,17 +33,14 @@ public class RoomServiceHandler extends HttpDispatcher {
             final String userToken = jsonObject.getString(HttpFields.UserToken, null);
 
             if (roomId < 0 || userToken == null) {
-                sendError(HttpResponses.MissingParameters);
-            }
-            else if (serverInstance.joinRoom(roomId, userToken)) {
-                sendJsonSuccess(jsonValue);
+                sendError(ServerResponse.MissingParameters);
             }
             else {
-                sendError(HttpResponses.OperationFailed);
+                sendJsonResponse(serverInstance.joinRoom(roomId, userToken), jsonObject);
             }
         }
         else {
-            sendError(HttpResponses.InvalidCommand);
+            sendError(ServerResponse.InvalidCommand);
         }
     }
 
@@ -60,17 +57,14 @@ public class RoomServiceHandler extends HttpDispatcher {
             final String userToken = jsonObject.getString(HttpFields.UserToken, null);
 
             if (roomName == null || userToken == null) {
-                sendError(HttpResponses.MissingParameters);
-            }
-            else if (serverInstance.createRoom(roomName, roomPassword, userToken)) {
-                sendJsonSuccess(jsonValue);
+                sendError(ServerResponse.MissingParameters);
             }
             else {
-                sendError(HttpResponses.OperationFailed);
+                sendJsonResponse(serverInstance.createRoom(roomName, roomPassword, userToken), jsonObject);
             }
         }
         else {
-            sendError(HttpResponses.InvalidCommand);
+            sendError(ServerResponse.InvalidCommand);
         }
     }
 
@@ -86,17 +80,14 @@ public class RoomServiceHandler extends HttpDispatcher {
             final String userToken = jsonObject.getString(HttpFields.UserToken, null);
 
             if (roomId < 0 || userToken == null) {
-                sendError(HttpResponses.MissingParameters);
-            }
-            else if (serverInstance.leaveRoom(roomId, userToken)) {
-                sendJsonSuccess(jsonValue);
+                sendError(ServerResponse.MissingParameters);
             }
             else {
-                sendError(HttpResponses.OperationFailed);
+                sendJsonResponse(serverInstance.leaveRoom(roomId, userToken), jsonObject);
             }
         }
         else {
-            sendError(HttpResponses.InvalidCommand);
+            sendError(ServerResponse.InvalidCommand);
         }
     }
 }

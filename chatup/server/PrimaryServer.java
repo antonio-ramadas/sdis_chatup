@@ -1,6 +1,7 @@
 package chatup.server;
 
 import chatup.http.PrimaryDispatcher;
+import chatup.http.ServerResponse;
 import chatup.main.ServerLogger;
 import chatup.room.Room;
 
@@ -48,18 +49,18 @@ public class PrimaryServer extends Server {
     }
 
     @Override
-    public boolean insertServer(int serverId, String newIp, short newPort) {
+    public ServerResponse insertServer(int serverId, String newIp, short newPort) {
         final ServerInfo selectedServer = servers.get(serverId);
-        return selectedServer == null;
+        return ServerResponse.SuccessResponse;
     }
 
     @Override
-    public boolean updateServer(int serverId, final String newIp, short newPort) {
+    public ServerResponse updateServer(int serverId, final String newIp, short newPort) {
 
         final ServerInfo selectedServer = servers.get(serverId);
 
         if (selectedServer == null) {
-            return false;
+            return ServerResponse.ServerNotFound;
         }
 
         try {
@@ -67,7 +68,7 @@ public class PrimaryServer extends Server {
             selectedServer.setTcpPort(newPort);
         }
         catch (UnknownHostException ex) {
-            return false;
+            return ServerResponse.ProtocolError;
         }
 
         final String generatedMessage = ServerMessage.replaceServer(serverId, newIp, newPort);
@@ -79,11 +80,11 @@ public class PrimaryServer extends Server {
             }
         });
 
-        return true;
+        return ServerResponse.SuccessResponse;
     }
 
     @Override
-    public boolean userDisconnect(final String userToken, final String userEmail) {
+    public ServerResponse userDisconnect(final String userToken, final String userEmail) {
 
         System.out.println("email:" + userEmail);
         System.out.println("token:" + userToken);
@@ -91,7 +92,7 @@ public class PrimaryServer extends Server {
         final String userRecord = users.get(userToken);
 
         if (userRecord == null || !userRecord.equals(userEmail)) {
-            return false;
+            return ServerResponse.InvalidToken;
         }
 
         final String generatedMessage = ServerMessage.userDisconnect(userToken, userEmail);
@@ -99,16 +100,16 @@ public class PrimaryServer extends Server {
         servers.forEach((severId, server) -> tcpConnection.send(server, generatedMessage));
         users.remove(userToken);
 
-        return true;
+        return ServerResponse.SuccessResponse;
     }
 
     @Override
-    public boolean removeServer(int serverId) {
+    public ServerResponse removeServer(int serverId) {
 
         final ServerInfo selectedServer = servers.get(serverId);
 
         if (selectedServer == null) {
-            return false;
+            return ServerResponse.ServerNotFound;
         }
 
         final String generatedMessage = ServerMessage.deleteServer(serverId);
@@ -122,6 +123,6 @@ public class PrimaryServer extends Server {
 
         servers.remove(serverId);
 
-        return true;
+        return ServerResponse.SuccessResponse;
     }
 }

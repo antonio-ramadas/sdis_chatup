@@ -27,17 +27,14 @@ public class UserServiceHandler extends HttpDispatcher {
             final String userToken = jsonObject.getString(HttpFields.UserToken, null);
 
             if (userEmail == null || userToken == null) {
-                sendError(HttpResponses.MissingParameters);
-            }
-            else if (serverInstance.userLogin(userEmail, userToken)) {
-                sendJsonSuccess(jsonValue);
+                sendError(ServerResponse.MissingParameters);
             }
             else {
-                sendError(HttpResponses.OperationFailed);
+                sendJsonResponse(serverInstance.userLogin(userEmail, userToken), jsonObject);
             }
         }
         else {
-            sendError(HttpResponses.InvalidCommand);
+            sendError(ServerResponse.InvalidCommand);
         }
     }
 
@@ -53,17 +50,14 @@ public class UserServiceHandler extends HttpDispatcher {
             final String userToken = jsonObject.getString(HttpFields.UserToken, null);
 
             if (userEmail == null || userToken == null) {
-                sendError(HttpResponses.MissingParameters);
-            }
-            else if (serverInstance.userDisconnect(userEmail, userToken)) {
-                sendJsonSuccess(jsonValue);
+                sendError(ServerResponse.MissingParameters);
             }
             else {
-                sendError(HttpResponses.OperationFailed);
+                sendJsonResponse(serverInstance.userDisconnect(userEmail, userToken), jsonObject);
             }
         }
         else {
-            sendError(HttpResponses.InvalidCommand);
+            sendError(ServerResponse.InvalidCommand);
         }
     }
 }

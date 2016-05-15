@@ -10,9 +10,9 @@ import java.io.OutputStream;
 
 public abstract class ServerDispatcher implements HttpHandler {
 
-    protected boolean sendError(final HttpExchange httpExchange, final String requestCommand) {
+    protected boolean sendError(final HttpExchange httpExchange, final ServerResponse httpResponse) {
 
-        final String errorResponse = Json.object().add(HttpResponses.ErrorResponse, requestCommand).toString();
+        final String errorResponse = Json.object().add("error", httpResponse.toString()).toString();
 
         try {
             httpExchange.sendResponseHeaders(404, errorResponse.length());

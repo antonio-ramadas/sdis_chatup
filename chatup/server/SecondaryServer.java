@@ -2,6 +2,7 @@ package chatup.server;
 
 import chatup.http.SecondaryDispatcher;
 import chatup.http.HttpRequest;
+import chatup.http.ServerResponse;
 import chatup.room.Room;
 import chatup.user.UserMessage;
 
@@ -47,21 +48,21 @@ public class SecondaryServer extends Server {
 	}
 
 	@Override
-	public boolean registerMessage(final String userToken, int roomId, final String messageBody) {
+	public ServerResponse registerMessage(final String userToken, int roomId, final String messageBody) {
 
 		if (!rooms.containsKey(roomId)) {
-			return false;
+			return ServerResponse.RoomNotFound;
 		}
 
 		final Room selectedRoom = rooms.get(roomId);
 
 		if (!selectedRoom.hasUser(userToken)) {
-			return false;
+			return ServerResponse.OperationFailed;
 		}
 
 		selectedRoom.insertMessage(new UserMessage(roomId, userToken, Instant.now().toEpochMilli(), messageBody));
 
-		return true;
+		return ServerResponse.SuccessResponse;
 	}
 
 	@Override
@@ -81,11 +82,11 @@ public class SecondaryServer extends Server {
 	}
 
 	@Override
-	public boolean insertServer(int serverId, String newIp, short newPort) {
-		return false;
+	public ServerResponse insertServer(int serverId, String newIp, short newPort) {
+		return ServerResponse.OperationFailed;
 	}
 
-	public boolean updateServer(int serverId, final String newIp, short newPort) {
+	public ServerResponse updateServer(int serverId, final String newIp, short newPort) {
 
 		final ServerInfo selectedServer = servers.get(serverId);
 
@@ -95,7 +96,7 @@ public class SecondaryServer extends Server {
 				servers.put(serverId, new ServerInfo(newIp, newPort));
 			}
 			catch (UnknownHostException e) {
-				return false;
+				return ServerResponse.OperationFailed;
 			}
 		}
 		else {
@@ -105,29 +106,29 @@ public class SecondaryServer extends Server {
 				selectedServer.setTcpPort(newPort);
 			}
 			catch (UnknownHostException ex) {
-				return false;
+				return ServerResponse.OperationFailed;
 			}
 		}
 
 
-		return true;
+		return ServerResponse.SuccessResponse;
 	}
 
-	public boolean removeServer(int serverId) {
+	public ServerResponse removeServer(int serverId) {
 
 		final ServerInfo selectedServer = servers.get(serverId);
 
 		if (selectedServer == null) {
-			return false;
+			return ServerResponse.ServerNotFound;
 		}
 
 		servers.remove(serverId);
 
-		return true;
+		return ServerResponse.SuccessResponse;
 	}
 
 	@Override
-	public boolean userDisconnect(final String userToken, final String userEmail) {
+	public ServerResponse userDisconnect(final String userToken, final String userEmail) {
 
 		System.out.println("email:" + userEmail);
 		System.out.println("token:" + userToken);
@@ -135,7 +136,7 @@ public class SecondaryServer extends Server {
 		final String userRecord = users.get(userToken);
 
 		if (userRecord == null || !userRecord.equals(userEmail)) {
-			return false;
+			return ServerResponse.InvalidToken;
 		}
 
 		rooms.forEach((roomId, room) -> {
@@ -147,7 +148,7 @@ public class SecondaryServer extends Server {
 
 		users.remove(userToken);
 
-		return true;
+		return ServerResponse.SuccessResponse;
 	}
 
 	@Override

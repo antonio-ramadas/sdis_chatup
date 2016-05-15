@@ -15,7 +15,7 @@ public class SecondaryDispatcher extends ServerDispatcher {
             new MessageServiceHandler(httpExchange).processRequest();
             break;
         default:
-            sendError(httpExchange, HttpResponses.InvalidService);
+            sendError(httpExchange, ServerResponse.InvalidService);
             break;
         }
     }

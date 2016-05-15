@@ -1,6 +1,7 @@
 package chatup.server;
 
 import chatup.http.HttpFields;
+import chatup.http.ServerResponse;
 import chatup.user.UserMessage;
 import com.eclipsesource.json.JsonValue;
 import chatup.room.Room;
@@ -101,17 +102,17 @@ public abstract class Server {
         return tcpConnection.getSocket();
     }
 
-    public abstract boolean insertServer(int serverId, final String newIp, short newPort);
-    public abstract boolean updateServer(int serverId, final String newIp, short newPort);
-    public abstract boolean removeServer(int serverId);
+    public abstract ServerResponse insertServer(int serverId, final String newIp, short newPort);
+    public abstract ServerResponse updateServer(int serverId, final String newIp, short newPort);
+    public abstract ServerResponse removeServer(int serverId);
 
-    public boolean leaveRoom(int roomId, final String userToken) {
+    public ServerResponse leaveRoom(int roomId, final String userToken) {
 
         System.out.println("roomId:" + roomId);
         System.out.println("token:" + userToken);
 
         if (!rooms.containsKey(roomId)) {
-            return false;
+            return ServerResponse.RoomNotFound;
         }
 
         final Room selectedRoom = rooms.get(roomId);
@@ -124,10 +125,10 @@ public abstract class Server {
             notifyLeaveRoom(roomId, userToken);
         }
 
-        return true;
+        return ServerResponse.SuccessResponse;
     }
 
-    public abstract boolean userDisconnect(final String userToken, final String userEmail);
+    public abstract ServerResponse userDisconnect(final String userToken, final String userEmail);
 
     protected void notifyLeaveRoom(int roomId, final String userToken) {
 
@@ -153,34 +154,47 @@ public abstract class Server {
         }
     }
 
-    public boolean createRoom(final String roomName, final String roomPassword, final String roomOwner) {
-        return rooms.put(++sequenceRoom, new Room(roomName, roomPassword, roomOwner)) == null;
+    public ServerResponse createRoom(final String roomName, final String roomPassword, final String roomOwner) {
+
+        if (rooms.put(++sequenceRoom, new Room(roomName, roomPassword, roomOwner)) == null) {
+            return ServerResponse.SuccessResponse;
+        }
+
+        return ServerResponse.OperationFailed;
     }
 
-    public boolean joinRoom(int roomId, final String userToken) {
+    public ServerResponse joinRoom(int roomId, final String userToken) {
 
         System.out.println("roomId:" + roomId);
         System.out.println("token:" + userToken);
 
         if (roomId < 0 || userToken == null) {
-            return false;
+            return ServerResponse.InvalidToken;
         }
 
         final Room selectedRoom = rooms.get(roomId);
 
         if (selectedRoom == null) {
-            return false;
+            return ServerResponse.RoomNotFound;
         }
 
-        return selectedRoom.registerUser(userToken);
+        if (selectedRoom.registerUser(userToken)) {
+            return ServerResponse.SuccessResponse;
+        }
+
+        return ServerResponse.OperationFailed;
     }
 
-    public boolean userLogin(String userEmail, String userToken) {
+    public ServerResponse userLogin(String userEmail, String userToken) {
 
         System.out.println("email:" + userEmail);
         System.out.println("token:" + userToken);
 
-        return userEmail.equals("marques999@gmail.com") && userToken.equals("14191091");
+        if (userEmail.equals("marques999@gmail.com") && userToken.equals("14191091")) {
+            return ServerResponse.SuccessResponse;
+        }
+
+        return ServerResponse.AuthenticationFailed;
     }
 
     public final JsonValue getRooms() {
@@ -202,8 +216,8 @@ public abstract class Server {
         return null;
     }
 
-    public boolean registerMessage(final String userToken, int roomId, final String msgContents) {
-        return false;
+    public ServerResponse registerMessage(final String userToken, int roomId, final String msgContents) {
+        return ServerResponse.OperationFailed;
     }
 
     public abstract ServerType getType();

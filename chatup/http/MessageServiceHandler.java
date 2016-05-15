@@ -24,8 +24,8 @@ public class MessageServiceHandler extends HttpDispatcher {
         final String userToken = parseString(getValues[0], HttpFields.UserToken);
         int roomId = parseInteger(getValues[1], HttpFields.RoomId);
 
-        if (userToken == null || roomId == -1) {
-            sendError(HttpResponses.MissingParameters);
+        if (userToken == null || roomId < 0) {
+            sendError(ServerResponse.MissingParameters);
         }
         else {
 
@@ -39,10 +39,10 @@ public class MessageServiceHandler extends HttpDispatcher {
                     jsonObject.asArray().add(userMessages[i].getRoomId());
                 }
 
-                sendSuccess(jsonObject.toString());
+                sendJsonResponse(ServerResponse.SuccessResponse, jsonObject);
             }
             else {
-                sendError(HttpResponses.OperationFailed);
+                sendError(ServerResponse.OperationFailed);
             }
         }
     }
@@ -59,18 +59,15 @@ public class MessageServiceHandler extends HttpDispatcher {
             final String userToken = jsonObject.getString(HttpFields.UserToken, null);
             final String userMessage = jsonObject.getString(HttpFields.UserMessage, null);
 
-            if (roomId == -1 || userToken == null || userMessage == null) {
-                sendError(HttpResponses.MissingParameters);
-            }
-            else if (serverInstance.registerMessage(userToken, roomId, userMessage)) {
-                sendSuccess(HttpCommands.SendMessage);
+            if (roomId < 0 || userToken == null || userMessage == null) {
+                sendError(ServerResponse.MissingParameters);
             }
             else {
-                sendError(HttpResponses.OperationFailed);
+                sendTextResponse(serverInstance.registerMessage(userToken, roomId, userMessage), HttpCommands.SendMessage);
             }
         }
         else {
-            sendError(HttpResponses.InvalidCommand);
+            sendError(ServerResponse.InvalidCommand);
         }
     }
 }

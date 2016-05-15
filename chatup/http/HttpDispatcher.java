@@ -27,7 +27,7 @@ public abstract class HttpDispatcher {
 
         final String requestMethod = httpExchange.getRequestMethod();
 
-        System.out.println(httpService + " received " + requestMethod + " request from " + httpExchange.getRemoteAddress() + "...");
+        System.out.println("[" + httpService + "] received " + requestMethod + " request from " + httpExchange.getRemoteAddress() + "...");
 
         switch (requestMethod) {
         case "GET":
@@ -43,15 +43,18 @@ public abstract class HttpDispatcher {
             parseDeleteRequest(Json.parse(parseRequestBody(httpExchange.getRequestBody())));
             break;
         default:
-            sendError(HttpResponses.InvalidMethod);
+            sendError(ServerResponse.InvalidMethod);
             break;
         }
     }
 
-    protected boolean sendError(final String serverResponse) {
+    protected boolean sendError(final ServerResponse serverResponse) {
 
         try {
-            sendResponse(Json.object().add(HttpResponses.ErrorResponse, serverResponse).toString(), HttpURLConnection.HTTP_OK);
+            sendResponse(
+                Json.object().add("error", serverResponse.toString()).toString(),
+                HttpURLConnection.HTTP_OK
+            );
         }
         catch (IOException ex) {
             return false;
@@ -62,7 +65,7 @@ public abstract class HttpDispatcher {
 
     private void sendResponse(final String serverResponse, int statusCode) throws IOException {
 
-        System.out.println(httpService +  " sending response: " + serverResponse);
+        System.out.println("[" + httpService +  "] sending response: " + serverResponse);
         httpExchange.sendResponseHeaders(statusCode, serverResponse.length());
 
         try (final OutputStream os = httpExchange.getResponseBody()) {
@@ -71,31 +74,42 @@ public abstract class HttpDispatcher {
         }
     }
 
-    protected boolean sendSuccess(final String requestCommand) {
+    protected boolean sendTextResponse(final ServerResponse httpResponse, final String httpParameters) {
 
-        try {
-            sendResponse(
-                Json.object().add(HttpResponses.SuccessResponse, requestCommand).toString(),
-                HttpURLConnection.HTTP_OK
-            );
+        if (httpResponse == ServerResponse.SuccessResponse) {
+
+            try {
+                sendResponse(
+                        Json.object().add("success", httpParameters).toString(),
+                        HttpURLConnection.HTTP_OK
+                );
+            } catch (IOException ex) {
+                return false;
+            }
         }
-        catch (IOException ex) {
-            return false;
+        else {
+            return sendError(httpResponse);
         }
 
         return true;
     }
 
-    protected boolean sendJsonSuccess(final JsonValue requestParameters) {
+    protected boolean sendJsonResponse(final ServerResponse httpResponse, final JsonValue httpParameters) {
 
-        try {
-            sendResponse(
-                Json.object().add(HttpResponses.SuccessResponse, requestParameters).toString(),
-                HttpURLConnection.HTTP_OK
-            );
+        if (httpResponse == ServerResponse.SuccessResponse) {
+
+            try {
+                sendResponse(
+                    Json.object().add("success", httpParameters).toString(),
+                    HttpURLConnection.HTTP_OK
+                );
+            }
+            catch (IOException ex) {
+                return false;
+            }
         }
-        catch (IOException ex) {
-            return false;
+        else {
+            return sendError(httpResponse);
         }
 
         return true;
@@ -187,18 +201,18 @@ public abstract class HttpDispatcher {
     }
 
     public void parseGetRequest(final String[] getValues) {
-        sendError(HttpResponses.InvalidMethod);
+        sendError(ServerResponse.InvalidMethod);
     }
 
     public void parsePostRequest(final JsonValue jsonValue) {
-        sendError(HttpResponses.InvalidMethod);
+        sendError(ServerResponse.InvalidMethod);
     }
 
     public void parsePutRequest(final JsonValue jsonValue) {
-        sendError(HttpResponses.InvalidMethod);
+        sendError(ServerResponse.InvalidMethod);
     }
 
     public void parseDeleteRequest(final JsonValue jsonValue) {
-        sendError(HttpResponses.InvalidMethod);
+        sendError(ServerResponse.InvalidMethod);
     }
 }
