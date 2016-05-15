@@ -11,9 +11,9 @@ import com.eclipsesource.json.JsonValue;
 
 import com.sun.net.httpserver.HttpExchange;
 
-public class MessageServiceHandler extends HttpDispatcher {
+class MessageServiceHandler extends HttpDispatcher {
 
-    public MessageServiceHandler(final HttpExchange httpExchange) {
+    MessageServiceHandler(final HttpExchange httpExchange) {
         super(ChatupGlobals.MessageServiceUrl, httpExchange);
     }
 
@@ -31,12 +31,12 @@ public class MessageServiceHandler extends HttpDispatcher {
 
             final Message[] userMessages = serverInstance.retrieveMessages(userToken, roomId);
 
-            if (userMessages == null) {
+            if (userMessages != null) {
 
                 final JsonValue jsonObject = Json.array();
 
-                for (int i = 0; i < userMessages.length; i++) {
-                    jsonObject.asArray().add(userMessages[i].getRoomId());
+                for (final Message userMessage : userMessages) {
+                    jsonObject.asArray().add(userMessage.getRoomId());
                 }
 
                 sendJsonResponse(ServerResponse.SuccessResponse, jsonObject);

@@ -1,6 +1,7 @@
 package chatup.http;
 
 import chatup.main.ChatupGlobals;
+
 import com.sun.net.httpserver.HttpExchange;
 
 public class PrimaryDispatcher extends ServerDispatcher {

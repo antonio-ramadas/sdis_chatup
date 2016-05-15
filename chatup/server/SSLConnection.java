@@ -9,39 +9,32 @@ import javax.net.ssl.SSLSocketFactory;
 
 import java.io.*;
 
-public class SSLConnection {
+class SSLConnection {
 
     private SSLServerSocket tcpSocket;
 
-    public SSLConnection(short paramPort, final ServerKeystore serverKeystore) throws IOException {
+    SSLConnection(short paramPort, final ServerKeystore serverKeystore) throws IOException {
         System.setProperty("javax.net.ssl.keyStore", serverKeystore.getPath());
         System.setProperty("javax.net.ssl.keyStorePassword", serverKeystore.getPassword());
         System.setProperty("javax.net.ssl.trustStore", "truststore.jts");
         System.setProperty("javax.net.ssl.trustStorePassword", serverKeystore.getPassword());
         SSLServerSocketFactory socketFactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
-        tcpPort = paramPort;
-        tcpSocket = (SSLServerSocket) socketFactory.createServerSocket(tcpPort);
+        tcpSocket = (SSLServerSocket) socketFactory.createServerSocket(paramPort);
     }
 
-    private short tcpPort;
-
-    public ReceiveThread getThread() {
+    final ReceiveThread getThread() {
         return new ReceiveThread(tcpSocket);
     }
 
-    public short getPort() {
-        return tcpPort;
-    }
-
-    public final SSLServerSocket getSocket() {
+    final SSLServerSocket getSocket() {
         return tcpSocket;
     }
 
-    public class ReceiveThread extends Thread {
+    private class ReceiveThread extends Thread {
 
         private SSLServerSocket tcpSocket;
 
-        public ReceiveThread(SSLServerSocket tcpSocket) {
+        ReceiveThread(SSLServerSocket tcpSocket) {
             this.tcpSocket = tcpSocket;
         }
 
@@ -65,7 +58,7 @@ public class SSLConnection {
         }
     }
 
-    public void sendMessage(final ServerInfo paramServer, final Message paramObject) {
+    void sendMessage(final ServerInfo paramServer, final Message paramObject) {
 
         try (final SSLSocket socket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(paramServer.getAddress(), paramServer.getPort());
              final ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream()))
@@ -78,7 +71,7 @@ public class SSLConnection {
         }
     }
 
-    public void send(final ServerInfo paramServer, final String message) {
+    void send(final ServerInfo paramServer, final String message) {
 
         try (final SSLSocket socket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(paramServer.getAddress(), paramServer.getPort());
              final OutputStreamWriter out = new OutputStreamWriter(socket.getOutputStream());

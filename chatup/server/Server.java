@@ -4,9 +4,11 @@ import chatup.http.HttpFields;
 import chatup.http.ServerResponse;
 import chatup.model.Database;
 import chatup.model.Message;
-import com.eclipsesource.json.JsonValue;
 import chatup.model.Room;
+
+import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.Json;
+
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
@@ -92,14 +94,6 @@ public abstract class Server {
         createRoom("XXX NAZIS XXX", "femnazi", "bca7cd6bdaf6efaf7ae8g5130ae76f8a");
         createRoom("MigaxPraSempre", null, "bca7cd6bdaf6efaf7ae8g5130ae76f8a");
         tcpConnection.getThread().start();
-    }
-
-    public short getHttpPort() {
-        return httpPort;
-    }
-
-    public short getTcpPort() {
-        return tcpConnection.getPort();
     }
 
     public SSLServerSocket getServerSocket() {

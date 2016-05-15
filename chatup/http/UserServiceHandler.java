@@ -9,9 +9,9 @@ import com.eclipsesource.json.JsonValue;
 
 import com.sun.net.httpserver.HttpExchange;
 
-public class UserServiceHandler extends HttpDispatcher {
+class UserServiceHandler extends HttpDispatcher {
 
-    public UserServiceHandler(final HttpExchange httpExchange) {
+    UserServiceHandler(final HttpExchange httpExchange) {
         super(ChatupGlobals.UserServiceUrl, httpExchange);
     }
 

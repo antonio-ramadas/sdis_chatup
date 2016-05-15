@@ -1,12 +1,10 @@
 package chatup.server;
 
 import chatup.http.SecondaryDispatcher;
-import chatup.http.HttpRequest;
 import chatup.http.ServerResponse;
 import chatup.model.Room;
 import chatup.model.Message;
 
-import java.io.*;
 import java.net.*;
 import java.sql.SQLException;
 import java.time.Instant;
@@ -18,34 +16,6 @@ public class SecondaryServer extends Server {
 	public SecondaryServer(final ServerKeystore serverKeystore, final ServerInfo paramPrimary, short httpPort, short tcpPort) throws SQLException {
 		super(serverKeystore, new SecondaryDispatcher(), httpPort, tcpPort);
 		primaryServer = paramPrimary;
-	}
-
-	public boolean sendHttpRequest(final HttpRequest myRequest) {
-
-		final HttpURLConnection urlConnection;
-
-		try {
-
-			urlConnection = (HttpURLConnection) new URL("localhost:8080/roomServer").openConnection();
-			urlConnection.setDoOutput(true);
-			urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-			urlConnection.setRequestMethod(myRequest.getMessage());
-
-			try (final OutputStreamWriter os = new OutputStreamWriter(urlConnection.getOutputStream());
-				 final BufferedWriter bw = new BufferedWriter(os)) {
-				bw.write(URLEncoder.encode(myRequest.getMessage(), "UTF-8"));
-				bw.close();
-			}
-
-			if (urlConnection != null) {
-				urlConnection.disconnect();
-			}
-		}
-		catch (IOException ex) {
-			return false;
-		}
-
-		return true;
 	}
 
 	@Override

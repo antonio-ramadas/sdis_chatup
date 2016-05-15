@@ -8,9 +8,9 @@ import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.io.OutputStream;
 
-public abstract class ServerDispatcher implements HttpHandler {
+abstract class ServerDispatcher implements HttpHandler {
 
-    protected boolean sendError(final HttpExchange httpExchange, final ServerResponse httpResponse) {
+    boolean sendError(final HttpExchange httpExchange, final ServerResponse httpResponse) {
 
         final String errorResponse = Json.object().add("error", httpResponse.toString()).toString();
 

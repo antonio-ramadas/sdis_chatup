@@ -23,13 +23,15 @@ public class ServerInfo {
         return serverAddress;
     }
 
-    public void setAddress(InetAddress paramAddress) {
+    public short getPort() {
+        return tcpPort;
+    }
+
+    void setAddress(InetAddress paramAddress) {
         serverAddress = paramAddress;
     }
 
-    public void setTcpPort(short paramPort) {
+    void setTcpPort(short paramPort) {
         tcpPort = paramPort;
     }
-
-    public short getPort() { return tcpPort; }
 }

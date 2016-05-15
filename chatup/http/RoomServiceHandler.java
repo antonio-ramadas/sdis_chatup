@@ -10,9 +10,9 @@ import com.eclipsesource.json.JsonValue;
 
 import com.sun.net.httpserver.HttpExchange;
 
-public class RoomServiceHandler extends HttpDispatcher {
+class RoomServiceHandler extends HttpDispatcher {
 
-    public RoomServiceHandler(final HttpExchange httpExchange) {
+    RoomServiceHandler(final HttpExchange httpExchange) {
         super(ChatupGlobals.RoomServiceUrl, httpExchange);
     }
 
