@@ -2,16 +2,21 @@ package chatup.server;
 
 import chatup.model.Message;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
+
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
-import java.io.*;
-
 class SSLConnection {
 
-    private SSLServerSocket tcpSocket;
+    private final SSLServerSocket tcpSocket;
 
     SSLConnection(short paramPort, final ServerKeystore serverKeystore) throws IOException {
         System.setProperty("javax.net.ssl.keyStore", serverKeystore.getPath());
@@ -32,12 +37,13 @@ class SSLConnection {
 
     class ReceiveThread extends Thread {
 
-        private SSLServerSocket tcpSocket;
+        private final SSLServerSocket tcpSocket;
 
         ReceiveThread(SSLServerSocket tcpSocket) {
             this.tcpSocket = tcpSocket;
         }
 
+        @Override
         public void run() {
 
             System.out.println("Server is now listening for TCP messages: ");

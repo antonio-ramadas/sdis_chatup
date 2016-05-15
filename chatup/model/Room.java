@@ -101,11 +101,15 @@ public class Room {
 	}
 
 	public boolean isEmpty() {
-		return roomUsers.size() == 0;
+		return roomUsers.isEmpty();
 	}
 
 	public boolean isPrivate() {
 		return roomPassword != null;
+	}
+
+	public boolean hasUser(final String userToken) {
+		return roomUsers.contains(userToken);
 	}
 
 	public final String getName() {
@@ -124,11 +128,7 @@ public class Room {
 		return roomUsers;
 	}
 
-	public boolean hasUser(final String userToken) {
-		return roomUsers.contains(userToken);
-	}
-
-    public Set<Integer> getServers() {
+    public final Set<Integer> getServers() {
         return roomServers;
     }
 }

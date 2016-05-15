@@ -1,5 +1,7 @@
 package chatup.model;
 
+import java.util.Objects;
+
 public class Message implements Comparable<Message> {
 
     private long messageTimestamp;
@@ -31,19 +33,19 @@ public class Message implements Comparable<Message> {
         return messageAuthor;
     }
 
-    public void setRoomId(int paramId) {
+    public final void setRoomId(int paramId) {
         messageRoom = paramId;
     }
 
-    public void setAuthor(final String paramAuthor) {
+    public final void setAuthor(final String paramAuthor) {
         messageAuthor = paramAuthor;
     }
 
-    public void setTimestamp(long paramTimestamp) {
+    public final void setTimestamp(long paramTimestamp) {
         messageTimestamp = paramTimestamp;
     }
 
-    public void setMessage(final String paramMessage) {
+    public final void setMessage(final String paramMessage) {
         messageContents = paramMessage;
     }
 
@@ -53,6 +55,15 @@ public class Message implements Comparable<Message> {
             && ((Message) other).getRoomId() == messageRoom
             && ((Message) other).getTimestamp() == messageTimestamp
             && ((Message) other).getSender().equals(messageAuthor);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 11 * hash + (int) (messageTimestamp ^ (messageTimestamp >>> 32));
+        hash = 11 * hash + messageRoom;
+        hash = 11 * hash + Objects.hashCode(messageAuthor);
+        return hash;
     }
 
     @Override

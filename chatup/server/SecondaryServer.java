@@ -5,7 +5,8 @@ import chatup.http.ServerResponse;
 import chatup.model.Room;
 import chatup.model.Message;
 
-import java.net.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.time.Instant;
 
@@ -57,6 +58,7 @@ public class SecondaryServer extends Server {
 		return ServerResponse.OperationFailed;
 	}
 
+	@Override
 	public ServerResponse updateServer(int serverId, final String newIp, short newPort) {
 
 		final ServerInfo selectedServer = servers.get(serverId);
@@ -85,6 +87,7 @@ public class SecondaryServer extends Server {
 		return ServerResponse.SuccessResponse;
 	}
 
+	@Override
 	public ServerResponse removeServer(int serverId) {
 
 		final ServerInfo selectedServer = servers.get(serverId);

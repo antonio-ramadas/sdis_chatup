@@ -27,11 +27,11 @@ public class ServerInfo {
         return tcpPort;
     }
 
-    void setAddress(InetAddress paramAddress) {
+    final void setAddress(InetAddress paramAddress) {
         serverAddress = paramAddress;
     }
 
-    void setTcpPort(short paramPort) {
+    final void setTcpPort(short paramPort) {
         tcpPort = paramPort;
     }
 }

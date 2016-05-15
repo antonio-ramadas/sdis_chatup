@@ -12,7 +12,7 @@ import com.eclipsesource.json.Json;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
-import java.io.*;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -49,8 +49,8 @@ public abstract class Server {
         try {
             // TODO: verify if 'TLSv1' is what we really want
             // TODO: clean up this mess (and understand it as well)
-         //   final KeyManagerFactory kmf = serverKeystore.getKeyManager();
-         //   final TrustManagerFactory tmf = serverKeystore.getTrustManager();
+            //   final KeyManagerFactory kmf = serverKeystore.getKeyManager();
+            //   final TrustManagerFactory tmf = serverKeystore.getTrustManager();
 
             httpServer = HttpServer.create(new InetSocketAddress(httpPort), 0);
 
@@ -195,12 +195,12 @@ public abstract class Server {
         final JsonValue newArray = Json.array();
 
         rooms.forEach((k, v) -> newArray.asArray()
-            .add(Json.object()
-            .add(HttpFields.RoomName, v.getName())
-            .add(HttpFields.UserToken, v.getOwner())
-            .add(HttpFields.RoomPrivate, v.isPrivate())
-            .add(HttpFields.RoomId, k)
-        ));
+                .add(Json.object()
+                        .add(HttpFields.RoomName, v.getName())
+                        .add(HttpFields.UserToken, v.getOwner())
+                        .add(HttpFields.RoomPrivate, v.isPrivate())
+                        .add(HttpFields.RoomId, k)
+                ));
 
         return newArray;
     }

@@ -17,7 +17,7 @@ public class UserSession {
     private InetAddress userAddress;
     private Set<Integer> userRooms;
 
-    public boolean enterRoom(int roomId) {
+    public final boolean enterRoom(int roomId) {
 
         if (userRooms.contains(roomId)) {
             return false;
@@ -28,7 +28,7 @@ public class UserSession {
         return true;
     }
 
-    public boolean leaveRoom(int roomId) {
+    public final boolean leaveRoom(int roomId) {
 
         if (!userRooms.contains(roomId)) {
             return false;
@@ -39,15 +39,15 @@ public class UserSession {
         return true;
     }
 
-    public int getCount() {
+    public final int getCount() {
         return userRooms.size();
     }
 
-    public short getPort() {
+    public final short getPort() {
         return userPort;
     }
 
-    public void setPort(short paramPort) {
+    public final void setPort(short paramPort) {
         userPort = paramPort;
     }
 
@@ -55,11 +55,11 @@ public class UserSession {
         return userAddress;
     }
 
-    public void setAddress(final InetAddress paramAddress) {
+    public final void setAddress(final InetAddress paramAddress) {
         userAddress = paramAddress;
     }
 
-    public void setRooms(final Set<Integer> paramRooms) {
+    public final void setRooms(final Set<Integer> paramRooms) {
         userRooms = paramRooms;
     }
 

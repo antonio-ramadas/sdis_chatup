@@ -3,9 +3,9 @@ package chatup.model;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class MessageCache<K, V> {
+class MessageCache<K, V> {
 
-    private Map<K, V> cache;
+    private final Map<K, V> cache;
 
     MessageCache(final int maxEntries) {
 
@@ -13,6 +13,7 @@ public class MessageCache<K, V> {
 
             private static final long serialVersionUID = -1650698049637132983L;
 
+            @Override
             public boolean removeEldestEntry(Map.Entry<K, V> eldest) {
                 return size() > maxEntries;
             }
