@@ -1,5 +1,6 @@
 package chatup.room;
 
+import chatup.user.MessageCache;
 import chatup.user.UserMessage;
 import javafx.util.Pair;
 
@@ -10,17 +11,16 @@ public class Room {
 	private String roomName;
 	private String roomPassword;
 	private String roomOwner;
-
-	private TreeSet<UserMessage> roomMessages;
-	private HashMap<String, String> roomUsers;
+	private MessageCache<Integer, UserMessage> roomMessages;
+	private Set<String> roomUsers;
 	private Set<Integer> roomServers;
 
 	public Room(final String paramName, final String paramPassword,final String paramOwner) {
 		roomName = paramName;
 		roomOwner = paramOwner;
 		roomPassword = paramPassword;
-		roomMessages = new TreeSet<>();
-		roomUsers = new HashMap<>();
+		roomMessages = new MessageCache<>(100);
+		roomUsers = new HashSet<>();
 		roomServers = new HashSet<>();
 	}
 
@@ -28,26 +28,50 @@ public class Room {
 		this(roomName, null, roomOwner);
 	}
 
-	public void registerMessage(final String userToken, int roomId, final String messageBody) {
-		roomMessages.add(new UserMessage(messageBody, userToken, roomId, (new Date()).getTime()));
-	}
-
 	public UserMessage[] getMessages() {
-		return (UserMessage[]) roomMessages.toArray();
+		return (UserMessage[]) roomMessages.getArray();
 	}
 
-	public boolean registerServer(int serverId) {
+	public int generateHash(final UserMessage paramMessage) {
 
-		if (roomServers.contains(serverId)) {
-			return false;
+		int hash = 7;
+
+		hash = 37 * hash + (int) (paramMessage.getTimestamp() ^ (paramMessage.getTimestamp() >>> 32));
+		hash = 37 * hash + Objects.hashCode(paramMessage.getSender());
+
+		return hash;
+	}
+
+	public boolean insertMessage(final UserMessage paramMessage) {
+
+		if (roomUsers.contains(paramMessage.getSender())) {
+
+			int messageKey = generateHash(paramMessage);
+
+			if (roomMessages.get(messageKey) != null) {
+				return false;
+			}
+
+			roomMessages.add(messageKey, paramMessage);
+
+			return true;
 		}
 
-		roomServers.add(serverId);
-
-		return true;
+		return false;
 	}
 
-	public boolean removeServer(int serverId) {
+    public boolean registerMirror(int serverId) {
+
+        if (roomServers.contains(serverId)) {
+            return false;
+        }
+
+        roomServers.add(serverId);
+
+        return true;
+    }
+
+	public boolean removeMirror(int serverId) {
 
 		if (!roomServers.contains(serverId)) {
 			return false;
@@ -58,24 +82,20 @@ public class Room {
 		return true;
 	}
 
-	public boolean registerUser(final Pair<String, String> userAccount) {
+	public boolean registerUser(final String userToken) {
 
-		final String userToken = userAccount.getKey();
-
-		if (roomUsers.containsKey(userToken)) {
+		if (roomUsers.contains(userToken)) {
 			return false;
 		}
 
-		roomUsers.put(userToken, userAccount.getValue());
+		roomUsers.add(userToken);
 
 		return true;
 	}
 
-	public boolean removeUser(final Pair<String, String> userAccount)  {
+	public boolean removeUser(final String userToken)  {
 
-		final String userToken = userAccount.getKey();
-
-		if (!roomUsers.containsKey(userToken)) {
+		if (!roomUsers.contains(userToken)) {
 			return false;
 		}
 
@@ -104,11 +124,15 @@ public class Room {
 		return roomPassword;
 	}
 
-	public final HashMap<String, String> getUsers() {
+	public final Set<String> getUsers() {
 		return roomUsers;
 	}
 
 	public boolean hasUser(final String userToken) {
-		return roomUsers.containsKey(userToken);
+		return roomUsers.contains(userToken);
 	}
+
+    public Set<Integer> getServers() {
+        return roomServers;
+    }
 }

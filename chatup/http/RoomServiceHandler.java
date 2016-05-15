@@ -32,7 +32,7 @@ public class RoomServiceHandler extends HttpDispatcher {
             int roomId = jsonObject.getInt(HttpFields.RoomId, -1);
             final String userToken = jsonObject.getString(HttpFields.UserToken, null);
 
-            if (roomId == -1 || userToken == null) {
+            if (roomId < 0 || userToken == null) {
                 sendError(HttpResponses.MissingParameters);
             }
             else if (serverInstance.joinRoom(roomId, userToken)) {
@@ -78,17 +78,17 @@ public class RoomServiceHandler extends HttpDispatcher {
     public void parseDeleteRequest(JsonValue jsonValue) {
 
         final Server serverInstance = ChatupServer.getInstance();
-        final JsonObject jsonObject = extractCommand(jsonValue, HttpCommands.DeleteRoom);
+        final JsonObject jsonObject = extractCommand(jsonValue, HttpCommands.LeaveRoom);
 
         if (jsonObject != null) {
 
             int roomId = jsonObject.getInt(HttpFields.RoomId, -1);
             final String userToken = jsonObject.getString(HttpFields.UserToken, null);
 
-            if (roomId == -1 || userToken == null) {
+            if (roomId < 0 || userToken == null) {
                 sendError(HttpResponses.MissingParameters);
             }
-            else if (serverInstance.deleteRoom(roomId, userToken)) {
+            else if (serverInstance.leaveRoom(roomId, userToken)) {
                 sendJsonSuccess(jsonValue);
             }
             else {

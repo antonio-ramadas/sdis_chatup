@@ -1,6 +1,7 @@
 package chatup.room;
 
 import chatup.http.HttpFields;
+import chatup.http.HttpMethod;
 import chatup.http.HttpRequest;
 import chatup.http.HttpCommands;
 
@@ -10,7 +11,7 @@ public class CreateRoom extends HttpRequest
 {
     public CreateRoom(final String userToken, final String roomName, final String roomPassword)
     {
-        super("PUT", roomPassword == null ?
+        super(HttpMethod.PUT, roomPassword == null ?
             Json.object()
                 .add(HttpCommands.CreateRoom, Json.object()
                 .add(HttpFields.UserToken, userToken)

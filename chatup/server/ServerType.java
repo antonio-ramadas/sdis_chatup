@@ -5,13 +5,14 @@ public enum ServerType {
     PRIMARY("Primary"),
     SECONDARY("Secondary");
 
-    private final String serverType;
-
     ServerType(final String paramType) {
         serverType = paramType;
     }
 
-    public final String getType() {
+    private final String serverType;
+
+    @Override
+    public String toString() {
         return serverType;
     }
 }

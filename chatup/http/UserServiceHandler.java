@@ -55,7 +55,7 @@ public class UserServiceHandler extends HttpDispatcher {
             if (userEmail == null || userToken == null) {
                 sendError(HttpResponses.MissingParameters);
             }
-            else if (serverInstance.userLogout(userEmail, userToken)) {
+            else if (serverInstance.userDisconnect(userEmail, userToken)) {
                 sendJsonSuccess(jsonValue);
             }
             else {

@@ -6,10 +6,9 @@ import chatup.room.Room;
 import chatup.user.UserMessage;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
+import java.net.*;
 import java.sql.SQLException;
+import java.time.Instant;
 
 public class SecondaryServer extends Server {
 
@@ -60,7 +59,7 @@ public class SecondaryServer extends Server {
 			return false;
 		}
 
-		selectedRoom.registerMessage(userToken, roomId, messageBody);
+		selectedRoom.insertMessage(new UserMessage(roomId, userToken, Instant.now().toEpochMilli(), messageBody));
 
 		return true;
 	}
@@ -79,6 +78,81 @@ public class SecondaryServer extends Server {
 		}
 
 		return selectedRoom.getMessages();
+	}
+
+	@Override
+	public boolean insertServer(int serverId, String newIp, short newPort) {
+		return false;
+	}
+
+	public boolean updateServer(int serverId, final String newIp, short newPort) {
+
+		final ServerInfo selectedServer = servers.get(serverId);
+
+		if (selectedServer == null) {
+
+			try {
+				servers.put(serverId, new ServerInfo(newIp, newPort));
+			}
+			catch (UnknownHostException e) {
+				return false;
+			}
+		}
+		else {
+
+			try {
+				selectedServer.setAddress(InetAddress.getByName(newIp));
+				selectedServer.setTcpPort(newPort);
+			}
+			catch (UnknownHostException ex) {
+				return false;
+			}
+		}
+
+
+		return true;
+	}
+
+	public boolean removeServer(int serverId) {
+
+		final ServerInfo selectedServer = servers.get(serverId);
+
+		if (selectedServer == null) {
+			return false;
+		}
+
+		servers.remove(serverId);
+
+		return true;
+	}
+
+	@Override
+	public boolean userDisconnect(final String userToken, final String userEmail) {
+
+		System.out.println("email:" + userEmail);
+		System.out.println("token:" + userToken);
+
+		final String userRecord = users.get(userToken);
+
+		if (userRecord == null || !userRecord.equals(userEmail)) {
+			return false;
+		}
+
+		rooms.forEach((roomId, room) -> {
+
+			if (room.hasUser(userToken)) {
+				notifyLeaveRoom(roomId, userToken);
+			}
+		});
+
+		users.remove(userToken);
+
+		return true;
+	}
+
+	@Override
+	protected void notifyLeaveRoom(int roomId, final String userToken) {
+		throw new UnsupportedOperationException("NotifyLeaveRoom");
 	}
 
 	@Override

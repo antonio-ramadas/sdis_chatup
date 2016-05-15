@@ -5,8 +5,8 @@ public abstract class HttpRequest {
     private final String requestMethod;
     private final String requestMessage;
 
-    public HttpRequest(final String paramMethod, final String paramMessage) {
-        requestMethod = paramMethod;
+    public HttpRequest(final HttpMethod paramMethod, final String paramMessage) {
+        requestMethod = paramMethod.toString();
         requestMessage = paramMessage;
     }
 

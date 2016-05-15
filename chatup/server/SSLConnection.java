@@ -1,12 +1,13 @@
 package chatup.server;
 
+import chatup.user.UserMessage;
+
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
 import java.io.*;
-import java.net.InetAddress;
 
 public class SSLConnection {
 
@@ -64,14 +65,28 @@ public class SSLConnection {
         }
     }
 
-    public void send(final InetAddress hostAddress, short hostPort, final String message) {
+    public void sendMessage(final ServerInfo paramServer, final UserMessage paramObject) {
 
-        try (final SSLSocket socket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(hostAddress, hostPort);
+        try (final SSLSocket socket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(paramServer.getAddress(), paramServer.getPort());
+             final ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream()))
+        {
+            oos.writeObject(paramObject);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public void send(final ServerInfo paramServer, final String message) {
+
+        try (final SSLSocket socket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(paramServer.getAddress(), paramServer.getPort());
              final OutputStreamWriter out = new OutputStreamWriter(socket.getOutputStream());
              final BufferedWriter bw = new BufferedWriter(out)) {
             bw.write(message);
             bw.flush();
-        } catch (IOException ex) {
+        }
+        catch (IOException ex) {
             System.out.println("Exception caught: " + ex.getMessage() + " in Server.contructor");
         }
     }

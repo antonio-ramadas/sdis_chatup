@@ -8,8 +8,7 @@ public class ServerInfo {
     private int serverId;
     private short tcpPort;
 
-    public ServerInfo(int serverId, final String serverAddress, short tcpPort) throws UnknownHostException {
-        setId(serverId);
+    public ServerInfo(final String serverAddress, short tcpPort) throws UnknownHostException {
         setAddress(InetAddress.getByName(serverAddress));
         setTcpPort(tcpPort);
     }
@@ -28,13 +27,5 @@ public class ServerInfo {
         tcpPort = paramPort;
     }
 
-    public short getTcpPort() { return tcpPort; }
-
-    public int getId() {
-        return serverId;
-    }
-
-    public void setId(int serverId) {
-        this.serverId = serverId;
-    }
+    public short getPort() { return tcpPort; }
 }

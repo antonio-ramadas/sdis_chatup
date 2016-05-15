@@ -2,28 +2,23 @@ package chatup.server;
 
 import chatup.http.HttpFields;
 import chatup.user.UserMessage;
-import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonValue;
-import com.sun.net.httpserver.*;
 import chatup.room.Room;
 import com.eclipsesource.json.Json;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import javafx.util.Pair;
-import sun.rmi.transport.tcp.TCPConnection;
 
 import java.io.*;
 import javax.net.ssl.*;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.security.*;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.concurrent.Executors;
 
 public abstract class Server {
 
     private HttpServer httpServer;
-    private SSLConnection tcpConnection;
+    protected SSLConnection tcpConnection;
     private ServerKeystore serverKeystore;
 
     private short httpPort;
@@ -31,6 +26,7 @@ public abstract class Server {
 
     protected final HashMap<Integer, Room> rooms = new HashMap<>();
     protected final HashMap<Integer, ServerInfo> servers = new HashMap<>();
+    protected final HashMap<String, String> users = new HashMap<>();
 
     public Server(final ServerKeystore serverKeystore, final HttpHandler httpHandler, short httpPort, short tcpPort) {
 
@@ -105,18 +101,11 @@ public abstract class Server {
         return tcpConnection.getSocket();
     }
 
-    public boolean removeServer(int serverId) {
+    public abstract boolean insertServer(int serverId, final String newIp, short newPort);
+    public abstract boolean updateServer(int serverId, final String newIp, short newPort);
+    public abstract boolean removeServer(int serverId);
 
-        if (!servers.containsKey(serverId)) {
-            return false;
-        }
-
-        servers.remove(serverId);
-
-        return true;
-    }
-
-    public boolean deleteRoom(int roomId, final String userToken) {
+    public boolean leaveRoom(int roomId, final String userToken) {
 
         System.out.println("roomId:" + roomId);
         System.out.println("token:" + userToken);
@@ -127,25 +116,45 @@ public abstract class Server {
 
         final Room selectedRoom = rooms.get(roomId);
 
-        if (!selectedRoom.getOwner().equals(userToken)) {
-            return false;
+        if (selectedRoom.getOwner().equals(userToken)) {
+            rooms.remove(roomId);
         }
-
-        rooms.remove(roomId);
+        else {
+            selectedRoom.removeUser(userToken);
+            notifyLeaveRoom(roomId, userToken);
+        }
 
         return true;
     }
 
+    public abstract boolean userDisconnect(final String userToken, final String userEmail);
+
+    protected void notifyLeaveRoom(int roomId, final String userToken) {
+
+        final Room selectedRoom = rooms.get(roomId);
+
+        if (selectedRoom == null) {
+            return;
+        }
+
+        final Set<Integer> roomServers = selectedRoom.getServers();
+
+        if (roomServers == null || roomServers.isEmpty()) {
+            return;
+        }
+
+        for (final Integer serverId : roomServers) {
+
+            final ServerInfo currentServer = servers.get(serverId);
+
+            if (currentServer != null) {
+                tcpConnection.send(currentServer, ServerMessage.leaveRoom(roomId, userToken));
+            }
+        }
+    }
+
     public boolean createRoom(final String roomName, final String roomPassword, final String roomOwner) {
-
-        if (roomPassword == null) {
-            rooms.put(++sequenceRoom, new Room(roomName, roomOwner));
-        }
-        else {
-            rooms.put(++sequenceRoom, new Room(roomName, roomPassword, roomOwner));
-        }
-
-        return true;
+        return rooms.put(++sequenceRoom, new Room(roomName, roomPassword, roomOwner)) == null;
     }
 
     public boolean joinRoom(int roomId, final String userToken) {
@@ -153,24 +162,17 @@ public abstract class Server {
         System.out.println("roomId:" + roomId);
         System.out.println("token:" + userToken);
 
-        if (!rooms.containsKey(roomId)) {
+        if (roomId < 0 || userToken == null) {
             return false;
         }
 
         final Room selectedRoom = rooms.get(roomId);
-        final String userEmail = "marques999@gmail.com";
 
-        //users.get(userToken);
-
-        if (userEmail == null || selectedRoom == null) {
+        if (selectedRoom == null) {
             return false;
         }
 
-        if (selectedRoom.registerUser(new Pair<>(userToken, userEmail))) {
-            return true;
-        }
-
-        return false;
+        return selectedRoom.registerUser(userToken);
     }
 
     public boolean userLogin(String userEmail, String userToken) {
@@ -181,38 +183,17 @@ public abstract class Server {
         return userEmail.equals("marques999@gmail.com") && userToken.equals("14191091");
     }
 
-    public boolean userLogout(String userEmail, String userToken) {
-
-        System.out.println("email:" + userEmail);
-        System.out.println("token:" + userToken);
-
-        return true;
-    }
-
     public final JsonValue getRooms() {
 
         final JsonValue newArray = Json.array();
 
-        rooms.forEach((k,v) ->
-        {
-            if (v.isPrivate())
-            {
-                newArray.asArray().add(Json.object()
-                        .add(HttpFields.RoomName, v.getName())
-                        .add(HttpFields.UserToken, v.getOwner())
-                        .add(HttpFields.RoomPassword, v.getPassword())
-                        .add(HttpFields.RoomId, k)
-                );
-            }
-            else
-            {
-                newArray.asArray().add(Json.object()
-                        .add(HttpFields.RoomName, v.getName())
-                        .add(HttpFields.UserToken, v.getOwner())
-                        .add(HttpFields.RoomId, k)
-                );
-            }
-        });
+        rooms.forEach((k, v) -> newArray.asArray()
+            .add(Json.object()
+            .add(HttpFields.RoomName, v.getName())
+            .add(HttpFields.UserToken, v.getOwner())
+            .add(HttpFields.RoomPrivate, v.isPrivate())
+            .add(HttpFields.RoomId, k)
+        ));
 
         return newArray;
     }
@@ -224,7 +205,6 @@ public abstract class Server {
     public boolean registerMessage(final String userToken, int roomId, final String msgContents) {
         return false;
     }
-
 
     public abstract ServerType getType();
 }

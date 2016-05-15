@@ -2,13 +2,10 @@ package chatup.server;
 
 import chatup.room.Room;
 import chatup.user.UserMessage;
-import chatup.user.UserLogin;
 
 import java.sql.*;
 import java.net.UnknownHostException;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
+import java.util.*;
 
 public class Database {
 
@@ -75,7 +72,13 @@ public class Database {
             try (final ResultSet rs = stmt.executeQuery()) {
 
                 if (rs.next()) {
-                    return new Room(rs.getString("name"), rs.getString("password"));
+
+                    final Room newRoom = new Room(
+                        rs.getString(DatabaseFields.RoomName),
+                        rs.getString(DatabaseFields.RoomPassword)
+                    );
+
+                    return newRoom;
                 }
             }
         }
@@ -86,15 +89,21 @@ public class Database {
         return null;
     }
 
-    public LinkedList<Room> getRooms() {
+    public HashMap<Integer, Room> getRooms() {
 
-        final LinkedList<Room> myRooms = new LinkedList<>();
+        final HashMap<Integer, Room> myRooms = new HashMap<>();
 
         try (final Statement stmt = dbConnection.createStatement();
              final ResultSet rs = stmt.executeQuery("SELECT * FROM Rooms")) {
 
             while (rs.next()) {
-                myRooms.add(new Room(rs.getString("name"), rs.getString("password")));
+
+                final Room newRoom = new Room(
+                    rs.getString(DatabaseFields.RoomName),
+                    rs.getString(DatabaseFields.RoomPassword)
+                );
+
+                myRooms.put(rs.getInt(DatabaseFields.RoomId), newRoom);
             }
         }
         catch (SQLException ex) {
@@ -151,10 +160,8 @@ public class Database {
             try (final ResultSet rs = stmt.executeQuery()) {
 
                 if (rs.next()) {
-                    return new UserMessage(rs.getString("message"),
-                                           rs.getString("token"),
-                                           rs.getInt("room"),
-                                           rs.getLong("epoch"));
+                    return new UserMessage(rs.getInt("room"), rs.getString("token"), rs.getLong("epoch"), rs.getString("message")
+                    );
                 }
             }
 
@@ -178,10 +185,8 @@ public class Database {
             try (final ResultSet rs = stmt.executeQuery()) {
 
                 while (rs.next()) {
-                    myMessages.add(new UserMessage(rs.getString("message"),
-                                                   rs.getString("token"),
-                                                   rs.getInt("room"),
-                                                   rs.getLong("epoch")));
+                    myMessages.add(new UserMessage(rs.getInt("room"), rs.getString("token"), rs.getLong("epoch"), rs.getString("message")
+                    ));
                 }
             }
         }
@@ -219,18 +224,18 @@ public class Database {
     /**********************
      * SERVERS
      **********************/
-    public boolean insertServer(final ServerInfo paramServer) {
+    public boolean insertServer(int serverId, final ServerInfo paramServer) {
 
-        if (serverExists(paramServer.getId())) {
-            return updateServer(paramServer);
+        if (serverExists(serverId)) {
+            return updateServer(serverId, paramServer);
         }
 
         final String sqlQuery = "INSERT INTO Servers(id, address, port) VALUES(?, ?, ?)";
 
         try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
-            stmt.setInt(1, paramServer.getId());
+            stmt.setInt(1, serverId);
             stmt.setString(2, paramServer.getAddress().getHostAddress());
-            stmt.setShort(3, paramServer.getTcpPort());
+            stmt.setShort(3, paramServer.getPort());
             stmt.executeUpdate();
         }
         catch (SQLException ex) {
@@ -277,14 +282,14 @@ public class Database {
         return false;
     }
 
-    public boolean updateServer(final ServerInfo paramServer) {
+    public boolean updateServer(int serverId, final ServerInfo paramServer) {
 
         final String sqlQuery = "UPDATE Servers SET address = ?, port = ? WHERE id = ?";
 
         try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
             stmt.setString(1, paramServer.getAddress().getHostAddress().toString());
-            stmt.setShort(2, paramServer.getTcpPort());
-            stmt.setInt(3, paramServer.getId());
+            stmt.setShort(2, paramServer.getPort());
+            stmt.setInt(3, serverId);
             stmt.executeUpdate();
         }
         catch (SQLException ex) {
@@ -303,7 +308,11 @@ public class Database {
             try (final ResultSet rs = stmt.executeQuery()) {
 
                 if (rs.next()) {
-                    return new ServerInfo(rs.getInt("id"), rs.getString("address"), rs.getShort("port"));
+
+                    return new ServerInfo(
+                        rs.getString(DatabaseFields.ServerAddress),
+                        rs.getShort(DatabaseFields.ServerPort)
+                    );
                 }
             }
         }
@@ -314,15 +323,21 @@ public class Database {
         return null;
     }
 
-    public LinkedList<ServerInfo> getServers() throws UnknownHostException {
+    public HashMap<Integer, ServerInfo> getServers() throws UnknownHostException {
 
-        final LinkedList<ServerInfo> myServers = new LinkedList<>();
+        final HashMap<Integer, ServerInfo> myServers = new HashMap<>();
 
         try (final Statement stmt = dbConnection.createStatement();
              final ResultSet rs = stmt.executeQuery("SELECT * FROM Servers")) {
 
             while (rs.next()) {
-                myServers.add(new ServerInfo(rs.getInt("id"), rs.getString("address"), rs.getShort("port")));
+
+                final ServerInfo newServer = new ServerInfo(
+                    rs.getString(DatabaseFields.ServerAddress),
+                    rs.getShort(DatabaseFields.ServerPort)
+                );
+
+                myServers.put(rs.getInt(DatabaseFields.ServerId), newServer);
             }
         }
         catch (SQLException ex) {
@@ -462,7 +477,7 @@ public class Database {
         return true;
     }
 
-    public UserLogin getUserByEmail(String email) {
+    public Map.Entry<String, String> getUserByEmail(String email) {
 
         final String sqlQuery = "SELECT * FROM Users WHERE email = ?";
 
@@ -473,7 +488,11 @@ public class Database {
             try (final ResultSet rs = stmt.executeQuery()) {
 
                 if (rs.next()) {
-                    return new UserLogin(rs.getString("email"), rs.getString("token"));
+
+                    return new AbstractMap.SimpleEntry<>(
+                        rs.getString(DatabaseFields.UserToken),
+                        rs.getString(DatabaseFields.UserEmail)
+                    );
                 }
             }
         }
@@ -484,7 +503,7 @@ public class Database {
         return null;
     }
 
-    public UserLogin getUserByToken(String token) {
+    public Map.Entry<String, String> getUserByToken(String token) {
 
         final String sqlQuery = "SELECT * FROM Users WHERE token = ?";
 
@@ -495,7 +514,11 @@ public class Database {
             try (final ResultSet rs = stmt.executeQuery()) {
 
                 if (rs.next()) {
-                    return new UserLogin(rs.getString("email"), rs.getString("token"));
+
+                    return new AbstractMap.SimpleEntry<>(
+                        rs.getString(DatabaseFields.UserToken),
+                        rs.getString(DatabaseFields.UserEmail)
+                    );
                 }
             }
         }

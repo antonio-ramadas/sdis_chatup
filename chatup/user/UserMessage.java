@@ -5,30 +5,46 @@ public class UserMessage implements Comparable<UserMessage> {
     private long messageTimestamp;
     private int messageRoom;
 
-    public UserMessage(final String paramBody, final String paramSender, int paramRoom, long paramTimestamp) {
-        messageBody = paramBody;
-        messageRoom = paramRoom;
-        messageSender = paramSender;
-        messageTimestamp = paramTimestamp;
+    public UserMessage(int roomId, final String messageAuthor, long messageTimestamp, final String messageContents) {
+        setRoomId(roomId);
+        setAuthor(messageAuthor);
+        setMessage(messageContents);
+        setTimestamp(messageTimestamp);
     }
 
-    private String messageSender;
-    private String messageBody;
+    private String messageAuthor;
+    private String messageContents;
 
-    public final int getRoomId() {
+    public int getRoomId() {
         return messageRoom;
     }
 
-    public final long getTimestamp() {
+    public long getTimestamp() {
         return messageTimestamp;
     }
 
     public final String getMessage() {
-        return messageBody;
+        return messageContents;
     }
 
     public final String getSender() {
-        return messageSender;
+        return messageAuthor;
+    }
+
+    public void setRoomId(int paramId) {
+        messageRoom = paramId;
+    }
+
+    public void setAuthor(final String paramAuthor) {
+        messageAuthor = paramAuthor;
+    }
+
+    public void setTimestamp(long paramTimestamp) {
+        messageTimestamp = paramTimestamp;
+    }
+
+    public void setMessage(final String paramMessage) {
+        messageContents = paramMessage;
     }
 
     @Override
@@ -36,7 +52,7 @@ public class UserMessage implements Comparable<UserMessage> {
         return other instanceof UserMessage
             && ((UserMessage) other).getRoomId() == messageRoom
             && ((UserMessage) other).getTimestamp() == messageTimestamp
-            && ((UserMessage) other).getSender().equals(messageSender);
+            && ((UserMessage) other).getSender().equals(messageAuthor);
     }
 
     @Override
