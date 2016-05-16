@@ -1,4 +1,5 @@
 package chatup.tcp;
 
-public class TcpMessage {
+public interface TcpMessage {
+    TcpCommand getType();
 }
