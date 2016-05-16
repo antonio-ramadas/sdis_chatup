@@ -21,7 +21,6 @@ public class ServerMessage {
     public static String leaveRoom(int roomId, final String userToken) {
         return String.join(" ", new String[]{"LeaveRoom", Integer.toString(roomId), userToken}) + "\r\n";
     }
-
     public static String userDisconnect(final String userToken, final String userEmail) {
         return String.join(" ", new String[]{"UserDisconnect", userToken, userEmail}) + "\r\n";
     }

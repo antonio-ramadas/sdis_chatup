@@ -6,6 +6,7 @@ import chatup.model.Database;
 import chatup.model.Message;
 import chatup.model.Room;
 
+import chatup.tcp.SSLConnection;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.Json;
 
@@ -47,8 +48,7 @@ public abstract class Server {
         }
 
         try {
-            // TODO: verify if 'TLSv1' is what we really want
-            // TODO: clean up this mess (and understand it as well)
+            // TODO: clean up this mess
             //   final KeyManagerFactory kmf = serverKeystore.getKeyManager();
             //   final TrustManagerFactory tmf = serverKeystore.getTrustManager();
 
