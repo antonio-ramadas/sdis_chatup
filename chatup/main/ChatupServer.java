@@ -4,6 +4,10 @@ import chatup.server.Server;
 import chatup.server.ServerInfo;
 import chatup.server.ServerKeystore;
 import chatup.server.ServerType;
+import chatup.tcp.PrimaryConnection;
+import chatup.tcp.SSLConnection;
+import chatup.tcp.SecondaryConnection;
+import chatup.tcp.TcpMessage;
 
 import java.io.IOException;
 
@@ -19,6 +23,8 @@ public class ChatupServer {
     private static Server serverInstance;
     private static ServerKeystore serverKeystore;
     private static ServerType serverType;
+    private static PrimaryConnection primaryConnection;
+    private static SecondaryConnection secondaryConnection;
 
     static boolean initializePrimary(short httpPort, short tcpPort) {
 
@@ -27,7 +33,8 @@ public class ChatupServer {
         try {
             serverKeystore = new ServerKeystore("server.jks", "123456");
             serverType = ServerType.PRIMARY;
-            serverInstance = new chatup.server.PrimaryServer(serverKeystore, httpPort, tcpPort);
+            primaryConnection = new PrimaryConnection(tcpPort, serverKeystore);
+            serverInstance = new chatup.server.PrimaryServer(primaryConnection, httpPort);
         }
         catch (IOException ex) {
             ex.printStackTrace();

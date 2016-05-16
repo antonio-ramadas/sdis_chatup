@@ -19,6 +19,7 @@ import javax.net.ssl.SSLSocketFactory;
 abstract public class SSLConnection {
 
     private final SSLServerSocket tcpSocket;
+    private final ServerKeystore serverKeystore;
 
     public SSLConnection(short paramPort, final ServerKeystore serverKeystore) throws IOException {
         System.setProperty("javax.net.ssl.keyStore", serverKeystore.getPath());
@@ -27,7 +28,10 @@ abstract public class SSLConnection {
         System.setProperty("javax.net.ssl.trustStorePassword", serverKeystore.getPassword());
         SSLServerSocketFactory socketFactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
         tcpSocket = (SSLServerSocket) socketFactory.createServerSocket(paramPort);
+        this.serverKeystore = serverKeystore;
     }
+
+    public ServerKeystore getServerKeystore(){ return serverKeystore; }
 
     public final ReceiveThread getThread() {
         return new ReceiveThread(tcpSocket);

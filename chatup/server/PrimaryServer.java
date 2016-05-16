@@ -4,6 +4,7 @@ import chatup.http.PrimaryDispatcher;
 import chatup.http.ServerResponse;
 import chatup.main.ServerLogger;
 import chatup.model.Room;
+import chatup.tcp.PrimaryConnection;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -12,8 +13,8 @@ import java.util.Set;
 
 public class PrimaryServer extends Server {
 
-    public PrimaryServer(ServerKeystore serverKeystore, short httpPort, short tcpPort) throws SQLException {
-        super(serverKeystore, new PrimaryDispatcher(), httpPort, tcpPort);
+    public PrimaryServer(PrimaryConnection connection, short httpPort) throws SQLException {
+        super(connection, new PrimaryDispatcher(), httpPort);
     }
 
     @Override

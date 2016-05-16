@@ -12,6 +12,12 @@ public class PrimaryConnection extends SSLConnection {
 
     @Override
     public void handle(TcpMessage message) {
-
+      switch(message.getType()){
+            case LeaveRoom:
+                LeaveRoom leave = (LeaveRoom) message;
+                break;
+          default:
+              break;
+        }
     }
 }

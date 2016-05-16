@@ -26,7 +26,6 @@ public abstract class Server {
 
     private HttpServer httpServer;
     protected SSLConnection tcpConnection;
-    private ServerKeystore serverKeystore;
 
     private short httpPort;
     private int sequenceRoom = 0;
@@ -35,20 +34,14 @@ public abstract class Server {
     final HashMap<Integer, ServerInfo> servers = new HashMap<>();
     final HashMap<String, String> users = new HashMap<>();
 
-    Server(final ServerKeystore serverKeystore, final HttpHandler httpHandler, short httpPort, short tcpPort) throws SQLException {
+    Server(final SSLConnection tcpConnection, final HttpHandler httpHandler, short httpPort) throws SQLException {
 
         this.httpPort = httpPort;
-        this.serverKeystore = serverKeystore;
-
-        try {
-            tcpConnection = new SSLConnection(tcpPort, serverKeystore);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.tcpConnection = tcpConnection;
 
         try {
             // TODO: clean up this mess
+            //   final KeyStore serverKeystore = tcpConnection.getServerKeystore();
             //   final KeyManagerFactory kmf = serverKeystore.getKeyManager();
             //   final TrustManagerFactory tmf = serverKeystore.getTrustManager();
 
