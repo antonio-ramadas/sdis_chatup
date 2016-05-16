@@ -1,6 +1,6 @@
 package chatup.tcp;
 
-public class DeleteServer{
+public class DeleteServer implements TcpMessage {
 
     private int serverId;
 
@@ -8,5 +8,12 @@ public class DeleteServer{
         serverId = paramId;
     }
 
-    public
+    public int getServerId() {
+        return serverId;
+    }
+
+    @Override
+    public TcpCommand getType() {
+        return TcpCommand.DeleteServer;
+    }
 }
