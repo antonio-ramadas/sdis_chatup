@@ -1,37 +1,30 @@
 package chatup.server;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
 public class ServerInfo {
 
-    private short tcpPort;
+    private int serverId;
+    private int serverPort;
 
-    public ServerInfo(final String serverAddress, short tcpPort) throws UnknownHostException {
-        setAddress(InetAddress.getByName(serverAddress));
-        setTcpPort(tcpPort);
-    }
-
-    public ServerInfo(final InetAddress serverAddress, short tcpPort) throws UnknownHostException {
+    public ServerInfo(final String serverAddress, int serverPort) {
         setAddress(serverAddress);
-        setTcpPort(tcpPort);
+        setPort(serverPort);
     }
 
-    private InetAddress serverAddress;
+    private String serverAddress;
 
-    public InetAddress getAddress() {
+    public int getPort() {
+        return serverPort;
+    }
+
+    public String getAddress() {
         return serverAddress;
     }
 
-    public short getPort() {
-        return tcpPort;
+    public void setPort(int paramPort) {
+        serverPort = paramPort;
     }
 
-    final void setAddress(InetAddress paramAddress) {
+    public void setAddress(final String paramAddress) {
         serverAddress = paramAddress;
-    }
-
-    final void setTcpPort(short paramPort) {
-        tcpPort = paramPort;
     }
 }

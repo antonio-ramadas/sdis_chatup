@@ -3,11 +3,11 @@ package chatup.model;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-class MessageCache<K, V> {
+public class MessageCache<K, V> {
 
     private final Map<K, V> cache;
 
-    MessageCache(final int maxEntries) {
+    public MessageCache(final int maxEntries) {
 
         cache = new LinkedHashMap<K, V>((int) Math.ceil(maxEntries * 1.75), .75f, true) {
 
@@ -20,15 +20,27 @@ class MessageCache<K, V> {
         };
     }
 
-    final Object[] getArray() {
+    public Object[] getArray() {
         return cache.values().toArray(new Object[cache.size()]);
     }
 
-    final void add(final K key, final V value) {
+    public void add(final K key, final V value) {
         cache.put(key, value);
     }
 
-    final V get(final K key) {
+    public int size() {
+        return cache.size();
+    }
+
+    public final V get(final K key) {
         return cache.get(key);
+    }
+
+    public final Map<K,V> getCache() {
+        return cache;
+    }
+
+    public void putAll(Map<K,V> otherMap) {
+        cache.putAll(otherMap);
     }
 }

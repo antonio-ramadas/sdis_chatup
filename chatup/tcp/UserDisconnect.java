@@ -1,25 +1,17 @@
 package chatup.tcp;
 
-public class UserDisconnect implements TcpMessage{
+public class UserDisconnect
+{
+    public String userEmail;
+    public String userToken;
 
-    private final String userEmail;
-    private final String userToken;
+    public UserDisconnect()
+    {
+    }
 
-    public UserDisconnect(final String paramToken, final String paramEmail) {
+    public UserDisconnect(final String paramToken, final String paramEmail)
+    {
         userEmail = paramEmail;
         userToken = paramToken;
-    }
-
-    public final String getEmail() {
-        return userEmail;
-    }
-
-    public final String getToken() {
-        return userToken;
-    }
-
-    @Override
-    public TcpCommand getType() {
-        return TcpCommand.UserDisconnect;
     }
 }

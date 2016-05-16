@@ -1,5 +1,6 @@
 package chatup.model;
 
+import chatup.server.ServerConnection;
 import chatup.server.ServerInfo;
 
 import java.sql.*;
@@ -233,8 +234,8 @@ public class Database {
 
         try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
             stmt.setInt(1, serverId);
-            stmt.setString(2, paramServer.getAddress().getHostAddress());
-            stmt.setShort(3, paramServer.getPort());
+            stmt.setString(2, paramServer.getAddress());
+            stmt.setInt(3, paramServer.getPort());
             stmt.executeUpdate();
         }
         catch (SQLException ex) {
@@ -286,8 +287,8 @@ public class Database {
         final String sqlQuery = "UPDATE Servers SET address = ?, port = ? WHERE id = ?";
 
         try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
-            stmt.setString(1, paramServer.getAddress().getHostAddress().toString());
-            stmt.setShort(2, paramServer.getPort());
+            stmt.setString(1, paramServer.getAddress());
+            stmt.setInt(2, paramServer.getPort());
             stmt.setInt(3, serverId);
             stmt.executeUpdate();
         }

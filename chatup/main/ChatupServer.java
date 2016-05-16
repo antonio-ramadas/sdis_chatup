@@ -1,13 +1,6 @@
 package chatup.main;
 
-import chatup.server.Server;
-import chatup.server.ServerInfo;
-import chatup.server.ServerKeystore;
-import chatup.server.ServerType;
-import chatup.tcp.PrimaryConnection;
-import chatup.tcp.SSLConnection;
-import chatup.tcp.SecondaryConnection;
-import chatup.tcp.TcpMessage;
+import chatup.server.*;
 
 import java.io.IOException;
 
@@ -22,19 +15,15 @@ public class ChatupServer {
 
     private static Server serverInstance;
     private static ServerKeystore serverKeystore;
-    private static ServerType serverType;
-    private static PrimaryConnection primaryConnection;
-    private static SecondaryConnection secondaryConnection;
 
-    static boolean initializePrimary(short httpPort, short tcpPort) {
+    static boolean initializePrimary(int httpPort, int tcpPort) {
 
         boolean exceptionThrown = false;
 
         try {
             serverKeystore = new ServerKeystore("server.jks", "123456");
-            serverType = ServerType.PRIMARY;
-            primaryConnection = new PrimaryConnection(tcpPort, serverKeystore);
-            serverInstance = new chatup.server.PrimaryServer(primaryConnection, httpPort);
+           // primaryConnection = new PrimaryConnection(tcpPort, serverKeystore);
+            serverInstance = new chatup.server.PrimaryServer(tcpPort, httpPort);
         }
         catch (IOException ex) {
             ex.printStackTrace();
@@ -56,14 +45,14 @@ public class ChatupServer {
         return exceptionThrown;
     }
 
-    static boolean initializeSecondary(final ServerInfo primaryServer, short httpPort, short tcpPort) {
+    static boolean initializeSecondary(final ServerInfo primaryServer, int httpPort, int tcpPort) {
 
         boolean exceptionThrown = false;
 
         try {
             serverKeystore = new ServerKeystore("server.jks", "123456");
-            serverType = ServerType.PRIMARY;
-            serverInstance = new chatup.server.SecondaryServer(serverKeystore, primaryServer, httpPort, tcpPort);
+            // secondaryConnection = new SecondaryConnection(tcpPort, serverKeystore);
+            serverInstance = new chatup.server.SecondaryServer(primaryServer, tcpPort, httpPort);
         }
         catch (IOException ex) {
             ex.printStackTrace();
@@ -83,10 +72,6 @@ public class ChatupServer {
         }
 
         return exceptionThrown;
-    }
-
-    public static ServerType getType() {
-        return serverType;
     }
 
     public static Server getInstance() {
