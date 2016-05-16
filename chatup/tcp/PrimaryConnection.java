@@ -6,13 +6,11 @@ import java.io.IOException;
 
 public class PrimaryConnection extends SSLConnection {
 
-    private PrimaryTcpDispatcher dispatcher;
-
-    public PrimaryConnection(short paramPort, ServerKeystore serverKeystore, PrimaryTcpDispatcher dispatcher) throws IOException {
+    public PrimaryConnection(short paramPort, ServerKeystore serverKeystore) throws IOException {
         super(paramPort, serverKeystore);
-        this.dispatcher = dispatcher;
     }
 
+    @Override
     public void handle(TcpMessage message) {
 
     }
