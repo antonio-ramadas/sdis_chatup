@@ -4,19 +4,23 @@ import chatup.http.PrimaryDispatcher;
 import chatup.http.ServerResponse;
 import chatup.main.ServerLogger;
 import chatup.model.Room;
-import chatup.tcp.PrimaryListener;
-import chatup.tcp.TcpNetwork;
+import chatup.tcp.*;
 import kryonet.Connection;
 import kryonet.KryoServer;
 
+import java.awt.*;
+import java.awt.List;
 import java.io.IOException;
+import java.sql.Array;
 import java.sql.SQLException;
-import java.util.Set;
+import java.util.*;
 
 public class PrimaryServer extends Server {
 
     private final KryoServer myServer;
     private final PrimaryListener myServerListener;
+
+    private int sequenceRoom = 0;
 
     public PrimaryServer(int tcpPort, int httpPort) throws IOException, SQLException {
 
@@ -42,6 +46,35 @@ public class PrimaryServer extends Server {
         return ServerType.PRIMARY;
     }
 
+    public ServerResponse createRoom(String roomName, String roomPassword, String roomOwner){
+
+        ArrayList serversList = new ArrayList<ServerInfo>();
+
+        // fill array list
+        Iterator<HashMap.Entry<Integer, ServerInfo>> entries = servers.entrySet().iterator();
+        while (entries.hasNext()) {
+            HashMap.Entry<Integer, ServerInfo> entry = entries.next();
+            serversList.add(entry.getValue());
+        }
+
+        // sort array list
+        Collections.sort(serversList);
+
+        int n = (int)(Math.floor(servers.size()/2) + 1);
+
+        ArrayList<ServerInfo> mostEmpty = (ArrayList<ServerInfo>) serversList.subList(0, n);
+
+        Room room = new Room(roomName, roomPassword, roomOwner);
+
+        for (int i = 0; i < mostEmpty.size() ; i++){
+            myServerListener.send(i, room);
+            if (!(rooms.put(++sequenceRoom, room) == null && serverDatabase.insertRoom(sequenceRoom, room)))
+                return ServerResponse.OperationFailed;
+        }
+
+        return ServerResponse.SuccessResponse;
+    }
+
     private boolean notifyJoinRoom(int roomId, final String userToken) {
 
         final Room selectedRoom = rooms.get(roomId);
@@ -60,7 +93,7 @@ public class PrimaryServer extends Server {
         }
 
         for (final Integer serverId : roomServers) {
-            myServerListener.send(serverId, ServerMessage.joinRoom(roomId, userToken));
+            myServerListener.send(serverId, new JoinRoom(roomId, userToken));
         }
 
         return true;
@@ -107,9 +140,7 @@ public class PrimaryServer extends Server {
             return ServerResponse.InvalidToken;
         }
 
-        final String generatedMessage = ServerMessage.userDisconnect(userToken, userEmail);
-
-        servers.forEach((severId, server) -> myServerListener.send(severId, generatedMessage));
+        servers.forEach((severId, server) -> myServerListener.send(severId, new UserDisconnect(userToken, userEmail)));
         users.remove(userToken);
 
         return ServerResponse.SuccessResponse;

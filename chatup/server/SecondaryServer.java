@@ -42,6 +42,10 @@ public class SecondaryServer extends Server {
 
 	private int serverId;
 
+	public ServerResponse createRoom(String roomName, String roomPassword, String roomOwner){
+		return ServerResponse.OperationFailed;
+	}
+
     public ServerResponse registerMessage(int roomId, final Message paramMessage) {
 
         final Room selectedRoom = rooms.get(roomId);

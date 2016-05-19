@@ -21,10 +21,9 @@ import java.util.concurrent.Executors;
 
 public abstract class Server {
 
-    private final Database serverDatabase = Database.getInstance();
+    protected final Database serverDatabase = Database.getInstance();
 
     private int httpPort;
-    private int sequenceRoom = 0;
 
     private HttpServer httpServer;
     final HashMap<Integer, Room> rooms = new HashMap<>();
@@ -130,14 +129,7 @@ public abstract class Server {
         }
     }
 
-    public ServerResponse createRoom(final String roomName, final String roomPassword, final String roomOwner) {
-
-        if (rooms.put(++sequenceRoom, new Room(roomName, roomPassword, roomOwner)) == null) {
-            return ServerResponse.SuccessResponse;
-        }
-
-        return ServerResponse.OperationFailed;
-    }
+    public abstract ServerResponse createRoom(final String roomName, final String roomPassword, final String roomOwner);
 
     public ServerResponse joinRoom(int roomId, final String userToken) {
 
