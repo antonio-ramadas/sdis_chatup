@@ -6,7 +6,6 @@ import chatup.model.Database;
 import chatup.model.Message;
 import chatup.model.Room;
 
-import chatup.tcp.SSLConnection;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.Json;
 
@@ -25,30 +24,23 @@ public abstract class Server {
     private final Database serverDatabase = Database.getInstance();
 
     private HttpServer httpServer;
-    protected SSLConnection tcpConnection;
-    private ServerKeystore serverKeystore;
+ //   protected SSLConnection tcpConnection;
 
-    private short httpPort;
+
+    private int httpPort;
     private int sequenceRoom = 0;
 
     final HashMap<Integer, Room> rooms = new HashMap<>();
     final HashMap<Integer, ServerInfo> servers = new HashMap<>();
     final HashMap<String, String> users = new HashMap<>();
 
-    Server(final ServerKeystore serverKeystore, final HttpHandler httpHandler, short httpPort, short tcpPort) throws SQLException {
+    Server(final HttpHandler httpHandler, int httpPort) throws SQLException {
 
         this.httpPort = httpPort;
-        this.serverKeystore = serverKeystore;
-
-        try {
-            tcpConnection = new SSLConnection(tcpPort, serverKeystore);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
 
         try {
             // TODO: clean up this mess
+            //   final KeyStore serverKeystore = tcpConnection.getServerKeystore();
             //   final KeyManagerFactory kmf = serverKeystore.getKeyManager();
             //   final TrustManagerFactory tmf = serverKeystore.getTrustManager();
 
@@ -80,7 +72,7 @@ public abstract class Server {
             httpServer.start();
         }
         catch (IOException ex) {
-            System.out.println("Exception caught: " + ex.getMessage() + " in Server.contructor");
+            System.out.println("Exception caught: " + ex.getMessage() + " in KryoServer.contructor");
         }
       /*  catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
@@ -92,14 +84,17 @@ public abstract class Server {
         createRoom("Justin Bieber", null, "bca7cd6bdaf6efaf7ae8g5130ae76f8a");
         createRoom("XXX NAZIS XXX", "femnazi", "bca7cd6bdaf6efaf7ae8g5130ae76f8a");
         createRoom("MigaxPraSempre", null, "bca7cd6bdaf6efaf7ae8g5130ae76f8a");
-        tcpConnection.getThread().start();
     }
 
-    public abstract ServerResponse insertServer(int serverId, final String newIp, short newPort);
-    public abstract ServerResponse updateServer(int serverId, final String newIp, short newPort);
-    public abstract ServerResponse removeServer(int serverId);
+    public abstract boolean insertServer(int serverId, final String newIp, int newPort);
+    public abstract boolean updateServer(int serverId, final String newIp, int newPort);
+    public abstract boolean removeServer(int serverId);
 
     public ServerResponse leaveRoom(int roomId, final String userToken) {
+
+        if (userToken == null || roomId < 0) {
+            return ServerResponse.MissingParameters;
+        }
 
         System.out.println("roomId:" + roomId);
         System.out.println("token:" + userToken);
@@ -135,15 +130,6 @@ public abstract class Server {
 
         if (roomServers == null || roomServers.isEmpty()) {
             return;
-        }
-
-        for (final Integer serverId : roomServers) {
-
-            final ServerInfo currentServer = servers.get(serverId);
-
-            if (currentServer != null) {
-                tcpConnection.send(currentServer, ServerMessage.leaveRoom(roomId, userToken));
-            }
         }
     }
 

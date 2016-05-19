@@ -2,34 +2,71 @@ package chatup.server;
 
 import chatup.http.SecondaryDispatcher;
 import chatup.http.ServerResponse;
+import chatup.model.MessageCache;
 import chatup.model.Room;
 import chatup.model.Message;
+import chatup.tcp.SecondaryListener;
+import chatup.tcp.TcpNetwork;
+import kryonet.KryoClient;
 
+import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.time.Instant;
 
 public class SecondaryServer extends Server {
 
-	private final ServerInfo primaryServer;
+	private final ServerInfo myPrimary;
+	private final KryoClient myClient;
+	private final SecondaryListener myClientListener;
 
-	public SecondaryServer(final ServerKeystore serverKeystore, final ServerInfo paramPrimary, short httpPort, short tcpPort) throws SQLException {
-		super(serverKeystore, new SecondaryDispatcher(), httpPort, tcpPort);
-		primaryServer = paramPrimary;
+	public SecondaryServer(final ServerInfo paramPrimary, int tcpPort, int httpPort) throws SQLException {
+
+		super(new SecondaryDispatcher(), httpPort);
+
+		myPrimary = paramPrimary;
+		myClient = new KryoClient();
+		myClientListener = new SecondaryListener(this, myClient);
+		TcpNetwork.register(myClient);
+
+		try {
+			myClient.start();
+			myClient.addListener(myClientListener);
+			myClient.connect(5, InetAddress.getByName(paramPrimary.getAddress()), paramPrimary.getPort());
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
+
+    public ServerResponse registerMessage(int roomId, final Message paramMessage) {
+
+        final Room selectedRoom = rooms.get(roomId);
+
+        if (selectedRoom == null) {
+            return ServerResponse.RoomNotFound;
+        }
+
+        if (!selectedRoom.hasUser(paramMessage.getMessage())) {
+            return ServerResponse.InvalidToken;
+        }
+
+        selectedRoom.insertMessage(paramMessage);
+
+        return ServerResponse.SuccessResponse;
+    }
 
 	@Override
 	public ServerResponse registerMessage(final String userToken, int roomId, final String messageBody) {
 
-		if (!rooms.containsKey(roomId)) {
-			return ServerResponse.RoomNotFound;
-		}
-
 		final Room selectedRoom = rooms.get(roomId);
 
-		if (!selectedRoom.hasUser(userToken)) {
-			return ServerResponse.OperationFailed;
+        if (selectedRoom == null) {
+            return ServerResponse.RoomNotFound;
+        }
+
+        if (!selectedRoom.hasUser(userToken)) {
+            return ServerResponse.InvalidToken;
 		}
 
 		selectedRoom.insertMessage(new Message(roomId, userToken, Instant.now().toEpochMilli(), messageBody));
@@ -54,51 +91,38 @@ public class SecondaryServer extends Server {
 	}
 
 	@Override
-	public ServerResponse insertServer(int serverId, String newIp, short newPort) {
-		return ServerResponse.OperationFailed;
+	public boolean insertServer(int serverId, final String newIp, int newPort) {
+		return false;
 	}
 
 	@Override
-	public ServerResponse updateServer(int serverId, final String newIp, short newPort) {
+	public boolean updateServer(int serverId, final String newIp, int newPort) {
 
 		final ServerInfo selectedServer = servers.get(serverId);
 
 		if (selectedServer == null) {
-
-			try {
-				servers.put(serverId, new ServerInfo(newIp, newPort));
-			}
-			catch (UnknownHostException e) {
-				return ServerResponse.OperationFailed;
-			}
+			servers.put(serverId, new ServerInfo(newIp, newPort));
 		}
 		else {
-
-			try {
-				selectedServer.setAddress(InetAddress.getByName(newIp));
-				selectedServer.setTcpPort(newPort);
-			}
-			catch (UnknownHostException ex) {
-				return ServerResponse.OperationFailed;
-			}
+			selectedServer.setAddress(newIp);
+			selectedServer.setPort(newPort);
 		}
 
-
-		return ServerResponse.SuccessResponse;
+		return true;
 	}
 
 	@Override
-	public ServerResponse removeServer(int serverId) {
+	public boolean removeServer(int serverId) {
 
 		final ServerInfo selectedServer = servers.get(serverId);
 
 		if (selectedServer == null) {
-			return ServerResponse.ServerNotFound;
+			return false;
 		}
 
 		servers.remove(serverId);
 
-		return ServerResponse.SuccessResponse;
+		return true;
 	}
 
 	@Override
@@ -134,4 +158,28 @@ public class SecondaryServer extends Server {
 	public ServerType getType() {
 		return ServerType.SECONDARY;
 	}
+
+	public int getId() {
+		return 1;
+	}
+
+    public ServerResponse syncRoom(int roomId, final MessageCache messageCache) {
+
+        System.out.println("roomId:" + roomId);
+        System.out.println("#messages:" + messageCache.size());
+
+        if (roomId < 0 || messageCache == null) {
+            return ServerResponse.MissingParameters;
+        }
+
+        final Room selectedRoom = rooms.get(roomId);
+
+        if (selectedRoom == null) {
+            return ServerResponse.RoomNotFound;
+        }
+
+        selectedRoom.syncMessages(messageCache);
+
+        return ServerResponse.SuccessResponse;
+    }
 }

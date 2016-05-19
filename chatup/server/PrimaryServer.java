@@ -4,16 +4,37 @@ import chatup.http.PrimaryDispatcher;
 import chatup.http.ServerResponse;
 import chatup.main.ServerLogger;
 import chatup.model.Room;
+import chatup.tcp.PrimaryListener;
+import chatup.tcp.TcpNetwork;
+import kryonet.Connection;
+import kryonet.KryoServer;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Set;
 
 public class PrimaryServer extends Server {
 
-    public PrimaryServer(ServerKeystore serverKeystore, short httpPort, short tcpPort) throws SQLException {
-        super(serverKeystore, new PrimaryDispatcher(), httpPort, tcpPort);
+    private final KryoServer myServer;
+    private final PrimaryListener myServerListener;
+
+    public PrimaryServer(int tcpPort, int httpPort) throws IOException, SQLException {
+
+        super(new PrimaryDispatcher(), httpPort);
+
+        myServer = new KryoServer(){
+
+            @Override
+            protected Connection newConnection() {
+                return new ServerConnection();
+            }
+        };
+
+        TcpNetwork.register(myServer);
+        myServerListener = new PrimaryListener(this, myServer);
+        myServer.addListener(myServerListener);
+        myServer.bind(tcpPort);
+        myServer.start();
     }
 
     @Override
@@ -26,7 +47,8 @@ public class PrimaryServer extends Server {
         final Room selectedRoom = rooms.get(roomId);
 
         if (selectedRoom == null || selectedRoom.hasUser(userToken)) {
-            ServerLogger.getInstance("0").error("User" + userToken + " has already joined room \"" + selectedRoom.getName() + "\"!");
+            ServerLogger.getInstance("0")
+                        .error("User" + userToken + " has already joined room \"" + selectedRoom.getName() + "\"!");
             return false;
         }
 
@@ -38,50 +60,39 @@ public class PrimaryServer extends Server {
         }
 
         for (final Integer serverId : roomServers) {
-
-            final ServerInfo currentServer = servers.get(serverId);
-
-            if (currentServer != null) {
-                tcpConnection.send(currentServer, ServerMessage.joinRoom(roomId, userToken));
-            }
+            myServerListener.send(serverId, ServerMessage.joinRoom(roomId, userToken));
         }
 
         return true;
     }
 
     @Override
-    public ServerResponse insertServer(int serverId, String newIp, short newPort) {
+    public boolean insertServer(int serverId, final String newIp, int newPort) {
+
         final ServerInfo selectedServer = servers.get(serverId);
-        return ServerResponse.SuccessResponse;
+
+        if (selectedServer != null) {
+            return false;
+        }
+
+        servers.put(serverId, new ServerInfo(newIp, newPort));
+
+        return true;
     }
 
     @Override
-    public ServerResponse updateServer(int serverId, final String newIp, short newPort) {
+    public boolean updateServer(int serverId, final String newIp, int newPort) {
 
         final ServerInfo selectedServer = servers.get(serverId);
 
         if (selectedServer == null) {
-            return ServerResponse.ServerNotFound;
+            return false;
         }
 
-        try {
-            selectedServer.setAddress(InetAddress.getByName(newIp));
-            selectedServer.setTcpPort(newPort);
-        }
-        catch (UnknownHostException ex) {
-            return ServerResponse.ProtocolError;
-        }
+        selectedServer.setAddress(newIp);
+        selectedServer.setPort(newPort);
 
-        final String generatedMessage = ServerMessage.replaceServer(serverId, newIp, newPort);
-
-        servers.forEach((currentId, currentServer) -> {
-
-            if (currentId != serverId) {
-                tcpConnection.send(currentServer, generatedMessage);
-            }
-        });
-
-        return ServerResponse.SuccessResponse;
+        return true;
     }
 
     @Override
@@ -98,19 +109,19 @@ public class PrimaryServer extends Server {
 
         final String generatedMessage = ServerMessage.userDisconnect(userToken, userEmail);
 
-        servers.forEach((severId, server) -> tcpConnection.send(server, generatedMessage));
+        servers.forEach((severId, server) -> myServerListener.send(severId, generatedMessage));
         users.remove(userToken);
 
         return ServerResponse.SuccessResponse;
     }
 
     @Override
-    public ServerResponse removeServer(int serverId) {
+    public boolean removeServer(int serverId) {
 
         final ServerInfo selectedServer = servers.get(serverId);
 
         if (selectedServer == null) {
-            return ServerResponse.ServerNotFound;
+            return false;
         }
 
         final String generatedMessage = ServerMessage.deleteServer(serverId);
@@ -118,12 +129,12 @@ public class PrimaryServer extends Server {
         servers.forEach((currentId, currentServer) -> {
 
             if (currentId != serverId) {
-                tcpConnection.send(currentServer, generatedMessage);
+                myServerListener.send(serverId, generatedMessage);
             }
         });
 
         servers.remove(serverId);
 
-        return ServerResponse.SuccessResponse;
+        return true;
     }
 }

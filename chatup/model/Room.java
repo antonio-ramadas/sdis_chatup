@@ -1,5 +1,6 @@
 package chatup.model;
 
+import java.time.Instant;
 import java.util.*;
 
 public class Room {
@@ -18,7 +19,10 @@ public class Room {
 		roomMessages = new MessageCache<>(100);
 		roomUsers = new HashSet<>();
 		roomServers = new HashSet<>();
+		lastSync = 0L;
 	}
+
+	private long lastSync;
 
 	public Room(final String roomName, final String roomOwner) {
 		this(roomName, null, roomOwner);
@@ -43,6 +47,8 @@ public class Room {
 		if (roomUsers.contains(paramMessage.getSender())) {
 
 			int messageKey = generateHash(paramMessage);
+
+			lastSync = Instant.now().getEpochSecond();
 
 			if (roomMessages.get(messageKey) != null) {
 				return false;
@@ -130,5 +136,9 @@ public class Room {
 
     public final Set<Integer> getServers() {
         return roomServers;
+    }
+
+    public void syncMessages(final MessageCache messageCache) {
+        roomMessages.putAll(messageCache.getCache());
     }
 }

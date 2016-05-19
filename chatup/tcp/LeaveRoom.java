@@ -1,26 +1,18 @@
 package chatup.tcp;
 
-public class LeaveRoom implements TcpMessage {
+public class LeaveRoom
+{
+    public String userToken;
 
-    private final String userToken;
+    public LeaveRoom()
+    {
+    }
 
-    public LeaveRoom(int paramId, final String paramToken) {
+    public LeaveRoom(int paramId, final String paramToken)
+    {
         roomId = paramId;
         userToken = paramToken;
     }
 
-    private int roomId;
-
-    public int getRoomId() {
-        return roomId;
-    }
-
-    public final String getToken() {
-        return userToken;
-    }
-
-    @Override
-    public TcpCommand getType() {
-        return TcpCommand.LeaveRoom;
-    }
+    public int roomId;
 }

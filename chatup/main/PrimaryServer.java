@@ -1,8 +1,14 @@
 package chatup.main;
 
+import java.io.IOException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+
 class PrimaryServer {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws UnrecoverableKeyException, CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
 
         if (args.length > 2) {
             System.err.println("USAGE: chatup.PrimaryServer (<tcpPort>) (<httpPort>)");

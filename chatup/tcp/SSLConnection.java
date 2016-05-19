@@ -1,6 +1,7 @@
 package chatup.tcp;
 
 import chatup.model.Message;
+
 import chatup.server.ServerInfo;
 import chatup.server.ServerKeystore;
 
@@ -19,15 +20,19 @@ import javax.net.ssl.SSLSocketFactory;
 abstract public class SSLConnection {
 
     private final SSLServerSocket tcpSocket;
+    private final ServerKeystore serverKeystore;
 
-    public SSLConnection(short paramPort, final ServerKeystore serverKeystore) throws IOException {
-        System.setProperty("javax.net.ssl.keyStore", serverKeystore.getPath());
-        System.setProperty("javax.net.ssl.keyStorePassword", serverKeystore.getPassword());
+    public SSLConnection(short paramPort, final ServerKeystore paramKeystore) throws IOException {
+        System.setProperty("javax.net.ssl.keyStore", paramKeystore.getPath());
+        System.setProperty("javax.net.ssl.keyStorePassword", paramKeystore.getPassword());
         System.setProperty("javax.net.ssl.trustStore", "truststore.jts");
-        System.setProperty("javax.net.ssl.trustStorePassword", serverKeystore.getPassword());
+        System.setProperty("javax.net.ssl.trustStorePassword", paramKeystore.getPassword());
         SSLServerSocketFactory socketFactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
         tcpSocket = (SSLServerSocket) socketFactory.createServerSocket(paramPort);
+        serverKeystore = paramKeystore;
     }
+
+    public ServerKeystore getServerKeystore(){ return serverKeystore; }
 
     public final ReceiveThread getThread() {
         return new ReceiveThread(tcpSocket);
@@ -48,7 +53,7 @@ abstract public class SSLConnection {
         @Override
         public void run() {
 
-            System.out.println("Server is now listening for TCP messages: ");
+            System.out.println("KryoServer is now listening for TCP messages: ");
 
             while (true) {
 
@@ -88,9 +93,7 @@ abstract public class SSLConnection {
             bw.flush();
         }
         catch (IOException ex) {
-            System.out.println("Exception caught: " + ex.getMessage() + " in Server.contructor");
+            System.out.println("Exception caught: " + ex.getMessage() + " in KryoServer.contructor");
         }
     }
-
-    public abstract void handle(TcpMessage message);
 }

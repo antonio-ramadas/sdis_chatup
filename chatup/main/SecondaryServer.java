@@ -2,9 +2,6 @@ package chatup.main;
 
 import chatup.server.ServerInfo;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
 public class SecondaryServer {
 
     public static void main(String[] args) {
@@ -49,18 +46,14 @@ public class SecondaryServer {
         try {
 
             final ServerInfo primaryServer = new ServerInfo(
-                InetAddress.getByName(addressString),
-                Short.parseShort(args[primaryIndex].substring(separatorPosition + 1))
+                addressString,
+                Integer.parseInt(args[primaryIndex].substring(separatorPosition + 1))
             );
 
            ChatupServer.initializeSecondary(primaryServer, httpPort, tcpPort);
         }
         catch (final NumberFormatException ex) {
             System.err.println("invalid primary server port, terminating application...");
-            System.exit(1);
-        }
-        catch (final UnknownHostException ex) {
-            System.err.println("invalid primary server address, terminating application...");
             System.exit(1);
         }
     }
