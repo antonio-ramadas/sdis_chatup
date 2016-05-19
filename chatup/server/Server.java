@@ -23,13 +23,10 @@ public abstract class Server {
 
     private final Database serverDatabase = Database.getInstance();
 
-    private HttpServer httpServer;
- //   protected SSLConnection tcpConnection;
-
-
     private int httpPort;
     private int sequenceRoom = 0;
 
+    private HttpServer httpServer;
     final HashMap<Integer, Room> rooms = new HashMap<>();
     final HashMap<Integer, ServerInfo> servers = new HashMap<>();
     final HashMap<String, String> users = new HashMap<>();
@@ -80,7 +77,7 @@ public abstract class Server {
         catch (KeyManagementException e) {
             e.printStackTrace();
         }
-*/
+        */
         createRoom("Justin Bieber", null, "bca7cd6bdaf6efaf7ae8g5130ae76f8a");
         createRoom("XXX NAZIS XXX", "femnazi", "bca7cd6bdaf6efaf7ae8g5130ae76f8a");
         createRoom("MigaxPraSempre", null, "bca7cd6bdaf6efaf7ae8g5130ae76f8a");
