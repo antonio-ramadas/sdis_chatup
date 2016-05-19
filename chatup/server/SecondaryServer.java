@@ -20,11 +20,12 @@ public class SecondaryServer extends Server {
 	private final KryoClient myClient;
 	private final SecondaryListener myClientListener;
 
-	public SecondaryServer(final ServerInfo paramPrimary, int tcpPort, int httpPort) throws SQLException {
+	public SecondaryServer(int paramId, final ServerInfo paramPrimary, int tcpPort, int httpPort) throws SQLException {
 
 		super(new SecondaryDispatcher(), httpPort);
 
 		myPrimary = paramPrimary;
+		serverId = paramId;
 		myClient = new KryoClient();
 		myClientListener = new SecondaryListener(this, myClient);
 		TcpNetwork.register(myClient);
@@ -38,6 +39,8 @@ public class SecondaryServer extends Server {
 			e.printStackTrace();
 		}
 	}
+
+	private int serverId;
 
     public ServerResponse registerMessage(int roomId, final Message paramMessage) {
 

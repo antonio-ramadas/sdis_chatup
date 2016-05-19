@@ -45,14 +45,13 @@ public class ChatupServer {
         return exceptionThrown;
     }
 
-    static boolean initializeSecondary(final ServerInfo primaryServer, int httpPort, int tcpPort) {
+    static boolean initializeSecondary(int serverId, final ServerInfo primaryServer, int httpPort, int tcpPort) {
 
         boolean exceptionThrown = false;
 
         try {
             serverKeystore = new ServerKeystore("server.jks", "123456");
-            // secondaryConnection = new SecondaryConnection(tcpPort, serverKeystore);
-            serverInstance = new chatup.server.SecondaryServer(primaryServer, tcpPort, httpPort);
+            serverInstance = new chatup.server.SecondaryServer(serverId, primaryServer, tcpPort, httpPort);
         }
         catch (IOException ex) {
             ex.printStackTrace();

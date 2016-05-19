@@ -63,7 +63,7 @@ public class PrimaryListener extends Listener {
     }
 
     @Override
-    public void received(Connection paramConnection, Object object) {
+    public void received(final Connection paramConnection, final Object paramObject) {
 
         final ServerConnection serverConnection = (ServerConnection) paramConnection;
 
@@ -71,11 +71,11 @@ public class PrimaryListener extends Listener {
             return;
         }
 
-        if (object instanceof LeaveRoom) {
-            leaveRoom(serverConnection, (LeaveRoom)object);
+        if (paramObject instanceof LeaveRoom) {
+            leaveRoom(serverConnection, (LeaveRoom)paramObject);
         }
-        else if (object instanceof ServerOnline) {
-            serverOnline(serverConnection, (ServerOnline)object);
+        else if (paramObject instanceof ServerOnline) {
+            serverOnline(serverConnection, (ServerOnline)paramObject);
         }
     }
 
