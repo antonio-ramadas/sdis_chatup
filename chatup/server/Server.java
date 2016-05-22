@@ -22,6 +22,11 @@ import java.util.concurrent.Executors;
 public abstract class Server {
 
     final Database serverDatabase = Database.getInstance();
+    protected final Database serverDatabase = Database.getInstance();
+
+    private int httpPort;
+
+    private HttpServer httpServer;
     final HashMap<Integer, Room> rooms = new HashMap<>();
     final HashMap<Integer, ServerInfo> servers = new HashMap<>();
     final HashMap<String, String> users = new HashMap<>();

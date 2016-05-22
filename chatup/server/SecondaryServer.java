@@ -80,6 +80,11 @@ public class SecondaryServer extends Server {
 
 	private int serverId;
 
+	public ServerResponse createRoom(String roomName, String roomPassword, String roomOwner){
+		return ServerResponse.OperationFailed;
+	}
+
+    public ServerResponse registerMessage(int roomId, final Message paramMessage) {
     public int getId() {
         return serverId;
     }
