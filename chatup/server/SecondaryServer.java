@@ -22,6 +22,7 @@ import java.util.Set;
 public class SecondaryServer extends Server {
 
     private final Database serverDatabase;
+    private final ServerLogger serverLogger;
     private final SecondaryServerListener myServerListener;
 	private final SecondaryClientListener myClientListener;
     private final HashMap<Integer, ServerInfo> servers;
@@ -41,6 +42,7 @@ public class SecondaryServer extends Server {
 
         serverId = paramId;
         serverDatabase = new Database(this);
+        serverLogger = new ServerLogger(this);
 
         final HashMap<Integer, ServerInfo> myServers = serverDatabase.getServers();
 
@@ -132,6 +134,10 @@ public class SecondaryServer extends Server {
         return serverId;
     }
 
+    public ServerLogger getLogger() {
+        return serverLogger;
+    }
+
     @Override
     public ServerResponse createRoom(final String roomName, final String roomPassword, final String roomOwner) {
 
@@ -140,6 +146,7 @@ public class SecondaryServer extends Server {
         return ServerResponse.SuccessResponse;
 	}
 
+    @Override
 	public ServerResponse joinRoom(int roomId, final String userEmail, final String userToken) {
 
         System.out.println("roomId:" + roomId);

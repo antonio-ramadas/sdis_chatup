@@ -15,7 +15,7 @@ public enum ServerResponse {
     RoomNotFound("roomNotFound"),
     ServiceOffline("serviceOffline"),
     ServerNotFound("serverNotFound"),
-    SuccessResponse("success");
+    SuccessResponse("success"), WrongPassword("wrongPassword");
 
     private final String responseMessage;
 

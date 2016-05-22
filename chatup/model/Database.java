@@ -16,6 +16,7 @@ public class Database {
     private static final String UserToken = "token";
     private static final String RoomId = "id";
     private static final String RoomName = "name";
+    private static final String RoomOwner = "owner";
     private static final String RoomPassword = "password";
     private static final String MessageContent = "contents";
     private static final String MessageAuthor = "author";
@@ -42,7 +43,7 @@ public class Database {
 
     private final Connection dbConnection;
 
-    private static final String queryInsertRoom = "INSERT INTO Rooms(id, name, password) VALUES(?, ?, ?)";
+    private static final String queryInsertRoom = "INSERT INTO Rooms(id, name, password, owner) VALUES(?, ?, ?, ?)";
     private static final String querySelectRoomById = "SELECT * FROM Rooms WHERE id = ?";
     private static final String queryDeleteRoom = "DELETE FROM Rooms WHERE id = ?";
     private static final String querySelectRooms = "SELECT * FROM Rooms";
@@ -53,6 +54,7 @@ public class Database {
             stmt.setInt(1, roomId);
             stmt.setString(2, paramRoom.getName());
             stmt.setString(3, paramRoom.getPassword());
+            stmt.setString(4, paramRoom.getOwner());
             stmt.executeUpdate();
         }
         catch (SQLException ex) {
@@ -87,7 +89,8 @@ public class Database {
 
                     final Room newRoom = new Room(
                         rs.getString(RoomName),
-                        rs.getString(RoomPassword)
+                        rs.getString(RoomPassword),
+                        rs.getString(RoomOwner)
                     );
 
                     return newRoom;
@@ -113,7 +116,7 @@ public class Database {
                 final Room newRoom = new Room(
                     rs.getString(RoomName),
                     rs.getString(RoomPassword),
-                    null
+                    rs.getString(RoomOwner)
                 );
 
                 myRooms.put(rs.getInt(RoomId), newRoom);
@@ -142,7 +145,7 @@ public class Database {
                 final RoomInfo newRoom = new RoomInfo(
                     rs.getString(RoomName),
                     rs.getString(RoomPassword),
-                    null
+                    rs.getString(RoomOwner)
                 );
 
                 myRooms.put(rs.getInt(RoomId), newRoom);

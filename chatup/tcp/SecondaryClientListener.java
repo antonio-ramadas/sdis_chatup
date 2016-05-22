@@ -128,6 +128,9 @@ public class SecondaryClientListener extends Listener {
         else if (paramObject instanceof LeaveRoom) {
             leaveRoom((LeaveRoom)paramObject);
         }
+        else if (paramObject instanceof UserDisconnect) {
+            userDisconnect((UserDisconnect) paramObject);
+        }
         else if (paramObject instanceof CreateRoom) {
             createRoom((CreateRoom)paramObject);
         }
@@ -136,6 +139,27 @@ public class SecondaryClientListener extends Listener {
         }
         else if (paramObject instanceof DeleteServer) {
             deleteServer((DeleteServer)paramObject);
+        }
+    }
+
+    private void userDisconnect(final UserDisconnect userDisconnect) {
+
+        final ServerResponse operationResult = secondaryServer.userDisconnect
+        (
+            userDisconnect.userEmail,
+            userDisconnect.userToken
+        );
+
+        switch (operationResult) {
+            case SuccessResponse:
+                secondaryServer.getLogger().userDisconnected(userDisconnect.userEmail);
+                break;
+            case InvalidToken:
+                secondaryServer.getLogger().userNotFound(userDisconnect.userEmail);
+                break;
+            default:
+                secondaryServer.getLogger().invalidCommand("UserDisconnect");
+                break;
         }
     }
 

@@ -11,10 +11,12 @@ public class ServerInfo implements Comparable<ServerInfo> {
     public ServerInfo(final String serverAddress, int serverPort) {
         setAddress(serverAddress);
         setPort(serverPort);
+        serverStatus = false;
         serverUsers = new HashSet<>();
     }
 
     private int serverPort;
+    private boolean serverStatus;
 
     public int getPort() {
         return serverPort;
@@ -69,8 +71,16 @@ public class ServerInfo implements Comparable<ServerInfo> {
         return 0;
     }
 
+    public void setStatus(boolean paramStatus) {
+        serverStatus = paramStatus;
+    }
+
     public boolean hasUser(final String userToken) {
         return serverUsers.contains(userToken);
+    }
+
+    public boolean isOnline() {
+        return serverStatus;
     }
 
     public int getLoad() {

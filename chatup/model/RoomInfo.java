@@ -106,4 +106,8 @@ public class RoomInfo implements Serializable {
     public void setServers(final Set<Integer> paramServers) {
        roomServers = paramServers;
     }
+
+    public boolean validatePassword(String userPassword) {
+        return roomPassword.equals(userPassword);
+    }
 }

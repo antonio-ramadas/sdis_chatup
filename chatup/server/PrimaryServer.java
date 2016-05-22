@@ -20,6 +20,7 @@ import java.util.*;
 public class PrimaryServer extends Server {
 
     private final Database serverDatabase;
+    private final ServerLogger serverLogger;
     private final PrimaryListener myServerListener;
     private final HashMap<Integer, ServerInfo> servers;
     private final HashMap<Integer, RoomInfo> rooms;
@@ -37,6 +38,7 @@ public class PrimaryServer extends Server {
         //--------------------------------------------------------------------
 
         serverDatabase = new Database(this);
+        serverLogger = new ServerLogger(this);
 
         final HashMap<Integer, ServerInfo> myServers = serverDatabase.getServers();
 
@@ -68,6 +70,8 @@ public class PrimaryServer extends Server {
         else {
             rooms = myRooms;
         }
+
+        sequenceRoom = Collections.max(rooms.keySet());
 
         //-----------------------------------------------------------------------
         // 4) Ler para memória associações servidor <-> sala armazenadas em disco
@@ -111,6 +115,10 @@ public class PrimaryServer extends Server {
 
     private int sequenceRoom;
 
+    public ServerLogger getLogger() {
+        return serverLogger;
+    }
+
     @Override
     public JsonValue getRooms() {
 
@@ -146,12 +154,15 @@ public class PrimaryServer extends Server {
         if (serverDatabase.insertRoom(roomId, newRoom)) {
             rooms.put(roomId, newRoom);
         }
+        else {
+            return ServerResponse.DatabaseError;
+        }
 
         //--------------------------------------------------------
         // 3) Notificar os servidores mirror da criação desta sala
         //--------------------------------------------------------
 
-        final ArrayList<ServerInfo> mostEmpty = (ArrayList<ServerInfo>) serversList.subList(0, n);
+       /* final ArrayList<ServerInfo> mostEmpty = (ArrayList<ServerInfo>) serversList.subList(0, n);
 
         for (int i = 0; i < mostEmpty.size() ; i++){
 
@@ -161,7 +172,7 @@ public class PrimaryServer extends Server {
             if (!serverDatabase.insertRoom(roomId, newRoom)) {
                 return ServerResponse.OperationFailed;
             }
-        }
+        }*/
 
         return ServerResponse.SuccessResponse;
     }
@@ -213,9 +224,6 @@ public class PrimaryServer extends Server {
     @Override
     public ServerResponse leaveRoom(int roomId, final String userToken) {
 
-        System.out.println("roomId:" + roomId);
-        System.out.println("userToken:" + userToken);
-
         //-----------------------------------------------------------
         // 1) Verificar se utilizador tem sessão iniciada no servidor
         //-----------------------------------------------------------
@@ -263,10 +271,7 @@ public class PrimaryServer extends Server {
     }
 
     @Override
-    public ServerResponse joinRoom(int roomId, final String userToken) {
-
-        System.out.println("roomId:" + roomId);
-        System.out.println("token:" + userToken);
+    public ServerResponse joinRoom(int roomId, final String userPassword, final String userToken) {
 
         //-----------------------------------------------------------
         // 1) Verificar se utilizador tem sessão iniciada no servidor
@@ -286,6 +291,14 @@ public class PrimaryServer extends Server {
 
         if (selectedRoom == null || selectedRoom.hasUser(userToken)) {
             return ServerResponse.InvalidToken;
+        }
+
+        //-------------------------------------------------------
+        // 3) Verificar palavra-passe introduzida pelo utilizador
+        //-------------------------------------------------------
+
+        if (selectedRoom.isPrivate() && !selectedRoom.validatePassword(userPassword)) {
+            return ServerResponse.WrongPassword;
         }
 
         //-------------------------------------------------------
@@ -351,7 +364,7 @@ public class PrimaryServer extends Server {
         //----------------------------------------------------
 
         if (servers.containsKey(serverId)) {
-            return ServerResponse.OperationFailed;
+            return ServerResponse.SuccessResponse;
         }
 
         //------------------------------------------------------
@@ -449,10 +462,7 @@ public class PrimaryServer extends Server {
     }
 
     @Override
-    public ServerResponse userDisconnect(final String userToken, final String userEmail) {
-
-        System.out.println("email:" + userEmail);
-        System.out.println("token:" + userToken);
+    public ServerResponse userDisconnect(final String userEmail, final String userToken) {
 
         //-----------------------------------------------------------
         // 1) verificar se utilizador tem sessão iniciada no servidor
@@ -494,9 +504,6 @@ public class PrimaryServer extends Server {
 
     public ServerResponse userLogin(final String userEmail, final String userToken) {
 
-        System.out.println("email:" + userEmail);
-        System.out.println("token:" + userToken);
-
         //--------------------------------------------------------------
         // 1) Verificar se utilizador já tem sessão iniciada no servidor
         //--------------------------------------------------------------
@@ -510,7 +517,7 @@ public class PrimaryServer extends Server {
         //----------------------------------------------------------
 
         if (userEmail.equals("marques999@gmail.com") && userToken.equals("14191091")) {
-           users.put(userToken, userEmail);
+            users.put(userToken, userEmail);
         }
         else {
             return ServerResponse.AuthenticationFailed;

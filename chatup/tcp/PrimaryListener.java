@@ -35,18 +35,19 @@ public class PrimaryListener extends Listener {
     private void serverOnline(final ServerConnection serverConnection, final ServerOnline serverOnline) {
 
         final InetSocketAddress serverSocket = serverConnection.getRemoteAddressTCP();
-        final String serverAddress = serverSocket.getHostName();
         int serverId = serverOnline.serverId;
-        int serverPort = serverSocket.getPort();
 
-        if (primaryServer.insertServer(serverId, serverAddress, serverPort) == ServerResponse.SuccessResponse) {
+        if (primaryServer.insertServer(serverId, serverSocket.getHostName(), serverSocket.getPort()) == ServerResponse.SuccessResponse) {
             serverConnection.serverId = serverId;
             kryoServer.sendToAllExceptTCP(serverConnection.getId(), serverOnline);
             myConnections.put(serverId, serverConnection.getId());
-            primaryServer.getLogger().serverOnline(serverId, serverAddress);
+            primaryServer.getLogger().serverOnline(serverId, serverSocket.getHostName());
             primaryServer.getLogger().insertServer(serverId);
         }
         else {
+
+            final String serverAddress = serverOnline.serverAddress;
+            int serverPort = serverOnline.serverPort;
 
             if (primaryServer.updateServer(serverId, serverAddress, serverPort) == ServerResponse.SuccessResponse) {
                 serverConnection.serverId = serverId;

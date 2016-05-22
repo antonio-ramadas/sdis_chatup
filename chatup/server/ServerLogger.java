@@ -142,19 +142,23 @@ public class ServerLogger {
     private void warning(final String paramMessage) {
         write(consoleOutput, "[WARNING] " + paramMessage);
         write(fileOutput, String.format("%s | WARNING | %s", generateTimestamp(), paramMessage));
+        flush();
     }
 
     private void error(final String paramMessage) {
         write(consoleOutput, "[ERROR]" + paramMessage);
         write(fileOutput, String.format("%s | ERROR | %s", generateTimestamp(), paramMessage));
+        flush();
     }
 
     private void debug(final String paramMessage) {
         write(fileOutput, String.format("%s | DEBUG | %s", generateFilename(), paramMessage));
+        flush();
     }
 
     private void information(final String paramMessage) {
         write(fileOutput, String.format("%s | INFORMATION | %s", generateFilename(), paramMessage));
+        flush();
     }
 
     private void write(final BufferedWriter buffer, final String message) {
@@ -174,5 +178,9 @@ public class ServerLogger {
 
     public boolean debugEnabled() {
         return true;
+    }
+
+    public void userNotFound(final String userEmail) {
+        warning("User " + userEmail + " not registed on this server!");
     }
 }

@@ -28,7 +28,7 @@ public class SecondaryServer {
         if (args.length > 2) {
 
             try {
-                tcpPort = Integer.parseInt(args[1]);
+                tcpPort = Integer.parseInt(args[2]);
             }
             catch (NumberFormatException ex) {
                 tcpPort = ChatupGlobals.DefaultTcpPort;
@@ -40,7 +40,7 @@ public class SecondaryServer {
         if (args.length > 3) {
 
             try {
-                httpPort = Short.parseShort(args[2]);
+                httpPort = Short.parseShort(args[3]);
             }
             catch (NumberFormatException ex) {
                 httpPort = ChatupGlobals.DefaultHttpPort;

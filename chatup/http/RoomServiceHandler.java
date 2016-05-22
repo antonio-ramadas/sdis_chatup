@@ -30,13 +30,14 @@ class RoomServiceHandler extends HttpDispatcher {
         if (jsonObject != null) {
 
             int roomId = jsonObject.getInt(HttpFields.RoomId, -1);
+            final String userPassword = jsonObject.getString(HttpFields.RoomPassword, null);
             final String userToken = jsonObject.getString(HttpFields.UserToken, null);
 
             if (roomId < 0 || userToken == null) {
                 sendError(ServerResponse.MissingParameters);
             }
             else {
-                sendJsonResponse(serverInstance.joinRoom(roomId, userToken), jsonObject);
+                sendJsonResponse(serverInstance.joinRoom(roomId, userPassword, userToken), jsonObject);
             }
         }
         else {

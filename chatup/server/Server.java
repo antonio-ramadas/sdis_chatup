@@ -18,16 +18,13 @@ import java.util.concurrent.Executors;
 
 public abstract class Server {
 
-    HashMap<String, String> users;
-
+    final HashMap<String, String> users = new HashMap<>();
     private ServerType serverType;
-    private ServerLogger serverLogger;
 
     Server(final HttpHandler httpHandler, final ServerType paramType, int httpPort) throws SQLException {
 
         final HttpServer httpServer;
 
-        serverLogger = new ServerLogger(this);
         serverType = paramType;
 
         try {
@@ -72,10 +69,6 @@ public abstract class Server {
             e.printStackTrace();
         }
         */
-    }
-
-    public ServerLogger getLogger() {
-        return serverLogger;
     }
 
     public ServerType getType() {
@@ -124,10 +117,6 @@ public abstract class Server {
 
     public JsonValue getRooms() {
         throw new UnsupportedOperationException("RetrieveRooms");
-    }
-
-    public ServerResponse joinRoom(int roomId, final String userToken) {
-        throw new UnsupportedOperationException("JoinRoom");
     }
 
     public ServerResponse joinRoom(int roomId, final String userEmail, final String userToken) {
