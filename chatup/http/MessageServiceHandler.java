@@ -57,17 +57,14 @@ class MessageServiceHandler extends HttpDispatcher {
 
             int roomId = jsonObject.getInt(HttpFields.RoomId, -1);
             final String userToken = jsonObject.getString(HttpFields.UserToken, null);
-            final String userMessage = jsonObject.getString(HttpFields.MessageContents, null);
+            final String messageBody = jsonObject.getString(HttpFields.MessageContents, null);
+            final Message userMessage = new Message(roomId, userToken, messageBody);
 
-            if (roomId < 0 || userToken == null || userMessage == null) {
+            if (roomId < 0 || userToken == null || messageBody == null) {
                 sendError(ServerResponse.MissingParameters);
             }
             else {
-                sendTextResponse(serverInstance.insertMessage(new Message(
-                    roomId,
-                    userToken,
-                    userMessage
-                )), HttpCommands.SendMessage);
+                sendTextResponse(serverInstance.insertMessage(userMessage), HttpCommands.SendMessage);
             }
         }
         else {

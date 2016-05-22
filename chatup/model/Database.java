@@ -3,7 +3,6 @@ package chatup.model;
 import chatup.server.ServerInfo;
 
 import java.sql.*;
-import java.net.UnknownHostException;
 import java.util.*;
 
 public class Database {
@@ -21,12 +20,13 @@ public class Database {
     private static final String MessageAuthor = "author";
     private static final String MessageTimestamp = "epoch";
     private static final String MessageRoom = "room";
-    private final Connection dbConnection;
 
     private Database() throws SQLException {
         dbConnection = DriverManager.getConnection("jdbc:sqlite:test.db");
         dbConnection.setAutoCommit(true);
     }
+
+    private final Connection dbConnection;
 
     public static Database getInstance() throws SQLException {
 
@@ -81,8 +81,8 @@ public class Database {
                 if (rs.next()) {
 
                     final Room newRoom = new Room(
-                            rs.getString(RoomName),
-                            rs.getString(RoomPassword)
+                        rs.getString(RoomName),
+                        rs.getString(RoomPassword)
                     );
 
                     return newRoom;

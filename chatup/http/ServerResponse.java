@@ -3,6 +3,7 @@ package chatup.http;
 public enum ServerResponse {
 
     AuthenticationFailed("authenticationFailed"),
+    DatabaseError("databaseError"),
     EmptyResponse("emptyResponse"),
     InvalidCommand("unexpectedCommand"),
     InvalidMethod("invalidMethod"),
@@ -14,8 +15,7 @@ public enum ServerResponse {
     RoomNotFound("roomNotFound"),
     ServiceOffline("serviceOffline"),
     ServerNotFound("serverNotFound"),
-    SuccessResponse("success"),
-    DatabaseError("databaseError");
+    SuccessResponse("success");
 
     private final String responseMessage;
 

@@ -2,9 +2,6 @@ package chatup.server;
 
 import chatup.model.Message;
 
-import chatup.server.ServerInfo;
-import chatup.server.ServerKeystore;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;

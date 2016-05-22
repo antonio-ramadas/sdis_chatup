@@ -4,11 +4,15 @@ import chatup.server.ServerInfo;
 
 public class SecondaryServer {
 
+    private static void displayUsage() {
+        System.out.println("USAGE: chatup.main.SecondaryServer <serverId> primaryIp:primaryPort (<tcpPort>) (<httpPort>)");
+        System.exit(1);
+    }
+
     public static void main(String[] args) {
 
         if (args.length < 2 || args.length > 4) {
-            System.out.println("USAGE: SecondaryServer <serverId> primaryIp:primaryPort (<tcpPort>) (<httpPort>)");
-            System.exit(1);
+            displayUsage();
         }
 
         int serverId = 0;
@@ -19,8 +23,7 @@ public class SecondaryServer {
             serverId = Integer.parseInt(args[0]);
         }
         catch (NumberFormatException ex) {
-            System.out.println("USAGE: SecondaryServer <serverId> (<tcpPort>) (<httpPort>) primaryIp:primaryPort");
-            System.exit(1);
+            displayUsage();
         }
 
         if (args.length > 2) {

@@ -1,10 +1,9 @@
 package chatup.model;
 
-import java.io.Serializable;
 import java.time.Instant;
 import java.util.*;
 
-public class Room extends RoomInfo implements Serializable {
+public class Room extends RoomInfo {
 
 	private MessageCache<Integer, Message> roomMessages;
 

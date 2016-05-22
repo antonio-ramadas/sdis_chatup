@@ -2,7 +2,9 @@ package chatup.tcp;
 
 import chatup.model.Room;
 
-public class SyncRoomResponse
+import java.io.Serializable;
+
+public class SyncRoomResponse implements Serializable
 {
     public Room roomObject;
 

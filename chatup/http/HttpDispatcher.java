@@ -12,7 +12,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import java.net.HttpURLConnection;
 
 abstract class HttpDispatcher {
@@ -82,10 +81,11 @@ abstract class HttpDispatcher {
 
             try {
                 sendResponse(
-                        Json.object().add("success", httpParameters).toString(),
-                        HttpURLConnection.HTTP_OK
+                    Json.object().add("success", httpParameters).toString(),
+                    HttpURLConnection.HTTP_OK
                 );
-            } catch (IOException ex) {
+            }
+            catch (IOException ex) {
                 return false;
             }
         }
@@ -169,7 +169,6 @@ abstract class HttpDispatcher {
         try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
             byte buf[] = new byte[4096];
-
 
             for (int n = in.read(buf); n > 0; n = in.read(buf)) {
                 out.write(buf, 0, n);

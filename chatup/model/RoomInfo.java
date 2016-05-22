@@ -1,9 +1,10 @@
 package chatup.model;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-public class RoomInfo {
+public class RoomInfo implements Serializable {
 
     private String roomName;
     private String roomPassword;
