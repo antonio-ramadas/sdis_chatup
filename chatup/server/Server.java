@@ -1,6 +1,5 @@
 package chatup.server;
 
-import chatup.http.HttpFields;
 import chatup.http.ServerResponse;
 import chatup.model.Database;
 import chatup.model.Message;
@@ -8,7 +7,6 @@ import chatup.model.MessageCache;
 import chatup.model.Room;
 
 import com.eclipsesource.json.JsonValue;
-import com.eclipsesource.json.Json;
 
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -22,19 +20,15 @@ import java.util.concurrent.Executors;
 public abstract class Server {
 
     final Database serverDatabase = Database.getInstance();
-    final HashMap<Integer, Room> rooms = new HashMap<>();
-    final HashMap<Integer, ServerInfo> servers = new HashMap<>();
-    final HashMap<String, String> users = new HashMap<>();
+
+    HashMap<String, String> users;
 
     private HttpServer httpServer;
     private ServerType serverType;
     private ServerLogger serverLogger;
 
-    private int httpPort;
-
     Server(final HttpHandler httpHandler, final ServerType paramType, int httpPort) throws SQLException {
 
-        this.httpPort = httpPort;
         serverLogger = new ServerLogger(this);
         serverType = paramType;
 
@@ -80,9 +74,6 @@ public abstract class Server {
             e.printStackTrace();
         }
         */
-        createRoom("Justin Bieber", null, "bca7cd6bdaf6efaf7ae8g5130ae76f8a");
-        createRoom("XXX NAZIS XXX", "femnazi", "bca7cd6bdaf6efaf7ae8g5130ae76f8a");
-        createRoom("MigaxPraSempre", null, "bca7cd6bdaf6efaf7ae8g5130ae76f8a");
     }
 
     public ServerLogger getLogger() {
@@ -97,9 +88,10 @@ public abstract class Server {
         return -1;
     }
 
-    /*
-     * SERVER MESSAGES
-     */
+    //---------------------------------------------------------------
+    // SERVER: insertServer, updateServer, deleteServer
+    //---------------------------------------------------------------
+
     public ServerResponse insertServer(int serverId, final String serverAddress, int serverPort) {
         throw new UnsupportedOperationException("InsertServer");
     }
@@ -112,9 +104,9 @@ public abstract class Server {
         throw new UnsupportedOperationException("DeleteServer");
     }
 
-    /*
-     * USER SERVICE PROTOCOL
-     */
+    //--------------------------------
+    // USER: userLogin, userDisconnect
+    //---------------------------------
 
     public ServerResponse userLogin(final String userToken, final String userEmail) {
         throw new UnsupportedOperationException("UserLogin");
@@ -124,16 +116,16 @@ public abstract class Server {
         throw new UnsupportedOperationException("UserLogin");
     }
 
-    /*
-     * ROOM SERVICE PROTOCOL
-     */
+    //---------------------------------------------------------
+    // ROOM(PRIMARY): createRoom, getRooms, joinRoom, leaveRoom
+    //---------------------------------------------------------
 
     public ServerResponse createRoom(final String roomName, final String roomPassword, final String roomOwner) {
         throw new UnsupportedOperationException("CreateRoom");
     }
 
-    public ServerResponse deleteRoom(int roomId) {
-        throw new UnsupportedOperationException("DeleteRoom");
+    public JsonValue getRooms() {
+        throw new UnsupportedOperationException("RetrieveRooms");
     }
 
     public ServerResponse joinRoom(int roomId, final String userToken) {
@@ -148,7 +140,15 @@ public abstract class Server {
         throw new UnsupportedOperationException("LeaveRoom");
     }
 
-    public ServerResponse syncRoom(int roomId) {
+    //--------------------------------------------------
+    // ROOM(SECONDARY): deleteRoom, syncRoom, updateRoom
+    //--------------------------------------------------
+
+    public ServerResponse deleteRoom(int roomId) {
+        throw new UnsupportedOperationException("DeleteRoom");
+    }
+
+    public ServerResponse syncRoom(int roomId, int serverId) {
         throw new UnsupportedOperationException("SyncRoom");
     }
 
@@ -156,24 +156,13 @@ public abstract class Server {
         throw new UnsupportedOperationException("SyncRoom");
     }
 
-    public final JsonValue getRooms() {
-
-        final JsonValue newArray = Json.array();
-
-        rooms.forEach((k, v) -> newArray.asArray()
-            .add(Json.object()
-            .add(HttpFields.RoomName, v.getName())
-            .add(HttpFields.UserToken, v.getOwner())
-            .add(HttpFields.RoomPrivate, v.isPrivate())
-            .add(HttpFields.RoomId, k)
-        ));
-
-        return newArray;
+    public ServerResponse updateRoom(final Room updateRoom) {
+        throw new UnsupportedOperationException("UpdateRoom");
     }
 
-    /*
-     * MESSAGE SERVICE PROTOCOL
-     */
+    //---------------------------------------------------
+    // MESSAGE: getMessages, insertMessage, notifyMessage
+    //---------------------------------------------------
 
     public MessageCache getMessages(final String userToken, int roomId) {
         throw new UnsupportedOperationException("RetrieveMessages");

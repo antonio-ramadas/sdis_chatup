@@ -10,4 +10,5 @@ public class ChatupGlobals {
 
     public static final int DefaultHttpPort = 8080;
     public static final int DefaultTcpPort = 8085;
+    public static final int DefaultTimeout = 5000;
 }

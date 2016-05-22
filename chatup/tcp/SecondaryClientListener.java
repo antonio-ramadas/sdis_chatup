@@ -128,14 +128,14 @@ public class SecondaryClientListener extends Listener {
         else if (paramObject instanceof LeaveRoom) {
             leaveRoom((LeaveRoom)paramObject);
         }
+        else if (paramObject instanceof CreateRoom) {
+            createRoom((CreateRoom)paramObject);
+        }
         else if (paramObject instanceof DeleteRoom) {
             deleteRoom((DeleteRoom)paramObject);
         }
         else if (paramObject instanceof DeleteServer) {
             deleteServer((DeleteServer)paramObject);
-        }
-        else if (paramObject instanceof CreateRoom) {
-            createRoom((CreateRoom)paramObject);
         }
     }
 

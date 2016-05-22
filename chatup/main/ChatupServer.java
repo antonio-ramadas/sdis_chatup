@@ -1,15 +1,8 @@
 package chatup.main;
 
-import chatup.server.*;
-
-import java.io.IOException;
-
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-
-import java.sql.SQLException;
+import chatup.server.Server;
+import chatup.server.ServerInfo;
+import chatup.server.ServerKeystore;
 
 public class ChatupServer {
 
@@ -22,23 +15,10 @@ public class ChatupServer {
 
         try {
             serverKeystore = new ServerKeystore("server.jks", "123456");
-           // primaryConnection = new PrimaryConnection(tcpPort, serverKeystore);
             serverInstance = new chatup.server.PrimaryServer(tcpPort, httpPort);
         }
-        catch (IOException ex) {
-            ex.printStackTrace();
-            exceptionThrown = true;
-        }
-        catch (SQLException ex) {
-            ex.printStackTrace();
-            exceptionThrown = true;
-        }
-        catch (KeyStoreException | UnrecoverableKeyException | CertificateException ex) {
-            ex.printStackTrace();
-            exceptionThrown = true;
-        }
-        catch (NoSuchAlgorithmException ex) {
-            ex.printStackTrace();
+        catch (Exception ex) {
+            System.out.println("Exception caught: " + ex.getMessage() + " in ChatupServer.contructor");
             exceptionThrown = true;
         }
 
@@ -53,20 +33,8 @@ public class ChatupServer {
             serverKeystore = new ServerKeystore("server.jks", "123456");
             serverInstance = new chatup.server.SecondaryServer(serverId, primaryServer, tcpPort, httpPort);
         }
-        catch (IOException ex) {
-            ex.printStackTrace();
-            exceptionThrown = true;
-        }
-        catch (SQLException ex) {
-            ex.printStackTrace();
-            exceptionThrown = true;
-        }
-        catch (KeyStoreException | UnrecoverableKeyException | CertificateException ex) {
-            ex.printStackTrace();
-            exceptionThrown = true;
-        }
-        catch (NoSuchAlgorithmException ex) {
-            ex.printStackTrace();
+        catch (Exception ex) {
+            System.out.println("Exception caught: " + ex.getMessage() + " in ChatupServer.contructor");
             exceptionThrown = true;
         }
 

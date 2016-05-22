@@ -24,6 +24,10 @@ public class ServerInfo implements Comparable<ServerInfo> {
         return serverAddress;
     }
 
+    public Set<String> getUsers() {
+        return serverUsers;
+    }
+
     public void setPort(int paramPort) {
         serverPort = paramPort;
     }
@@ -32,28 +36,33 @@ public class ServerInfo implements Comparable<ServerInfo> {
         serverAddress = paramAddress;
     }
 
-    public int getNumberUsers() {
-        return serverUsers.size();
-    }
-
     public boolean registerUser(final String userToken) {
         return serverUsers.add(userToken);
     }
 
     public boolean removeUser(final String userToken) {
-        return serverUsers.remove(userToken);
+
+        if (serverUsers.contains(userToken)) {
+            serverUsers.remove(userToken);
+        }
+        else {
+            return false;
+        }
+
+        return true;
     }
 
     @Override
     public int compareTo(final ServerInfo serverInfo) {
 
-        int otherUsers = serverInfo.getNumberUsers();
+        int thisUsers = serverUsers.size();
+        int otherUsers = serverInfo.getUsers().size();
 
-        if (getNumberUsers() < otherUsers) {
+        if (thisUsers < otherUsers) {
             return -1;
         }
 
-        if (getNumberUsers() > otherUsers) {
+        if (thisUsers > otherUsers) {
             return 1;
         }
 
@@ -62,5 +71,14 @@ public class ServerInfo implements Comparable<ServerInfo> {
 
     public boolean hasUser(final String userToken) {
         return serverUsers.contains(userToken);
+    }
+
+    public int getLoad() {
+        return serverUsers.size();
+    }
+
+    @Override
+    public String toString() {
+        return serverAddress + ":" + serverPort;
     }
 }

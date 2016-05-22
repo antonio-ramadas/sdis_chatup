@@ -2,6 +2,7 @@ package chatup.server;
 
 import chatup.http.SecondaryDispatcher;
 import chatup.http.ServerResponse;
+import chatup.main.ChatupGlobals;
 import chatup.model.MessageCache;
 import chatup.model.Room;
 import chatup.model.Message;
@@ -14,33 +15,96 @@ import kryonet.KryoServer;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Set;
 
 public class SecondaryServer extends Server {
 
     private final SecondaryServerListener myServerListener;
 	private final SecondaryClientListener myClientListener;
+    private final HashMap<Integer, ServerInfo> servers;
+    private final HashMap<Integer, Room> rooms;
 
 	public SecondaryServer(int paramId, final ServerInfo paramPrimary, int tcpPort, int httpPort) throws SQLException, IOException {
 
+        //----------------------------------------------------------------
+        // 1) Inicializar servidor HTTPS para receber pedidos dos clientes
+        //----------------------------------------------------------------
+
 		super(new SecondaryDispatcher(), ServerType.SECONDARY, httpPort);
 
-        /*
-         * COMUNICAÇÃO PRIMÁRIO <=> SECUNDÁRIO
-         */
+        //--------------------------------------------------------------------
+        // 2) Ler para memória informações dos servidores armazenadas em disco
+        //--------------------------------------------------------------------
+
+        final HashMap<Integer, ServerInfo> myServers = serverDatabase.getServers();
+
+        if (myServers == null) {
+            servers = new HashMap<>();
+        }
+        else {
+            servers = myServers;
+        }
+
+        if (getLogger().debugEnabled()) {
+
+            System.out.println("*=====     servers     =====*");
+
+            servers.forEach((serverId, serverInformation) -> {
+                System.out.println("[" + serverId + "] " + serverInformation);
+            });
+        }
+
+        //---------------------------------------------------------------
+        // 3) Ler para memória informações das salas armazenadas em disco
+        //---------------------------------------------------------------
+
+        final HashMap<Integer, Room> myRooms = serverDatabase.getRooms();
+
+        if (myRooms == null) {
+            rooms = new HashMap<>();
+        }
+        else {
+            rooms = myRooms;
+        }
+
+        //-----------------------------------------------------------------------
+        // 4) Ler para memória associações servidor <-> sala armazenadas em disco
+        //-----------------------------------------------------------------------
+
+        if (getLogger().debugEnabled()) {
+            System.out.println("*=====      rooms      =====*");
+        }
+
+        rooms.forEach((roomId, roomInformation) -> {
+
+            final Set<Integer> roomServers = serverDatabase.getServerByRoom(roomId);
+
+            if (roomServers != null) {
+                roomInformation.setServers(roomServers);
+            }
+
+            if (getLogger().debugEnabled()) {
+                System.out.println("[" + roomId + "] " + roomInformation);
+            }
+        });
+
+        //--------------------------------------------------------------------------
+        // 5) Inicializar cliente TCP/SSL para receber comandos do servidor primário
+        //--------------------------------------------------------------------------
 
         final KryoClient myClient = new KryoClient();
 
         myClientListener = new SecondaryClientListener(this, myClient);
         serverId = paramId;
-		TcpNetwork.register(myClient);
+        TcpNetwork.register(myClient);
         myClient.addListener(myClientListener);
         myClient.start();
-        myClient.connect(5, InetAddress.getByName(paramPrimary.getAddress()), paramPrimary.getPort());
+        myClient.connect(ChatupGlobals.DefaultTimeout, InetAddress.getByName(paramPrimary.getAddress()), paramPrimary.getPort());
 
-        /*
-         * COMUNICAÇÃO SECUNDÁRIO <=> SECUNDÁRIO
-         */
+        //--------------------------------------------------------------------------------
+        // 6) Inicializar servidor TCP/SSL para receber pedidos dos servidores secundários
+        //--------------------------------------------------------------------------------
 
         final KryoServer myServer = new KryoServer() {
 
@@ -119,14 +183,14 @@ public class SecondaryServer extends Server {
 
         selectedRoom.removeUser(userToken);
 
-        if (removeUser(userToken)) {
+        if (cascadeUser(userToken)) {
             getLogger().removeUser(userToken);
         }
 
         return ServerResponse.SuccessResponse;
     }
 
-    private boolean removeUser(final String userToken) {
+    private boolean cascadeUser(final String userToken) {
 
         boolean userRemoved = true;
 
@@ -142,6 +206,16 @@ public class SecondaryServer extends Server {
         }
 
         return userRemoved;
+    }
+
+    private void cascadeRoom(final Set<String> roomUsers) {
+
+        for (final String userToken : roomUsers) {
+
+            if (cascadeUser(userToken)) {
+                getLogger().removeUser(userToken);
+            }
+        }
     }
 
     @Override
@@ -160,13 +234,7 @@ public class SecondaryServer extends Server {
         final Set<String> roomUsers = selectedRoom.getUsers();
 
         rooms.remove(roomId);
-
-        for (final String userToken : roomUsers) {
-
-            if (removeUser(userToken)) {
-                getLogger().removeUser(userToken);
-            }
-        }
+        cascadeRoom(roomUsers);
 
         return ServerResponse.SuccessResponse;
     }
@@ -310,10 +378,7 @@ public class SecondaryServer extends Server {
         }
 
         servers.remove(serverId);
-
-        rooms.forEach((roomId, room) -> {
-            room.removeMirror(serverId);
-        });
+        rooms.forEach((roomId, room) -> room.removeMirror(serverId));
 
         return ServerResponse.SuccessResponse;
 	}
@@ -336,19 +401,17 @@ public class SecondaryServer extends Server {
             return ServerResponse.InvalidToken;
         }
 
-		rooms.forEach((roomId, room) -> {
-			room.removeUser(userToken);
-		});
-
+		rooms.forEach((roomId, room) -> room.removeUser(userToken));
 		users.remove(userToken);
 
 		return ServerResponse.SuccessResponse;
 	}
 
     @Override
-    public ServerResponse syncRoom(int roomId) {
+    public ServerResponse syncRoom(int roomId, int serverId) {
 
         System.out.println("roomId:" + roomId);
+        System.out.println("serverId:" + serverId);
 
         final Room selectedRoom = rooms.get(roomId);
 
@@ -356,20 +419,23 @@ public class SecondaryServer extends Server {
             return ServerResponse.RoomNotFound;
         }
 
-        final MessageCache syncMessages = selectedRoom.getMessages();
+        myServerListener.sendServer(serverId, selectedRoom);
 
-        System.out.println("#messages:" + syncMessages.size());
+        return ServerResponse.SuccessResponse;
+    }
 
-        final SyncRoom syncRoom = new SyncRoom(roomId, syncMessages);
-        final Set<Integer> roomServers = selectedRoom.getServers();
+    public ServerResponse updateRoom(final SyncRoomResponse updateRoom) {
 
-        if (roomServers == null || roomServers.isEmpty()) {
+        System.out.println("roomId:" + updateRoom.roomId);
+        System.out.println("roomName:" + updateRoom.roomObject);
+
+        final Room selectedRoom = rooms.get(updateRoom.roomId);
+
+        if (selectedRoom == null) {
             return ServerResponse.RoomNotFound;
         }
 
-        for (final Integer serverId : roomServers) {
-            myServerListener.send(serverId, syncRoom);
-        }
+        rooms.put(updateRoom.roomId, updateRoom.roomObject);
 
         return ServerResponse.SuccessResponse;
     }
@@ -382,7 +448,7 @@ public class SecondaryServer extends Server {
         System.out.println("#messages:" + messageCache.size());
         System.out.println("----------------------");
 
-        if (roomId < 0 || messageCache == null) {
+        if (roomId < 0) {
             return ServerResponse.MissingParameters;
         }
 

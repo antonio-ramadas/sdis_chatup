@@ -3,6 +3,7 @@ package chatup.tcp;
 import chatup.http.ServerResponse;
 import chatup.model.Message;
 import chatup.server.SecondaryServer;
+import chatup.server.ServerConnection;
 
 import kryonet.Connection;
 import kryonet.KryoServer;
@@ -26,11 +27,27 @@ public class SecondaryServerListener extends Listener {
     @Override
     public void received(final Connection paramConnection, final Object paramObject) {
 
+        final ServerConnection serverConnection = (ServerConnection) paramConnection;
+
         if (paramObject instanceof Message) {
             sendMessage((Message) paramObject);
         }
         else if (paramObject instanceof SyncRoom) {
-            syncRoom((SyncRoom) paramObject);
+            syncRoomResponse(serverConnection, (SyncRoom) paramObject);
+        }
+        else if (paramObject instanceof SyncRoomResponse) {
+            syncRoom(serverConnection, (SyncRoomResponse)paramObject);
+        }
+    }
+
+    @Override
+    public void disconnected(final Connection paramConnection) {
+
+        final ServerConnection serverConnection = (ServerConnection) paramConnection;
+
+        if (serverConnection.serverId > 0) {
+            myConnections.remove(serverConnection.serverId);
+            secondaryServer.getLogger().serverOffline(serverConnection.serverId);
         }
     }
 
@@ -56,17 +73,17 @@ public class SecondaryServerListener extends Listener {
         }
     }
 
-    private void syncRoom(final SyncRoom syncRoom) {
+    private void syncRoomResponse(final ServerConnection paramConnection, final SyncRoom syncRoom) {
 
         final ServerResponse operationResult = secondaryServer.syncRoom
         (
             syncRoom.roomId,
-            syncRoom.messageCache
+            paramConnection.serverId
         );
 
         switch (operationResult) {
         case SuccessResponse:
-            secondaryServer.getLogger().sendBlock(syncRoom.roomId);
+            secondaryServer.getLogger().syncRoom(syncRoom.roomId, paramConnection.serverId);
             break;
         case RoomNotFound:
             secondaryServer.getLogger().roomNotFound(syncRoom.roomId);
@@ -77,7 +94,25 @@ public class SecondaryServerListener extends Listener {
         }
     }
 
-    public void send(int serverId, final Object paramObject) {
+    private void syncRoom(final ServerConnection paramConnection, final SyncRoomResponse updateRoom) {
+
+        final ServerResponse operationResult = secondaryServer.updateRoom(updateRoom);
+        final String roomName = updateRoom.roomObject.getName();
+
+        switch (operationResult) {
+            case SuccessResponse:
+                secondaryServer.getLogger().updateRoom(roomName, paramConnection.serverId);
+                break;
+            case RoomNotFound:
+                secondaryServer.getLogger().roomNotFound(roomName);
+                break;
+            default:
+                secondaryServer.getLogger().invalidCommand("SyncRoom");
+                break;
+        }
+    }
+
+    public void sendServer(int serverId, final Object paramObject) {
 
         if (myConnections.containsKey(serverId)) {
             kryoServer.sendToTCP(myConnections.get(serverId), paramObject);

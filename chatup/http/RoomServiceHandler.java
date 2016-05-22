@@ -22,7 +22,7 @@ class RoomServiceHandler extends HttpDispatcher {
     }
 
     @Override
-    public void parsePostRequest(JsonValue jsonValue) {
+    public void parsePostRequest(final JsonValue jsonValue) {
 
         final Server serverInstance = ChatupServer.getInstance();
         final JsonObject jsonObject = extractCommand(jsonValue, HttpCommands.JoinRoom);

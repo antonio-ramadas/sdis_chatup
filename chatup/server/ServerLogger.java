@@ -71,6 +71,10 @@ public class ServerLogger {
         error("Room #" + roomId + " is not registered on this server!");
     }
 
+    public void roomNotFound(final String roomName) {
+        error("Room $" + roomName + "$ is not registered on this server!");
+    }
+
     public void userConnected(final String userName) {
         information(userName + " has connected.");
     }
@@ -83,12 +87,16 @@ public class ServerLogger {
         error("User " + userToken + " was not inside Room #" + roomId + "!");
     }
 
-    public void sendBlock(int roomId) {
-        information("Received message block from Room #" + roomId + "!");
+    public void syncRoom(int roomId, int serverId) {
+        information("Sending Room $" + roomId + "$ metadata to server " + serverId + "...");
+    }
+
+    public void updateRoom(final String roomName, int serverId) {
+        information("Received Room $" + roomName + "$ metadata from server " + serverId + "!");
     }
 
     public void sendMessage(int roomId) {
-        information("Received new message from Room #" + roomId + "!");
+        information("Sending message from Room #" + roomId + " to server!");
     }
 
     public void serverOffline(int serverId) {
@@ -162,5 +170,9 @@ public class ServerLogger {
 
     public void removeUser(final String userToken) {
         information("User " + userToken + " is not connected to this server anymore!");
+    }
+
+    public boolean debugEnabled() {
+        return true;
     }
 }

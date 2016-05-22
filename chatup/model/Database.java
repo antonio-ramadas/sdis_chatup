@@ -42,7 +42,7 @@ public class Database {
     private static final String queryDeleteRoom = "DELETE FROM Rooms WHERE id = ?";
     private static final String querySelectRooms = "SELECT * FROM Rooms";
 
-    public boolean insertRoom(int roomId, final Room paramRoom) {
+    public boolean insertRoom(int roomId, final RoomInfo paramRoom) {
 
         try (final PreparedStatement stmt = dbConnection.prepareStatement(queryInsertRoom)) {
             stmt.setInt(1, roomId);
@@ -107,13 +107,47 @@ public class Database {
 
                 final Room newRoom = new Room(
                     rs.getString(RoomName),
-                    rs.getString(RoomPassword)
+                    rs.getString(RoomPassword),
+                    null
                 );
 
                 myRooms.put(rs.getInt(RoomId), newRoom);
             }
         }
         catch (SQLException ex) {
+            return null;
+        }
+
+        if (myRooms.isEmpty()) {
+            return null;
+        }
+
+        return myRooms;
+    }
+
+    public HashMap<Integer, RoomInfo> getRoomInformation() {
+
+        final HashMap<Integer, RoomInfo> myRooms = new HashMap<>();
+
+        try (final Statement stmt = dbConnection.createStatement();
+             final ResultSet rs = stmt.executeQuery(querySelectRooms)) {
+
+            while (rs.next()) {
+
+                final RoomInfo newRoom = new RoomInfo(
+                    rs.getString(RoomName),
+                    rs.getString(RoomPassword),
+                    null
+                );
+
+                myRooms.put(rs.getInt(RoomId), newRoom);
+            }
+        }
+        catch (SQLException ex) {
+            return null;
+        }
+
+        if (myRooms.isEmpty()) {
             return null;
         }
 
@@ -153,35 +187,6 @@ public class Database {
         }
 
         return true;
-    }
-
-    public Message getMessage(int messageId) {
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(querySelectMessageById)) {
-
-            stmt.setInt(1, messageId);
-
-            try (final ResultSet rs = stmt.executeQuery()) {
-
-                if (rs.next()) {
-
-                    final Message newMessage = new Message(
-                        rs.getInt(MessageRoom),
-                        rs.getString(MessageAuthor),
-                        rs.getLong(MessageTimestamp),
-                        rs.getString(MessageContent)
-                    );
-
-                    return newMessage;
-                }
-            }
-
-        }
-        catch (SQLException ex) {
-            return null;
-        }
-
-        return null;
     }
 
     public LinkedList<Message> getMessagesByRoom(int roomId) {
@@ -251,16 +256,16 @@ public class Database {
     private static final String queryDeleteServer = "DELETE FROM Servers WHERE id = ?";
     private static final String querySelectServers = "SELECT * FROM Servers";
 
-    public boolean insertServer(int serverId, final ServerInfo paramServer) {
+    public boolean insertServer(int serverId, final String serverAddress, int serverPort) {
 
         if (serverExists(serverId)) {
-            return updateServer(serverId, paramServer);
+            return updateServer(serverId, serverAddress, serverPort);
         }
 
         try (final PreparedStatement stmt = dbConnection.prepareStatement(queryInsertServer)) {
             stmt.setInt(1, serverId);
-            stmt.setString(2, paramServer.getAddress());
-            stmt.setInt(3, paramServer.getPort());
+            stmt.setString(2, serverAddress);
+            stmt.setInt(3, serverPort);
             stmt.executeUpdate();
         }
         catch (SQLException ex) {
@@ -283,11 +288,11 @@ public class Database {
         return true;
     }
 
-    public boolean updateServer(int serverId, final ServerInfo paramServer) {
+    public boolean updateServer(int serverId, final String serverAddress, int serverPort) {
 
         try (final PreparedStatement stmt = dbConnection.prepareStatement(queryUpdateServer)) {
-            stmt.setString(1, paramServer.getAddress());
-            stmt.setInt(2, paramServer.getPort());
+            stmt.setString(1, serverAddress);
+            stmt.setInt(2, serverPort);
             stmt.setInt(3, serverId);
             stmt.executeUpdate();
         }
@@ -318,31 +323,7 @@ public class Database {
         return false;
     }
 
-    public final ServerInfo getServer(int serverId) throws UnknownHostException {
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(querySelectServerById)) {
-
-            stmt.setInt(1, serverId);
-
-            try (final ResultSet rs = stmt.executeQuery()) {
-
-                if (rs.next()) {
-
-                    return new ServerInfo(
-                        rs.getString(ServerAddress),
-                        rs.getShort(ServerPort)
-                    );
-                }
-            }
-        }
-        catch (SQLException ex) {
-            return null;
-        }
-
-        return null;
-    }
-
-    public HashMap<Integer, ServerInfo> getServers() throws UnknownHostException {
+    public final HashMap<Integer, ServerInfo> getServers() {
 
         final HashMap<Integer, ServerInfo> myServers = new HashMap<>();
 
@@ -362,6 +343,10 @@ public class Database {
             }
         }
         catch (SQLException ex) {
+            return null;
+        }
+
+        if (myServers.isEmpty()) {
             return null;
         }
 
