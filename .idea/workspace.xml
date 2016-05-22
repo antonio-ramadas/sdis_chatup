@@ -5,37 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="12837c42-8525-4718-b44a-390330e984d3" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/chatup/backend/GraphicsUtilities.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/chatup/backend/NinePatch.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/chatup/backend/NinePatchChunk.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/chatup/http/HeartbeatServiceHandler.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/chatup/tcp/SSLConnection.java" afterPath="$PROJECT_DIR$/chatup/server/SSLConnection.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/chatup/tcp/TcpNetwork.java" afterPath="$PROJECT_DIR$/chatup/server/TcpNetwork.java" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/chatup/backend/GraphicsUtilities.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/chatup/backend/NinePatch.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/chatup/backend/NinePatchChunk.java" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/http/MessageServiceHandler.java" afterPath="$PROJECT_DIR$/chatup/http/MessageServiceHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/http/PrimaryDispatcher.java" afterPath="$PROJECT_DIR$/chatup/http/PrimaryDispatcher.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/http/SecondaryDispatcher.java" afterPath="$PROJECT_DIR$/chatup/http/SecondaryDispatcher.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/http/ServerDispatcher.java" afterPath="$PROJECT_DIR$/chatup/http/ServerDispatcher.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/main/ChatupGlobals.java" afterPath="$PROJECT_DIR$/chatup/main/ChatupGlobals.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/model/Message.java" afterPath="$PROJECT_DIR$/chatup/model/Message.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/model/MessageCache.java" afterPath="$PROJECT_DIR$/chatup/model/MessageCache.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/model/Room.java" afterPath="$PROJECT_DIR$/chatup/model/Room.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/PrimaryServer.java" afterPath="$PROJECT_DIR$/chatup/server/PrimaryServer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/SecondaryServer.java" afterPath="$PROJECT_DIR$/chatup/server/SecondaryServer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/Server.java" afterPath="$PROJECT_DIR$/chatup/server/Server.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/ServerLogger.java" afterPath="$PROJECT_DIR$/chatup/server/ServerLogger.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/tcp/CreateRoom.java" afterPath="$PROJECT_DIR$/chatup/tcp/CreateRoom.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/tcp/DeleteRoom.java" afterPath="$PROJECT_DIR$/chatup/tcp/DeleteRoom.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/tcp/DeleteServer.java" afterPath="$PROJECT_DIR$/chatup/tcp/DeleteServer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/tcp/JoinRoom.java" afterPath="$PROJECT_DIR$/chatup/tcp/JoinRoom.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/tcp/LeaveRoom.java" afterPath="$PROJECT_DIR$/chatup/tcp/LeaveRoom.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/tcp/SecondaryClientListener.java" afterPath="$PROJECT_DIR$/chatup/tcp/SecondaryClientListener.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/tcp/SecondaryServerListener.java" afterPath="$PROJECT_DIR$/chatup/tcp/SecondaryServerListener.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/tcp/SendMessage.java" afterPath="$PROJECT_DIR$/chatup/tcp/SendMessage.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/tcp/ServerOffline.java" afterPath="$PROJECT_DIR$/chatup/tcp/ServerOffline.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/tcp/ServerOnline.java" afterPath="$PROJECT_DIR$/chatup/tcp/ServerOnline.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/tcp/SyncRoom.java" afterPath="$PROJECT_DIR$/chatup/tcp/SyncRoom.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/tcp/UserDisconnect.java" afterPath="$PROJECT_DIR$/chatup/tcp/UserDisconnect.java" />
     </list>
     <ignored path="sdis_chatup.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -100,18 +73,6 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SecondaryClientListener.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/chatup/tcp/SecondaryClientListener.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="253">
-              <caret line="43" column="67" selection-start-line="43" selection-start-column="67" selection-end-line="43" selection-end-column="67" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="Server.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/chatup/server/Server.java">
           <provider selected="true" editor-type-id="text-editor">
@@ -123,18 +84,6 @@
                 <element signature="e#4709#4710#0" expanded="true" />
                 <element signature="e#5208#5209#0" expanded="true" />
                 <element signature="e#5275#5276#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="SecondaryServerListener.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/chatup/tcp/SecondaryServerListener.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-428">
-              <caret line="27" column="0" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
-              <folding>
-                <element signature="imports" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -158,18 +107,6 @@
             <state relative-caret-position="221">
               <caret line="31" column="55" selection-start-line="31" selection-start-column="55" selection-end-line="31" selection-end-column="55" />
               <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PrimaryListener.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/chatup/tcp/PrimaryListener.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="250">
-              <caret line="26" column="96" selection-start-line="26" selection-start-column="96" selection-end-line="26" selection-end-column="96" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
             </state>
           </provider>
         </entry>
@@ -296,6 +233,20 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="secondary-1" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="sdis_chatup" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="sdis_chatup" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
               <option name="myItemId" value="chatup" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -373,20 +324,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="http" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="sdis_chatup" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="sdis_chatup" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="chatup" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -651,7 +588,14 @@
       <option name="project" value="LOCAL" />
       <updated>1463923388366</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="time for testing, throws exception for now">
+      <created>1463933764007</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1463933764007</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
@@ -727,7 +671,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="more merge fixes" />
-    <option name="LAST_COMMIT_MESSAGE" value="more merge fixes" />
+    <MESSAGE value="time for testing, throws exception for now" />
+    <option name="LAST_COMMIT_MESSAGE" value="time for testing, throws exception for now" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -736,43 +681,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="jar://C:/Program Files/Java/jdk1.8.0_92/jre/lib/rt.jar!/java/util/HashSet.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="64" column="30" selection-start-line="64" selection-start-column="30" selection-end-line="64" selection-end-column="30" />
-          <folding>
-            <element signature="e#1679#1680#0" expanded="true" />
-            <element signature="e#1737#1738#0" expanded="true" />
-            <element signature="e#1779#1780#0" expanded="true" />
-            <element signature="e#1834#1835#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/chatup/server/ServerMessage.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="442">
-          <caret line="26" column="1" selection-start-line="26" selection-start-column="1" selection-end-line="26" selection-end-column="1" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://C:/Program Files/Java/jdk1.8.0_92/jre/lib/rt.jar!/java/util/function/BiConsumer.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="306">
-          <caret line="21" column="0" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/chatup/server/ServerType.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" column="12" selection-start-line="2" selection-start-column="12" selection-end-line="2" selection-end-column="12" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://C:/Program Files/Java/jdk1.8.0_92/jre/lib/rt.jar!/java/util/Collections.class">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="663">
@@ -1183,6 +1091,38 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="202">
           <caret line="712" column="0" selection-start-line="712" selection-start-column="0" selection-end-line="712" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/chatup/backend/GraphicsUtilities.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="68">
+          <caret line="13" column="13" selection-start-line="13" selection-start-column="13" selection-end-line="13" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/secondary-1/2016-05-22-17_14_35.log">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/secondary-1/2016-05-22-17_14_51.log">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/secondary-1/2016-05-22-17_13_13.log">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
