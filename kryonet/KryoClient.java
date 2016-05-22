@@ -21,29 +21,21 @@ package kryonet;
 
 import java.io.IOException;
 
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.NetworkInterface;
 import java.net.SocketTimeoutException;
 
-import java.nio.ByteBuffer;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 
 import java.security.AccessControlException;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import com.esotericsoftware.kryo.Kryo;
 
-import kryonet.FrameworkMessage.DiscoverHost;
 import kryonet.FrameworkMessage.RegisterTCP;
 import kryonet.FrameworkMessage.RegisterUDP;
 
@@ -85,7 +77,7 @@ public class KryoClient extends Connection implements EndPoint {
         this(writeBufferSize, objectBufferSize, new KryoSerialization());
     }
 
-    public KryoClient(int writeBufferSize, int objectBufferSize, Serialization serialization)
+    private KryoClient(int writeBufferSize, int objectBufferSize, final Serialization serialization)
     {
         super();
         endPoint = this;
@@ -103,16 +95,13 @@ public class KryoClient extends Connection implements EndPoint {
         }
     }
 
-    public void setDiscoveryHandler (ClientDiscoveryHandler newDiscoveryHandler)
-    {
-        discoveryHandler = newDiscoveryHandler;
-    }
-
+    @Override
     public Serialization getSerialization()
     {
         return serialization;
     }
 
+    @Override
     public Kryo getKryo()
     {
         return ((KryoSerialization)serialization).getKryo();
@@ -128,7 +117,7 @@ public class KryoClient extends Connection implements EndPoint {
         connect(timeout, host, tcpPort, -1);
     }
 
-    public void connect (int timeout, InetAddress host, int tcpPort, int udpPort) throws IOException
+    private void connect (int timeout, InetAddress host, int tcpPort, int udpPort) throws IOException
     {
         if (host == null)
         {
@@ -144,19 +133,34 @@ public class KryoClient extends Connection implements EndPoint {
         this.connectHost = host;
         this.connectTcpPort = tcpPort;
         this.connectUdpPort = udpPort;
+
         close();
-        if (INFO) {
+
+        if (INFO)
+        {
             if (udpPort != -1)
+            {
                 info("kryonet", "Connecting: " + host + ":" + tcpPort + "/" + udpPort);
+            }
             else
+            {
                 info("kryonet", "Connecting: " + host + ":" + tcpPort);
+            }
         }
+
         id = -1;
-        try {
-            if (udpPort != -1) udp = new UdpConnection(serialization, tcp.readBuffer.capacity());
+
+        try
+        {
+            if (udpPort != -1)
+            {
+                udp = new UdpConnection(serialization, tcp.readBuffer.capacity());
+            }
 
             long endTime;
-            synchronized (updateLock) {
+
+            synchronized (updateLock)
+            {
                 tcpRegistered = false;
                 selector.wakeup();
                 endTime = System.currentTimeMillis() + timeout;
@@ -184,7 +188,7 @@ public class KryoClient extends Connection implements EndPoint {
 
             if (udpPort != -1)
             {
-                InetSocketAddress udpAddress = new InetSocketAddress(host, udpPort);
+                final InetSocketAddress udpAddress = new InetSocketAddress(host, udpPort);
 
                 synchronized (updateLock)
                 {
@@ -200,16 +204,25 @@ public class KryoClient extends Connection implements EndPoint {
                         RegisterUDP registerUDP = new RegisterUDP();
                         registerUDP.connectionID = id;
                         udp.send(this, registerUDP, udpAddress);
-                        try {
+
+                        try
+                        {
                             udpRegistrationLock.wait(100);
-                        } catch (InterruptedException ignored) {
+                        }
+                        catch (InterruptedException ex)
+                        {
                         }
                     }
+
                     if (!udpRegistered)
+                    {
                         throw new SocketTimeoutException("Connected, but timed out during UDP registration: " + host + ":" + udpPort);
+                    }
                 }
             }
-        } catch (IOException ex) {
+        }
+        catch (IOException ex)
+        {
             close();
             throw ex;
         }
@@ -230,7 +243,8 @@ public class KryoClient extends Connection implements EndPoint {
         connect(timeout, connectHost, connectTcpPort, connectUdpPort);
     }
 
-    public void update (int timeout) throws IOException
+    @Override
+    public void update(int timeout) throws IOException
     {
         updateThread = Thread.currentThread();
 
@@ -276,14 +290,17 @@ public class KryoClient extends Connection implements EndPoint {
         {
             emptySelects = 0;
             isClosed = false;
-            Set<SelectionKey> keys = selector.selectedKeys();
+
+            final Set<SelectionKey> keys = selector.selectedKeys();
 
             synchronized (keys)
             {
-                for (Iterator<SelectionKey> iter = keys.iterator(); iter.hasNext();)
+                for (final Iterator<SelectionKey> iter = keys.iterator(); iter.hasNext();)
                 {
                     keepAlive();
-                    SelectionKey selectionKey = iter.next();
+
+                    final SelectionKey selectionKey = iter.next();
+
                     iter.remove();
 
                     try
@@ -296,25 +313,38 @@ public class KryoClient extends Connection implements EndPoint {
                             {
                                 while (true)
                                 {
-                                    Object object = tcp.readObject(this);
+                                    final Object paramObject = tcp.readObject(this);
 
-                                    if (object == null) break;
+                                    if (paramObject == null)
+                                    {
+                                        break;
+                                    }
+
                                     if (!tcpRegistered)
                                     {
-                                        if (object instanceof RegisterTCP) {
-                                            id = ((RegisterTCP)object).connectionID;
-                                            synchronized (tcpRegistrationLock) {
+                                        if (paramObject instanceof RegisterTCP)
+                                        {
+                                            id = ((RegisterTCP)paramObject).connectionID;
+
+                                            synchronized (tcpRegistrationLock)
+                                            {
                                                 tcpRegistered = true;
                                                 tcpRegistrationLock.notifyAll();
                                                 if (udp == null) setConnected(true);
                                             }
-                                            if (udp == null) notifyConnected();
+
+                                            if (udp == null)
+                                            {
+                                                notifyConnected();
+                                            }
                                         }
+
                                         continue;
                                     }
+
                                     if (udp != null && !udpRegistered)
                                     {
-                                        if (object instanceof RegisterUDP)
+                                        if (paramObject instanceof RegisterUDP)
                                         {
                                             synchronized (udpRegistrationLock)
                                             {
@@ -323,8 +353,7 @@ public class KryoClient extends Connection implements EndPoint {
 
                                                 if (DEBUG)
                                                 {
-                                                    debug("kryonet", "Port " + udp.datagramChannel.socket().getLocalPort()
-                                                            + "/UDP connected to: " + udp.connectedAddress);
+                                                    debug("kryonet", "Port " + udp.datagramChannel.socket().getLocalPort() + "/UDP connected to: " + udp.connectedAddress);
                                                 }
 
                                                 setConnected(true);
@@ -335,19 +364,23 @@ public class KryoClient extends Connection implements EndPoint {
 
                                         continue;
                                     }
-                                    if (!isConnected) continue;
+
+                                    if (!isConnected)
+                                    {
+                                        continue;
+                                    }
 
                                     if (DEBUG)
                                     {
-                                        String objectString = object == null ? "null" : object.getClass().getSimpleName();
+                                        String objectString = paramObject == null ? "null" : paramObject.getClass().getSimpleName();
 
-                                        if (!(object instanceof FrameworkMessage))
+                                        if (!(paramObject instanceof FrameworkMessage))
                                         {
                                             debug("kryonet", this + " received TCP: " + objectString);
                                         }
                                     }
 
-                                    notifyReceived(object);
+                                    notifyReceived(paramObject);
                                 }
                             }
                             else
@@ -365,22 +398,17 @@ public class KryoClient extends Connection implements EndPoint {
                         if ((ops & SelectionKey.OP_WRITE) == SelectionKey.OP_WRITE) tcp.writeOperation();
                     } catch (CancelledKeyException ignored)
                     {
-                        // Connection is closed.
                     }
                 }
             }
         }
+
         if (isConnected)
         {
             long time = System.currentTimeMillis();
 
             if (tcp.isTimedOut(time))
             {
-                if (DEBUG)
-                {
-                    debug("kryonet", this + " timed out.");
-                }
-
                 close();
             }
             else
@@ -415,6 +443,7 @@ public class KryoClient extends Connection implements EndPoint {
         }
     }
 
+    @Override
     public void run()
     {
         shutdown = false;
@@ -464,6 +493,7 @@ public class KryoClient extends Connection implements EndPoint {
         }
     }
 
+    @Override
     public void start()
     {
         if (updateThread != null)
@@ -484,6 +514,7 @@ public class KryoClient extends Connection implements EndPoint {
         updateThread.start();
     }
 
+    @Override
     public void stop()
     {
         if (!shutdown)
@@ -494,6 +525,7 @@ public class KryoClient extends Connection implements EndPoint {
         }
     }
 
+    @Override
     public void close()
     {
         super.close();
@@ -502,12 +534,17 @@ public class KryoClient extends Connection implements EndPoint {
         {
         }
 
-        if (!isClosed) {
+        if (!isClosed)
+        {
             isClosed = true;
             selector.wakeup();
-            try {
+
+            try
+            {
                 selector.selectNow();
-            } catch (IOException ignored) {
+            }
+            catch (IOException ex)
+            {
             }
         }
     }
@@ -518,11 +555,13 @@ public class KryoClient extends Connection implements EndPoint {
         selector.close();
     }
 
+    @Override
     public void addListener(final Listener listener)
     {
         super.addListener(listener);
     }
 
+    @Override
     public void removeListener(final Listener listener)
     {
         super.removeListener(listener);
@@ -533,125 +572,9 @@ public class KryoClient extends Connection implements EndPoint {
         udp.keepAliveMillis = keepAliveMillis;
     }
 
+    @Override
     public Thread getUpdateThread()
     {
         return updateThread;
-    }
-
-    private void broadcast(int udpPort, DatagramSocket socket) throws IOException
-    {
-        ByteBuffer dataBuffer = ByteBuffer.allocate(64);
-        serialization.write(null, dataBuffer, new DiscoverHost());
-        dataBuffer.flip();
-        byte[] data = new byte[dataBuffer.limit()];
-        dataBuffer.get(data);
-
-        for (final NetworkInterface iface : Collections.list(NetworkInterface.getNetworkInterfaces()))
-        {
-            for (final InetAddress address : Collections.list(iface.getInetAddresses()))
-            {
-                byte[] ip = address.getAddress();
-
-                ip[3] = -1;
-
-                try
-                {
-                    socket.send(new DatagramPacket(data, data.length, InetAddress.getByAddress(ip), udpPort));
-                }
-                catch (Exception ignored)
-                {
-                }
-
-                ip[2] = -1;
-
-                try
-                {
-                    socket.send(new DatagramPacket(data, data.length, InetAddress.getByAddress(ip), udpPort));
-                }
-                catch (Exception ignored)
-                {
-                }
-            }
-        }
-    }
-
-    public InetAddress discoverHost (int udpPort, int timeoutMillis)
-    {
-        DatagramSocket socket = null;
-
-        try
-        {
-            socket = new DatagramSocket();
-            broadcast(udpPort, socket);
-            socket.setSoTimeout(timeoutMillis);
-            DatagramPacket packet = discoveryHandler.onRequestNewDatagramPacket();
-
-            try
-            {
-                socket.receive(packet);
-            }
-            catch (SocketTimeoutException ex)
-            {
-                if (INFO) info("kryonet", "Host discovery timed out.");
-                return null;
-            }
-
-            if (INFO) info("kryonet", "Discovered server: " + packet.getAddress());
-            discoveryHandler.onDiscoveredHost(packet, getKryo());
-            return packet.getAddress();
-        } catch (IOException ex) {
-            if (ERROR) error("kryonet", "Host discovery failed.", ex);
-            return null;
-        } finally {
-            if (socket != null) socket.close();
-            discoveryHandler.onFinally();
-        }
-    }
-
-    public List<InetAddress> discoverHosts (int udpPort, int timeoutMillis) {
-
-        List<InetAddress> hosts = new ArrayList<InetAddress>();
-        DatagramSocket socket = null;
-
-        try {
-
-            socket = new DatagramSocket();
-            broadcast(udpPort, socket);
-            socket.setSoTimeout(timeoutMillis);
-
-            while (true) {
-
-                DatagramPacket packet = discoveryHandler.onRequestNewDatagramPacket();
-
-                try {
-                    socket.receive(packet);
-                } catch (SocketTimeoutException ex) {
-                    if (INFO) info("kryonet", "Host discovery timed out.");
-                    return hosts;
-                }
-
-                if (INFO) info("kryonet", "Discovered server: " + packet.getAddress());
-                discoveryHandler.onDiscoveredHost(packet, getKryo());
-                hosts.add(packet.getAddress());
-            }
-        }
-        catch (IOException ex)
-        {
-            if (ERROR)
-            {
-                error("kryonet", "Host discovery failed.", ex);
-            }
-
-            return hosts;
-        }
-        finally
-        {
-            if (socket != null)
-            {
-                socket.close();
-            }
-
-            discoveryHandler.onFinally();
-        }
     }
 }

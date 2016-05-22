@@ -1,6 +1,5 @@
 package chatup.model;
 
-import chatup.server.ServerConnection;
 import chatup.server.ServerInfo;
 
 import java.sql.*;
@@ -10,7 +9,19 @@ import java.util.*;
 public class Database {
 
     private static Database instance;
-    private Connection dbConnection = null;
+    private static final String ServerId = "id";
+    private static final String ServerAddress = "address";
+    private static final String ServerPort = "port";
+    private static final String UserEmail = "email";
+    private static final String UserToken = "token";
+    private static final String RoomId = "id";
+    private static final String RoomName = "name";
+    private static final String RoomPassword = "password";
+    private static final String MessageContent = "contents";
+    private static final String MessageAuthor = "author";
+    private static final String MessageTimestamp = "epoch";
+    private static final String MessageRoom = "room";
+    private final Connection dbConnection;
 
     private Database() throws SQLException {
         dbConnection = DriverManager.getConnection("jdbc:sqlite:test.db");
@@ -26,14 +37,14 @@ public class Database {
         return instance;
     }
 
-    /**********************
-     * ROOMS
-     **********************/
+    private static final String queryInsertRoom = "INSERT INTO Rooms(id, name, password) VALUES(?, ?, ?)";
+    private static final String querySelectRoomById = "SELECT * FROM Rooms WHERE id = ?";
+    private static final String queryDeleteRoom = "DELETE FROM Rooms WHERE id = ?";
+    private static final String querySelectRooms = "SELECT * FROM Rooms";
+
     public boolean insertRoom(int roomId, final Room paramRoom) {
 
-        final String sqlQuery = "INSERT INTO Rooms(id, name, password) VALUES(?, ?, ?)";
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
+        try (final PreparedStatement stmt = dbConnection.prepareStatement(queryInsertRoom)) {
             stmt.setInt(1, roomId);
             stmt.setString(2, paramRoom.getName());
             stmt.setString(3, paramRoom.getPassword());
@@ -48,9 +59,7 @@ public class Database {
 
     public boolean deleteRoom(int roomId) {
 
-        final String sqlQuery = "DELETE FROM Rooms WHERE id = ?";
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
+        try (final PreparedStatement stmt = dbConnection.prepareStatement(queryDeleteRoom)) {
             stmt.setInt(1, roomId);
             stmt.executeUpdate();
         }
@@ -63,9 +72,7 @@ public class Database {
 
     public final Room getRoom(int roomId) {
 
-        final String sqlQuery = "SELECT * FROM Rooms WHERE id = ?";
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
+        try (final PreparedStatement stmt = dbConnection.prepareStatement(querySelectRoomById)) {
 
             stmt.setInt(1, roomId);
 
@@ -74,8 +81,8 @@ public class Database {
                 if (rs.next()) {
 
                     final Room newRoom = new Room(
-                        rs.getString(DatabaseFields.RoomName),
-                        rs.getString(DatabaseFields.RoomPassword)
+                            rs.getString(RoomName),
+                            rs.getString(RoomPassword)
                     );
 
                     return newRoom;
@@ -94,16 +101,16 @@ public class Database {
         final HashMap<Integer, Room> myRooms = new HashMap<>();
 
         try (final Statement stmt = dbConnection.createStatement();
-             final ResultSet rs = stmt.executeQuery("SELECT * FROM Rooms")) {
+             final ResultSet rs = stmt.executeQuery(querySelectRooms)) {
 
             while (rs.next()) {
 
                 final Room newRoom = new Room(
-                    rs.getString(DatabaseFields.RoomName),
-                    rs.getString(DatabaseFields.RoomPassword)
+                    rs.getString(RoomName),
+                    rs.getString(RoomPassword)
                 );
 
-                myRooms.put(rs.getInt(DatabaseFields.RoomId), newRoom);
+                myRooms.put(rs.getInt(RoomId), newRoom);
             }
         }
         catch (SQLException ex) {
@@ -113,14 +120,15 @@ public class Database {
         return myRooms;
     }
 
-    /**********************
-     * MESSAGES
-     **********************/
+    private final static String queryInsertMessage = "INSERT INTO Messages(room, token, epoch, message) VALUES(?, ?, ?, ?)";
+    private final static String querySelectMessagesByRoomLimit = "SELECT * FROM Message WHERE room = ? ORDER BY epoch DESC LIMIT ";
+    private final static String querySelectMessagesByRoom = "SELECT * FROM Messages WHERE room = ? ORDER BY epoch DESC";
+    private final static String querySelectMessageById = "SELECT * FROM Messages WHERE id = ?";
+    private final static String queryDeleteMessage = "DELETE FROM Messages WHERE id = ?";
+
     public boolean insertMessage(final Message paramMessage) {
 
-        final String sqlQuery = "INSERT INTO Messages(room, token, epoch, message) VALUES(?, ?, ?, ?)";
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
+        try (final PreparedStatement stmt = dbConnection.prepareStatement(queryInsertMessage)) {
             stmt.setInt(1, paramMessage.getRoomId());
             stmt.setString(2, paramMessage.getSender());
             stmt.setLong(3, paramMessage.getTimestamp());
@@ -136,9 +144,7 @@ public class Database {
 
     public boolean deleteMessage(int messageId) {
 
-        final String sqlQuery = "DELETE FROM Messages WHERE id = ?";
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
+        try (final PreparedStatement stmt = dbConnection.prepareStatement(queryDeleteMessage)) {
             stmt.setInt(1, messageId);
             stmt.executeUpdate();
         }
@@ -151,17 +157,22 @@ public class Database {
 
     public Message getMessage(int messageId) {
 
-        final String sqlQuery = "SELECT * FROM Messages WHERE id = ?";
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
+        try (final PreparedStatement stmt = dbConnection.prepareStatement(querySelectMessageById)) {
 
             stmt.setInt(1, messageId);
 
             try (final ResultSet rs = stmt.executeQuery()) {
 
                 if (rs.next()) {
-                    return new Message(rs.getInt("room"), rs.getString("token"), rs.getLong("epoch"), rs.getString("message")
+
+                    final Message newMessage = new Message(
+                        rs.getInt(MessageRoom),
+                        rs.getString(MessageAuthor),
+                        rs.getLong(MessageTimestamp),
+                        rs.getString(MessageContent)
                     );
+
+                    return newMessage;
                 }
             }
 
@@ -173,20 +184,26 @@ public class Database {
         return null;
     }
 
-    public LinkedList<Message> getMessagesByRoomId(int roomId) {
+    public LinkedList<Message> getMessagesByRoom(int roomId) {
 
         final LinkedList<Message> myMessages = new LinkedList<>();
-        final String sqlQuery = "SELECT * FROM Messages WHERE room = ? ORDER BY epoch DESC";
 
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
+        try (final PreparedStatement stmt = dbConnection.prepareStatement(querySelectMessagesByRoom)) {
 
             stmt.setInt(1, roomId);
 
             try (final ResultSet rs = stmt.executeQuery()) {
 
                 while (rs.next()) {
-                    myMessages.add(new Message(rs.getInt("room"), rs.getString("token"), rs.getLong("epoch"), rs.getString("message")
-                    ));
+
+                    final Message newMessage = new Message(
+                        rs.getInt(MessageRoom),
+                        rs.getString(MessageAuthor),
+                        rs.getLong(MessageTimestamp),
+                        rs.getString(MessageContent)
+                    );
+
+                    myMessages.add(newMessage);
                 }
             }
         }
@@ -197,12 +214,10 @@ public class Database {
         return myMessages;
     }
 
-    /*
-    public LinkedList<Message> getLimitedMessagesByRoomId(int roomId, int messagesQuantity) {
+    public LinkedList<Message> getMessagesByRoom(int roomId, int messagesQuantity) {
 
         final LinkedList<Message> myMessages = new LinkedList<>();
-        final String sqlQuery = "SELECT * FROM Message WHERE room = ? ORDER BY epoch DESC LIMIT " + messagesQuantity;
-        System.out.println(sqlQuery);
+        final String sqlQuery = querySelectMessagesByRoomLimit + messagesQuantity;
 
         try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
 
@@ -211,28 +226,38 @@ public class Database {
             try (final ResultSet rs = stmt.executeQuery()) {
 
                 while (rs.next()) {
-                    myMessages.add(new Message(rs.getString("message"), rs.getString("token"), rs.getInt("room"), rs.getLong("epoch")));
+
+                    final Message newMessage = new Message(
+                        rs.getInt(MessageRoom),
+                        rs.getString(MessageAuthor),
+                        rs.getLong(MessageTimestamp),
+                        rs.getString(MessageContent)
+                    );
+
+                    myMessages.add(newMessage);;
                 }
             }
         }
         catch (SQLException ex) {
             return null;
         }
-        return myMessages;
-    }*/
 
-    /**********************
-     * SERVERS
-     **********************/
+        return myMessages;
+    }
+
+    private static final String queryInsertServer = "INSERT INTO Servers(id, address, port) VALUES(?, ?, ?)";
+    private static final String queryUpdateServer = "UPDATE Servers SET address = ?, port = ? WHERE id = ?";;
+    private static final String querySelectServerById = "SELECT * FROM Servers WHERE id = ?";
+    private static final String queryDeleteServer = "DELETE FROM Servers WHERE id = ?";
+    private static final String querySelectServers = "SELECT * FROM Servers";
+
     public boolean insertServer(int serverId, final ServerInfo paramServer) {
 
         if (serverExists(serverId)) {
             return updateServer(serverId, paramServer);
         }
 
-        final String sqlQuery = "INSERT INTO Servers(id, address, port) VALUES(?, ?, ?)";
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
+        try (final PreparedStatement stmt = dbConnection.prepareStatement(queryInsertServer)) {
             stmt.setInt(1, serverId);
             stmt.setString(2, paramServer.getAddress());
             stmt.setInt(3, paramServer.getPort());
@@ -247,10 +272,23 @@ public class Database {
 
     public boolean deleteServer(int serverId) {
 
-        final String sqlQuery = "DELETE FROM Servers WHERE id = ?";
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
+        try (final PreparedStatement stmt = dbConnection.prepareStatement(queryDeleteServer)) {
             stmt.setInt(1, serverId);
+            stmt.executeUpdate();
+        }
+        catch (SQLException ex) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean updateServer(int serverId, final ServerInfo paramServer) {
+
+        try (final PreparedStatement stmt = dbConnection.prepareStatement(queryUpdateServer)) {
+            stmt.setString(1, paramServer.getAddress());
+            stmt.setInt(2, paramServer.getPort());
+            stmt.setInt(3, serverId);
             stmt.executeUpdate();
         }
         catch (SQLException ex) {
@@ -262,9 +300,7 @@ public class Database {
 
     private boolean serverExists(int serverId) {
 
-        final String sqlQuery = "SELECT * FROM Servers WHERE id = ?";
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
+        try (final PreparedStatement stmt = dbConnection.prepareStatement(querySelectServerById)) {
 
             stmt.setInt(1, serverId);
 
@@ -282,26 +318,9 @@ public class Database {
         return false;
     }
 
-    public boolean updateServer(int serverId, final ServerInfo paramServer) {
-
-        final String sqlQuery = "UPDATE Servers SET address = ?, port = ? WHERE id = ?";
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
-            stmt.setString(1, paramServer.getAddress());
-            stmt.setInt(2, paramServer.getPort());
-            stmt.setInt(3, serverId);
-            stmt.executeUpdate();
-        }
-        catch (SQLException ex) {
-            return false;
-        }
-
-        return true;
-    }
-
     public final ServerInfo getServer(int serverId) throws UnknownHostException {
 
-        try (final PreparedStatement stmt = dbConnection.prepareStatement("SELECT * FROM Servers WHERE id = ?")) {
+        try (final PreparedStatement stmt = dbConnection.prepareStatement(querySelectServerById)) {
 
             stmt.setInt(1, serverId);
 
@@ -310,8 +329,8 @@ public class Database {
                 if (rs.next()) {
 
                     return new ServerInfo(
-                        rs.getString(DatabaseFields.ServerAddress),
-                        rs.getShort(DatabaseFields.ServerPort)
+                        rs.getString(ServerAddress),
+                        rs.getShort(ServerPort)
                     );
                 }
             }
@@ -328,16 +347,18 @@ public class Database {
         final HashMap<Integer, ServerInfo> myServers = new HashMap<>();
 
         try (final Statement stmt = dbConnection.createStatement();
-             final ResultSet rs = stmt.executeQuery("SELECT * FROM Servers")) {
+             final ResultSet rs = stmt.executeQuery(querySelectServers)) {
 
             while (rs.next()) {
 
+                int serverId = rs.getInt(ServerId);
+
                 final ServerInfo newServer = new ServerInfo(
-                    rs.getString(DatabaseFields.ServerAddress),
-                    rs.getShort(DatabaseFields.ServerPort)
+                    rs.getString(ServerAddress),
+                    rs.getShort(ServerPort)
                 );
 
-                myServers.put(rs.getInt(DatabaseFields.ServerId), newServer);
+                myServers.put(serverId, newServer);
             }
         }
         catch (SQLException ex) {
@@ -347,14 +368,13 @@ public class Database {
         return myServers;
     }
 
-    /**********************
-     * SERVER ROOMS
-     **********************/
-    public boolean insertServerRooms(int serverId, int roomId) {
+    private static final String queryInsertRoomServer = "INSERT INTO ServerRooms(server, room) VALUES(?, ?)";
+    private static final String queryDeleteRoomServer = "DELETE FROM ServerRooms WHERE server = ? AND room = ?";;
+    private static final String querySelectServersByRoom = "SELECT * FROM ServerRooms WHERE room = ?";
 
-        final String sqlQuery = "INSERT INTO ServerRooms(server, room) VALUES(?, ?)";
+    public boolean insertServerRoom(int serverId, int roomId) {
 
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
+        try (final PreparedStatement stmt = dbConnection.prepareStatement(queryInsertRoomServer)) {
             stmt.setInt(1, serverId);
             stmt.setInt(2, roomId);
             stmt.executeUpdate();
@@ -368,9 +388,7 @@ public class Database {
 
     public boolean deleteServerRoom(int serverId, int roomId) {
 
-        final String sqlQuery = "DELETE FROM ServerRooms WHERE server = ? AND room = ?";
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
+        try (final PreparedStatement stmt = dbConnection.prepareStatement(queryDeleteRoomServer)) {
             stmt.setInt(1, serverId);
             stmt.setInt(2, roomId);
             stmt.executeUpdate();
@@ -385,9 +403,8 @@ public class Database {
     public Set<Integer> getServerByRoom(int roomId) {
 
         final HashSet<Integer> myServers = new HashSet<>();
-        final String sqlQuery = "SELECT * FROM ServerRooms WHERE room = ?";
 
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
+        try (final PreparedStatement stmt = dbConnection.prepareStatement(querySelectServersByRoom)) {
 
             stmt.setInt(1, roomId);
 
@@ -405,14 +422,15 @@ public class Database {
         return myServers;
     }
 
-    /**********************
-     * USERS
-     **********************/
+    private static final String queryInsertUser = "INSERT INTO Users(token, email) VALUES(?, ?)";
+    private static final String queryUpdateUser = "UPDATE Users SET token = ? WHERE token = ?";
+    private static final String queryDeleteUser = "DELETE FROM Users WHERE token = ?";
+    private static final String querySelectUserById = "SELECT * FROM Users WHERE token = ?";
+    private static final String querySelectUserByEmail = "SELECT * FROM Users WHERE email = ?";
+
     public boolean insertUser(String token, String email) {
 
-        final String sqlQuery = "INSERT INTO Users(token, email) VALUES(?, ?)";
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
+        try (final PreparedStatement stmt = dbConnection.prepareStatement(queryInsertUser)) {
             stmt.setString(1, token);
             stmt.setString(2, email);
             stmt.executeUpdate();
@@ -424,12 +442,10 @@ public class Database {
         return true;
     }
 
-    public boolean deleteUser(String token) {
+    public boolean deleteUser(final String userToken) {
 
-        final String sqlQuery = "DELETE FROM Users WHERE token = ?";
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
-            stmt.setString(1, token);
+        try (final PreparedStatement stmt = dbConnection.prepareStatement(queryDeleteUser)) {
+            stmt.setString(1, userToken);
             stmt.executeUpdate();
         }
         catch (SQLException ex) {
@@ -439,13 +455,11 @@ public class Database {
         return true;
     }
 
-    private boolean userExists(String token) {
+    private boolean userExists(final String userToken) {
 
-        final String sqlQuery = "SELECT * FROM Users WHERE token = ?";
+        try (final PreparedStatement stmt = dbConnection.prepareStatement(querySelectUserById)) {
 
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
-
-            stmt.setString(1, token);
+            stmt.setString(1, userToken);
 
             try (final ResultSet rs = stmt.executeQuery()) {
 
@@ -461,13 +475,11 @@ public class Database {
         return false;
     }
 
-    public boolean updateUser(String token, String newToken) {
+    public boolean updateUser(final String oldToken, final String newToken) {
 
-        final String sqlQuery = "UPDATE Users SET token = ? WHERE token = ?";
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
+        try (final PreparedStatement stmt = dbConnection.prepareStatement(queryUpdateUser)) {
             stmt.setString(1, newToken);
-            stmt.setString(2, token);
+            stmt.setString(2, oldToken);
             stmt.executeUpdate();
         }
         catch (SQLException ex) {
@@ -479,9 +491,7 @@ public class Database {
 
     public Map.Entry<String, String> getUserByEmail(String email) {
 
-        final String sqlQuery = "SELECT * FROM Users WHERE email = ?";
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
+        try (final PreparedStatement stmt = dbConnection.prepareStatement(querySelectUserByEmail)) {
 
             stmt.setString(1, email);
 
@@ -490,8 +500,8 @@ public class Database {
                 if (rs.next()) {
 
                     return new AbstractMap.SimpleEntry<>(
-                        rs.getString(DatabaseFields.UserToken),
-                        rs.getString(DatabaseFields.UserEmail)
+                        rs.getString(UserToken),
+                        rs.getString(UserEmail)
                     );
                 }
             }
@@ -503,21 +513,19 @@ public class Database {
         return null;
     }
 
-    public Map.Entry<String, String> getUserByToken(String token) {
+    public Map.Entry<String, String> getUserByToken(final String userToken) {
 
-        final String sqlQuery = "SELECT * FROM Users WHERE token = ?";
+        try (final PreparedStatement stmt = dbConnection.prepareStatement(querySelectUserById)) {
 
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
-
-            stmt.setString(1, token);
+            stmt.setString(1, userToken);
 
             try (final ResultSet rs = stmt.executeQuery()) {
 
                 if (rs.next()) {
 
                     return new AbstractMap.SimpleEntry<>(
-                        rs.getString(DatabaseFields.UserToken),
-                        rs.getString(DatabaseFields.UserEmail)
+                        rs.getString(UserToken),
+                        rs.getString(UserEmail)
                     );
                 }
             }

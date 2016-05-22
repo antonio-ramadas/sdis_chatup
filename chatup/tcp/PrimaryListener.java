@@ -67,7 +67,7 @@ public class PrimaryListener extends Listener {
 
         final ServerConnection serverConnection = (ServerConnection) paramConnection;
 
-        if (serverConnection.serverId < 0) {
+        if (serverConnection.serverId <= 0) {
             return;
         }
 

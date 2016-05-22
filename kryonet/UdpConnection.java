@@ -34,12 +34,12 @@ class UdpConnection
 {
     InetSocketAddress connectedAddress;
     DatagramChannel datagramChannel;
-    int keepAliveMillis = 19000;
-    final ByteBuffer readBuffer, writeBuffer;
+
+    private final ByteBuffer readBuffer;
+    private final ByteBuffer writeBuffer;
     private final Serialization serialization;
     private SelectionKey selectionKey;
     private final Object writeLock = new Object();
-    private long lastCommunicationTime;
 
     UdpConnection(final Serialization serialization, int bufferSize)
     {
@@ -48,26 +48,8 @@ class UdpConnection
         writeBuffer = ByteBuffer.allocateDirect(bufferSize);
     }
 
-    void bind(final Selector selector, final InetSocketAddress localPort) throws IOException
-    {
-        close();
-        readBuffer.clear();
-        writeBuffer.clear();
-
-        try
-        {
-            datagramChannel = selector.provider().openDatagramChannel();
-            datagramChannel.socket().bind(localPort);
-            datagramChannel.configureBlocking(false);
-            selectionKey = datagramChannel.register(selector, SelectionKey.OP_READ);
-            lastCommunicationTime = System.currentTimeMillis();
-        }
-        catch (IOException ex)
-        {
-            close();
-            throw ex;
-        }
-    }
+    int keepAliveMillis = 19000;
+    private long lastCommunicationTime;
 
     void connect(Selector selector, InetSocketAddress remoteAddress) throws IOException
     {

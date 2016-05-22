@@ -115,10 +115,12 @@ public class KryoServer implements EndPoint{
         }
     }
 
+    @Override
     public Serialization getSerialization() {
         return serialization;
     }
 
+    @Override
     public Kryo getKryo() {
         return ((KryoSerialization) serialization).getKryo();
     }
@@ -156,6 +158,7 @@ public class KryoServer implements EndPoint{
         }
     }
 
+    @Override
     public void update(int timeout) throws IOException {
 
         updateThread = Thread.currentThread();
@@ -313,10 +316,6 @@ public class KryoServer implements EndPoint{
 
             if (connection.tcp.isTimedOut(time)) {
 
-                if (DEBUG) {
-                    debug("kryonet", connection + " timed out.");
-                }
-
                 connection.close();
             }
             else {
@@ -332,38 +331,44 @@ public class KryoServer implements EndPoint{
         }
     }
 
-    private void keepAlive() {
-
+    private void keepAlive()
+    {
         long time = System.currentTimeMillis();
-
         final Connection[] connections = this.connections;
 
-        for (final Connection connection : connections) {
-
-            if (connection.tcp.needsKeepAlive(time)) {
+        for (final Connection connection : connections)
+        {
+            if (connection.tcp.needsKeepAlive(time))
+            {
                 connection.sendTCP(FrameworkMessage.keepAlive);
             }
         }
     }
 
-    public void run() {
-
+    @Override
+    public void run()
+    {
         shutdown = false;
 
-        while (!shutdown) {
-
-            try {
+        while (!shutdown)
+        {
+            try
+            {
                 update(250);
             }
-            catch (IOException ex) {
-                if (ERROR) {
+            catch (IOException ex)
+            {
+                if (ERROR)
+                {
                     error("kryonet", "Error updating server connections.", ex);
                 }
+
                 close();
             }
         }
     }
 
+    @Override
     public void start() {
         new Thread(this, "KryoServer").start();
     }
@@ -376,22 +381,23 @@ public class KryoServer implements EndPoint{
         }
     }
 
-    private void acceptOperation(SocketChannel socketChannel) {
-
+    private void acceptOperation(SocketChannel socketChannel)
+    {
         final Connection connection = newConnection();
 
         connection.initialize(serialization, writeBufferSize, objectBufferSize);
         connection.endPoint = this;
 
-        try {
-
+        try
+        {
             final SelectionKey selectionKey = connection.tcp.accept(selector, socketChannel);
 
             selectionKey.attach(connection);
 
             int id = nextConnectionID++;
 
-            if (nextConnectionID == -1) {
+            if (nextConnectionID == -1)
+            {
                 nextConnectionID = 1;
             }
 
@@ -406,11 +412,12 @@ public class KryoServer implements EndPoint{
             connection.sendTCP(registerConnection);
             connection.notifyConnected();
         }
-        catch (IOException ex) {
-
+        catch (IOException ex)
+        {
             connection.close();
 
-            if (DEBUG) {
+            if (DEBUG)
+            {
                 debug("kryonet", "Unable to accept TCP connection.", ex);
             }
         }
@@ -438,18 +445,20 @@ public class KryoServer implements EndPoint{
         pendingConnections.remove(connection.id);
     }
 
-    public void sendToAllTCP(final Object object) {
-
-        for (final Connection connection : connections) {
+    public void sendToAllTCP(final Object object)
+    {
+        for (final Connection connection : connections)
+        {
             connection.sendTCP(object);
         }
     }
 
-    public void sendToAllExceptTCP(int connectionId, final Object myObject) {
-
-        for (final Connection connection : connections) {
-
-            if (connection.id != connectionId) {
+    public void sendToAllExceptTCP(int connectionId, final Object myObject)
+    {
+        for (final Connection connection : connections)
+        {
+            if (connection.id != connectionId)
+            {
                 connection.sendTCP(myObject);
             }
         }
@@ -466,45 +475,50 @@ public class KryoServer implements EndPoint{
         }
     }
 
-    public void addListener(final Listener listener) {
-
-        synchronized (listenerLock) {
-
+    @Override
+    public void addListener(final Listener paramListener)
+    {
+        synchronized (listenerLock)
+        {
             final Listener[] myListeners = listeners;
             int n = myListeners.length;
 
-            for (final Listener myListener : myListeners) {
-
-                if (listener == myListener) {
+            for (final Listener myListener : myListeners)
+            {
+                if (paramListener == myListener)
+                {
                     return;
                 }
             }
 
             final Listener[] newListeners = new Listener[n + 1];
 
-            newListeners[0] = listener;
+            newListeners[0] = paramListener;
             System.arraycopy(myListeners, 0, newListeners, 1, n);
             listeners = newListeners;
         }
     }
 
-    public void removeListener(final Listener listener) {
-
-        synchronized (listenerLock) {
-
+    @Override
+    public void removeListener(final Listener paramListener)
+    {
+        synchronized (listenerLock)
+        {
             final Listener[] myListeners = listeners;
             int n = myListeners.length;
             final Listener[] newListeners = new Listener[n - 1];
 
-            for (int i = 0, ii = 0; i < n; i++) {
-
+            for (int i = 0, ii = 0; i < n; i++)
+            {
                 final Listener copyListener = myListeners[i];
 
-                if (listener == copyListener) {
+                if (paramListener == copyListener)
+                {
                     continue;
                 }
 
-                if (ii == n - 1) {
+                if (ii == n - 1)
+                {
                     return;
                 }
 
@@ -515,11 +529,13 @@ public class KryoServer implements EndPoint{
         }
     }
 
-    public void close() {
-
+    @Override
+    public void close()
+    {
         Connection[] connections = this.connections;
 
-        if (INFO && connections.length > 0) {
+        if (INFO && connections.length > 0)
+        {
             info("kryonet", "Closing server connections...");
         }
 
@@ -561,6 +577,7 @@ public class KryoServer implements EndPoint{
         selector.close();
     }
 
+    @Override
     public Thread getUpdateThread() {
         return updateThread;
     }

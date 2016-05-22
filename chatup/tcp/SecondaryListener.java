@@ -2,7 +2,6 @@ package chatup.tcp;
 
 import chatup.http.ServerResponse;
 import chatup.server.SecondaryServer;
-import chatup.server.ServerConnection;
 
 import com.esotericsoftware.minlog.Log;
 
@@ -14,11 +13,11 @@ import java.util.HashMap;
 
 public class SecondaryListener extends Listener {
 
-    private HashMap<Integer, Integer> myConnections;
+    private HashMap<Integer, Integer> serverConnections;
 
     public SecondaryListener(final SecondaryServer paramSecondary, final KryoClient paramClient) {
         kryoClient = paramClient;
-        myConnections = new HashMap<>();
+        serverConnections = new HashMap<>();
         secondaryServer = paramSecondary;
     }
 
@@ -42,7 +41,7 @@ public class SecondaryListener extends Listener {
             Log.error("primary", "Room #" + createRoom.roomName + " already exists!");
             break;
         default:
-            Log.error("primary", "Received empty or invalid command!");
+            Log.error("primary", "Received empty or invalid request!");
             break;
         }
     }
@@ -63,7 +62,41 @@ public class SecondaryListener extends Listener {
             Log.error("primary", "Room #" + joinRoom.roomId + " is not registered on this server!");
             break;
         default:
-            Log.error("primary", "Received empty or invalid command!");
+            Log.error("primary", "Received empty or invalid request!");
+            break;
+        }
+    }
+
+    private void deleteRoom(final DeleteRoom deleteRoom) {
+
+        final ServerResponse operationResult = secondaryServer.deleteRoom(deleteRoom.roomId);
+
+        switch (operationResult) {
+        case SuccessResponse:
+            Log.info("secondary", "Room #" + deleteRoom.roomId + " has been deleted!");
+            break;
+        case RoomNotFound:
+            Log.error("secondary", "Room #" + deleteRoom.roomId + " is not registered on this server!");
+            break;
+        default:
+            Log.error("primary", "Received empty or invalid request!");
+            break;
+        }
+    }
+
+    private void deleteServer(final DeleteServer deleteServer) {
+
+        final ServerResponse operationResult = secondaryServer.deleteServer(deleteServer.serverId);
+
+        switch (operationResult) {
+        case SuccessResponse:
+            Log.info("secondary", "Server #" + deleteServer.serverId + " has been deleted!");
+            break;
+        case ServerNotFound:
+            Log.error("secondary", "Server #" + deleteServer.serverId + " is not registered on this server!");
+            break;
+        default:
+            Log.error("primary", "Received empty or invalid request!");
             break;
         }
     }
@@ -84,73 +117,29 @@ public class SecondaryListener extends Listener {
             Log.error("primary", "Room #" + leaveRoom.roomId + " is not registered on this server!");
             break;
         default:
-            Log.error("primary", "Received empty or invalid command!");
-            break;
-        }
-    }
-
-    private void syncRoom(final SyncRoom syncRoom) {
-
-        final ServerResponse operationResult = secondaryServer.syncRoom
-        (
-            syncRoom.roomId,
-            syncRoom.messageCache
-        );
-
-        switch (operationResult) {
-        case SuccessResponse:
-            Log.info("primary", "Received message block for Room #" + syncRoom.roomId + ".");
-            break;
-        case RoomNotFound:
-            Log.error("primary", "Room #" + syncRoom.roomId + " is not registered on this server!");
-            break;
-        default:
-            Log.error("primary", "Received empty or invalid command!");
-            break;
-        }
-    }
-
-    private void sendMessage(final SendMessage sendMessage) {
-
-        final ServerResponse operationResult = secondaryServer.registerMessage
-        (
-            sendMessage.roomId,
-            sendMessage.message
-        );
-
-        switch (operationResult) {
-        case SuccessResponse:
-            Log.info("primary", "Received message block for Room #" + sendMessage.roomId + ".");
-            break;
-        case InvalidToken:
-            Log.error("primary", "User " + sendMessage.message.getSender() + " is not inside Room #" + sendMessage.roomId + "!");
-            break;
-        case RoomNotFound:
-            Log.error("primary", "Room #" + sendMessage.roomId + " is not registered on this server!");
-            break;
-        default:
-            Log.error("primary", "Received empty or invalid command!");
+            Log.error("primary", "Received empty or invalid request!");
             break;
         }
     }
 
     @Override
-    public void received(Connection paramConnection, Object object) {
+    public void received(final Connection paramConnection, final Object paramObject) {
 
-        if (object instanceof JoinRoom) {
-            joinRoom((JoinRoom)object);
+        if (paramObject instanceof JoinRoom) {
+            joinRoom((JoinRoom)paramObject);
         }
-        else if (object instanceof LeaveRoom) {
-            leaveRoom((LeaveRoom)object);
+
+        else if (paramObject instanceof LeaveRoom) {
+            leaveRoom((LeaveRoom)paramObject);
         }
-        else if (object instanceof SendMessage) {
-            sendMessage((SendMessage)object);
+        else if (paramObject instanceof DeleteRoom) {
+            deleteRoom((DeleteRoom)paramObject);
         }
-        else if (object instanceof SyncRoom) {
-            syncRoom((SyncRoom)object);
+        else if (paramObject instanceof DeleteServer) {
+            deleteServer((DeleteServer)paramObject);
         }
-        else if (object instanceof CreateRoom) {
-            createRoom((CreateRoom)object);
+        else if (paramObject instanceof CreateRoom) {
+            createRoom((CreateRoom)paramObject);
         }
     }
 

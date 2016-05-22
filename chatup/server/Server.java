@@ -21,15 +21,12 @@ import java.util.concurrent.Executors;
 
 public abstract class Server {
 
-    private final Database serverDatabase = Database.getInstance();
-
-    private int httpPort;
-    private int sequenceRoom = 0;
-
-    private HttpServer httpServer;
+    final Database serverDatabase = Database.getInstance();
     final HashMap<Integer, Room> rooms = new HashMap<>();
     final HashMap<Integer, ServerInfo> servers = new HashMap<>();
     final HashMap<String, String> users = new HashMap<>();
+
+    private HttpServer httpServer;
 
     Server(final HttpHandler httpHandler, int httpPort) throws SQLException {
 
@@ -83,6 +80,8 @@ public abstract class Server {
         createRoom("MigaxPraSempre", null, "bca7cd6bdaf6efaf7ae8g5130ae76f8a");
     }
 
+    private int httpPort;
+
     public abstract boolean insertServer(int serverId, final String newIp, int newPort);
     public abstract boolean updateServer(int serverId, final String newIp, int newPort);
     public abstract boolean removeServer(int serverId);
@@ -130,14 +129,7 @@ public abstract class Server {
         }
     }
 
-    public ServerResponse createRoom(final String roomName, final String roomPassword, final String roomOwner) {
-
-        if (rooms.put(++sequenceRoom, new Room(roomName, roomPassword, roomOwner)) == null) {
-            return ServerResponse.SuccessResponse;
-        }
-
-        return ServerResponse.OperationFailed;
-    }
+    public abstract ServerResponse createRoom(final String roomName, final String roomPassword, final String roomOwner);
 
     public ServerResponse joinRoom(int roomId, final String userToken) {
 
@@ -197,4 +189,7 @@ public abstract class Server {
     }
 
     public abstract ServerType getType();
+
+    public abstract ServerResponse deleteRoom(int roomId);
+    public abstract ServerResponse deleteServer(int serverId);
 }

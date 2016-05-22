@@ -54,21 +54,25 @@ public class Listener
             listener = paramListener;
         }
 
+        @Override
         public void connected(final Connection connection)
         {
             queue(() -> listener.connected(connection));
         }
 
+        @Override
         public void disconnected(final Connection connection)
         {
             queue(() -> listener.disconnected(connection));
         }
 
+        @Override
         public void received(final Connection connection, final Object object)
         {
             queue(() -> listener.received(connection, object));
         }
 
+        @Override
         public void idle(final Connection connection)
         {
             queue(() -> listener.idle(connection));
@@ -77,8 +81,8 @@ public class Listener
         abstract protected void queue(final Runnable runnable);
     }
 
-    static public class ThreadedListener extends QueuedListener
-    {
+    static public class ThreadedListener extends QueuedListener{
+
         protected final ExecutorService threadPool;
 
         public ThreadedListener(Listener listener)
@@ -98,6 +102,7 @@ public class Listener
             this.threadPool = threadPool;
         }
 
+        @Override
         public void queue(Runnable runnable)
         {
             threadPool.execute(runnable);

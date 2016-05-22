@@ -42,38 +42,30 @@ public class ObjectIntMap<K>{
     private int stashCapacity;
     private int pushIterations;
 
-    /**
-     * Creates a new map with an initial capacity of 32 and a load factor of 0.8. This map will hold 25 items before growing the
-     * backing table.
-     */
     public ObjectIntMap() {
         this(32, 0.8f);
     }
 
-    /**
-     * Creates a new map with a load factor of 0.8. This map will hold initialCapacity * 0.8 items before growing the backing
-     * table.
-     */
     public ObjectIntMap(int initialCapacity) {
         this(initialCapacity, 0.8f);
     }
 
-    /**
-     * Creates a new map with the specified initial capacity and load factor. This map will hold initialCapacity * loadFactor items
-     * before growing the backing table.
-     */
     public ObjectIntMap(int initialCapacity, float loadFactor) {
+
         if (initialCapacity < 0) {
             throw new IllegalArgumentException("initialCapacity must be >= 0: " + initialCapacity);
         }
+
         if (initialCapacity > 1 << 30) {
             throw new IllegalArgumentException("initialCapacity is too large: " + initialCapacity);
         }
+
         capacity = ObjectMap.nextPowerOfTwo(initialCapacity);
 
         if (loadFactor <= 0) {
             throw new IllegalArgumentException("loadFactor must be > 0: " + loadFactor);
         }
+
         this.loadFactor = loadFactor;
 
         threshold = (int) (capacity * loadFactor);
@@ -81,14 +73,10 @@ public class ObjectIntMap<K>{
         hashShift = 31 - Integer.numberOfTrailingZeros(capacity);
         stashCapacity = Math.max(3, (int) Math.ceil(Math.log(capacity)) * 2);
         pushIterations = Math.max(Math.min(capacity, 8), (int) Math.sqrt(capacity) / 8);
-
         keyTable = (K[]) new Object[capacity + stashCapacity];
         valueTable = new int[keyTable.length];
     }
 
-    /**
-     * Creates a new map identical to the specified map.
-     */
     public ObjectIntMap(ObjectIntMap<? extends K> map) {
         this(map.capacity, map.loadFactor);
         stashSize = map.stashSize;
@@ -98,7 +86,6 @@ public class ObjectIntMap<K>{
     }
 
     public void put(K key, int value) {
-
         final K[] keyTable = this.keyTable;
         int hashCode = key.hashCode();
         int index1 = hashCode & mask;
@@ -123,7 +110,6 @@ public class ObjectIntMap<K>{
             return;
         }
 
-        // Update key in the stash.
         for (int i = capacity, n = i + stashSize; i < n; i++) {
             if (key.equals(keyTable[i])) {
                 valueTable[i] = value;
@@ -131,7 +117,6 @@ public class ObjectIntMap<K>{
             }
         }
 
-        // Check for empty buckets.
         if (key1 == null) {
             keyTable[index1] = key;
             valueTable[index1] = value;
@@ -162,42 +147,49 @@ public class ObjectIntMap<K>{
         push(key, value, index1, key1, index2, key2, index3, key3);
     }
 
-    /**
-     * Skips checks for existing keys.
-     */
     private void putResize(K key, int value) {
-        // Check for empty buckets.
+
         int hashCode = key.hashCode();
         int index1 = hashCode & mask;
+
         K key1 = keyTable[index1];
+
         if (key1 == null) {
             keyTable[index1] = key;
             valueTable[index1] = value;
+
             if (size++ >= threshold) {
                 resize(capacity << 1);
             }
+
             return;
         }
 
         int index2 = hash2(hashCode);
         K key2 = keyTable[index2];
+
         if (key2 == null) {
             keyTable[index2] = key;
             valueTable[index2] = value;
+
             if (size++ >= threshold) {
                 resize(capacity << 1);
             }
+
             return;
         }
 
         int index3 = hash3(hashCode);
         K key3 = keyTable[index3];
+
         if (key3 == null) {
             keyTable[index3] = key;
             valueTable[index3] = value;
+
             if (size++ >= threshold) {
                 resize(capacity << 1);
             }
+
             return;
         }
 
@@ -213,8 +205,8 @@ public class ObjectIntMap<K>{
         K evictedKey;
         int evictedValue;
         int i = 0, pushIterations = this.pushIterations;
+
         do {
-            // Replace the key and value for one of the hashes.
             switch (random.nextInt(3)) {
             case 0:
                 evictedKey = key1;
@@ -236,10 +228,11 @@ public class ObjectIntMap<K>{
                 break;
             }
 
-            // If the evicted key hashes to an empty bucket, put it there and stop.
             int hashCode = evictedKey.hashCode();
+
             index1 = hashCode & mask;
             key1 = keyTable[index1];
+
             if (key1 == null) {
                 keyTable[index1] = evictedKey;
                 valueTable[index1] = evictedValue;
@@ -283,14 +276,15 @@ public class ObjectIntMap<K>{
     }
 
     private void putStash(K key, int value) {
+
         if (stashSize == stashCapacity) {
-            // Too many pushes occurred and the stash is full, increase the table size.
             resize(capacity << 1);
             put(key, value);
             return;
         }
-        // Store key in the stash.
+
         int index = capacity + stashSize;
+
         keyTable[index] = key;
         valueTable[index] = value;
         stashSize++;
@@ -298,27 +292,38 @@ public class ObjectIntMap<K>{
     }
 
     public int get(K key, int defaultValue) {
+
         int hashCode = key.hashCode();
         int index = hashCode & mask;
+
         if (!key.equals(keyTable[index])) {
+
             index = hash2(hashCode);
+
             if (!key.equals(keyTable[index])) {
+
                 index = hash3(hashCode);
+
                 if (!key.equals(keyTable[index])) {
                     return getStash(key, defaultValue);
                 }
             }
         }
+
         return valueTable[index];
     }
 
     private int getStash(K key, int defaultValue) {
-        K[] keyTable = this.keyTable;
+
+        final K[] keyTable = this.keyTable;
+
         for (int i = capacity, n = i + stashSize; i < n; i++) {
+
             if (key.equals(keyTable[i])) {
                 return valueTable[i];
             }
         }
+
         return defaultValue;
     }
 
@@ -411,6 +416,7 @@ public class ObjectIntMap<K>{
     }
 
     void removeStashIndex(int index) {
+
         stashSize--;
 
         int lastIndex = capacity + stashSize;
@@ -440,63 +446,79 @@ public class ObjectIntMap<K>{
     }
 
     public void clear(int maximumCapacity) {
+
         if (capacity <= maximumCapacity) {
             clear();
             return;
         }
+
         size = 0;
         resize(maximumCapacity);
     }
 
     public void clear() {
+
         K[] keyTable = this.keyTable;
+
         for (int i = capacity + stashSize; i-- > 0; ) {
             keyTable[i] = null;
         }
+
         size = 0;
         stashSize = 0;
     }
 
     public boolean containsValue(int value) {
-        K[] keyTable = this.keyTable;
+
+        final K[] keyTable = this.keyTable;
         int[] valueTable = this.valueTable;
+
         for (int i = capacity + stashSize; i-- > 0; ) {
+
             if (keyTable[i] != null && valueTable[i] == value) {
                 return true;
             }
         }
+
         return false;
     }
 
     public boolean containsKey(K key) {
+
         int hashCode = key.hashCode();
         int index = hashCode & mask;
+
         if (!key.equals(keyTable[index])) {
+
             index = hash2(hashCode);
+
             if (!key.equals(keyTable[index])) {
+
                 index = hash3(hashCode);
+
                 if (!key.equals(keyTable[index])) {
                     return containsKeyStash(key);
                 }
             }
         }
+
         return true;
     }
 
     private boolean containsKeyStash(K key) {
+
         K[] keyTable = this.keyTable;
+
         for (int i = capacity, n = i + stashSize; i < n; i++) {
+
             if (key.equals(keyTable[i])) {
                 return true;
             }
         }
+
         return false;
     }
 
-    /**
-     * Returns the key for the specified value, or null if it is not in the map. Note this traverses the entire map and compares
-     * every value, which may be an expensive operation.
-     */
     public K findKey(int value) {
         K[] keyTable = this.keyTable;
         int[] valueTable = this.valueTable;
@@ -508,10 +530,6 @@ public class ObjectIntMap<K>{
         return null;
     }
 
-    /**
-     * Increases the size of the backing array to acommodate the specified number of additional items. Useful before adding many
-     * items to avoid multiple backing array resizes.
-     */
     public void ensureCapacity(int additionalCapacity) {
         int sizeNeeded = size + additionalCapacity;
         if (sizeNeeded >= threshold) {
