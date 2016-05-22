@@ -11,7 +11,6 @@ public enum ServerResponse {
     InvalidToken("invalidToken"),
     MissingParameters("missingParameters"),
     OperationFailed("operationFailed"),
-    ProtocolError("protocolError"),
     RoomNotFound("roomNotFound"),
     ServiceOffline("serviceOffline"),
     ServerNotFound("serverNotFound"),
@@ -26,20 +25,5 @@ public enum ServerResponse {
     @Override
     public String toString() {
         return responseMessage;
-    }
-
-    public static ServerResponse fromString(final String httpResponse) {
-
-        if (httpResponse != null) {
-
-            for (final ServerResponse hr : ServerResponse.values()) {
-
-                if (httpResponse.equalsIgnoreCase(hr.responseMessage)) {
-                    return hr;
-                }
-            }
-        }
-
-        return ServerResponse.InvalidResponse;
     }
 }

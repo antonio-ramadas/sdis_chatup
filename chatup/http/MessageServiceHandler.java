@@ -26,7 +26,8 @@ class MessageServiceHandler extends HttpDispatcher {
 
         if (userToken == null || roomId < 0) {
             sendError(ServerResponse.MissingParameters);
-        } else {
+        }
+        else {
 
             final Message[] userMessages = (Message[]) serverInstance.getMessages(userToken, roomId).getArray();
 

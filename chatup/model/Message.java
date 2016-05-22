@@ -38,19 +38,19 @@ public class Message implements Comparable<Message>, Serializable {
         return messageAuthor;
     }
 
-    public void setId(int paramId) {
+    private void setId(int paramId) {
         messageRoom = paramId;
     }
 
-    public void setAuthor(final String paramAuthor) {
+    private void setAuthor(final String paramAuthor) {
         messageAuthor = paramAuthor;
     }
 
-    public void setTimestamp(long paramTimestamp) {
+    private void setTimestamp(long paramTimestamp) {
         messageTimestamp = paramTimestamp;
     }
 
-    public void setMessage(final String paramMessage) {
+    private void setMessage(final String paramMessage) {
         messageContents = paramMessage;
     }
 

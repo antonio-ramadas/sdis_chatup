@@ -7,7 +7,6 @@ import chatup.model.Message;
 import chatup.model.MessageCache;
 import chatup.model.Room;
 
-import chatup.tcp.SendMessage;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.Json;
 
