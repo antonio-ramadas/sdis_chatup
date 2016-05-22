@@ -2,7 +2,6 @@ package chatup.http;
 
 import chatup.main.ChatupGlobals;
 import chatup.main.ChatupServer;
-import chatup.model.MessageCache;
 import chatup.server.Server;
 import chatup.model.Message;
 
@@ -36,7 +35,7 @@ class MessageServiceHandler extends HttpDispatcher {
                 final JsonValue jsonObject = Json.array();
 
                 for (final Message userMessage : userMessages) {
-                    jsonObject.asArray().add(userMessage.getRoomId());
+                    jsonObject.asArray().add(userMessage.getId());
                 }
 
                 sendJsonResponse(ServerResponse.SuccessResponse, jsonObject);

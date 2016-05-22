@@ -2,7 +2,6 @@ package chatup.model;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.Objects;
 
 public class Message implements Comparable<Message>, Serializable {
 
@@ -10,7 +9,7 @@ public class Message implements Comparable<Message>, Serializable {
     private int messageRoom;
 
     public Message(int roomId, final String messageAuthor, long messageTimestamp, final String messageContents) {
-        setRoomId(roomId);
+        setId(roomId);
         setAuthor(messageAuthor);
         setMessage(messageContents);
         setTimestamp(messageTimestamp);
@@ -23,7 +22,7 @@ public class Message implements Comparable<Message>, Serializable {
     private String messageAuthor;
     private String messageContents;
 
-    public int getRoomId() {
+    public int getId() {
         return messageRoom;
     }
 
@@ -39,26 +38,26 @@ public class Message implements Comparable<Message>, Serializable {
         return messageAuthor;
     }
 
-    public final void setRoomId(int paramId) {
+    public void setId(int paramId) {
         messageRoom = paramId;
     }
 
-    public final void setAuthor(final String paramAuthor) {
+    public void setAuthor(final String paramAuthor) {
         messageAuthor = paramAuthor;
     }
 
-    public final void setTimestamp(long paramTimestamp) {
+    public void setTimestamp(long paramTimestamp) {
         messageTimestamp = paramTimestamp;
     }
 
-    public final void setMessage(final String paramMessage) {
+    public void setMessage(final String paramMessage) {
         messageContents = paramMessage;
     }
 
     @Override
     public boolean equals(final Object otherObject) {
         return otherObject instanceof Message
-            && ((Message) otherObject).getRoomId() == messageRoom
+            && ((Message) otherObject).getId() == messageRoom
             && ((Message) otherObject).getTimestamp() == messageTimestamp
             && ((Message) otherObject).getSender().equals(messageAuthor);
     }
@@ -70,7 +69,7 @@ public class Message implements Comparable<Message>, Serializable {
 
         hash = 11 * hash + (int) (messageTimestamp ^ (messageTimestamp >>> 32));
         hash = 11 * hash + messageRoom;
-        hash = 11 * hash + Objects.hashCode(messageAuthor);
+        hash = 11 * hash + messageAuthor.hashCode();
 
         return hash;
     }

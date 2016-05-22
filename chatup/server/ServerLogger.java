@@ -1,57 +1,20 @@
 package chatup.server;
 
-import chatup.model.Room;
-import com.esotericsoftware.minlog.Log;
-
 import java.io.*;
-import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class ServerLogger {
 
-    private static ServerLogger instance;
-
     private BufferedWriter fileOutput;
-    private Path filePath;
     private BufferedWriter consoleOutput;
 
-    private final boolean createDirectory(final String paramDirectory) {
-
-        final File myFile = new File(paramDirectory);
-
-        if (!myFile.exists() || !myFile.isDirectory()) {
-            return myFile.mkdir();
-        }
-
-        return true;
-    }
-
-    protected void flush() {
-
-        try {
-            consoleOutput.flush();
-            fileOutput.flush();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    protected final String generateFilename() {
-        return new SimpleDateFormat("'/'yyyy-MM-dd-HH_mm_ss'.log'").format(new Date());
-    }
-
-    protected final String generateTimestamp() {
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss' | '").format(new Date());
-    }
-
-    public ServerLogger(final Server paramServer) {
+    ServerLogger(final Server paramServer) {
 
         final String serverName;
 
         if (paramServer.getType() == ServerType.PRIMARY) {
-            serverName = "primary" ;
+            serverName = "primary";
         }
         else {
             serverName = "secondary" + paramServer.getId();
@@ -72,6 +35,30 @@ public class ServerLogger {
         consoleOutput = new BufferedWriter(new OutputStreamWriter(System.out));
     }
 
+    private boolean createDirectory(final String paramDirectory) {
+        final File myFile = new File(paramDirectory);
+        return !(!myFile.exists() || !myFile.isDirectory()) || myFile.mkdir();
+    }
+
+    protected void flush() {
+
+        try {
+            consoleOutput.flush();
+            fileOutput.flush();
+        }
+        catch (final IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private final String generateFilename() {
+        return new SimpleDateFormat("'/'yyyy-MM-dd-HH_mm_ss'.log'").format(new Date());
+    }
+
+    private final String generateTimestamp() {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss' | '").format(new Date());
+    }
+
     public void invalidCommand(final String commandName) {
         error(commandName + "received empty or invalid command!");
     }
@@ -79,8 +66,9 @@ public class ServerLogger {
     public void roomExists(final String roomName) {
         warning("Room #" + roomName + " already exists!");
     }
+
     public void roomNotFound(int roomId) {
-        error("Room #" + roomId  + " is not registered on this server!");
+        error("Room #" + roomId + " is not registered on this server!");
     }
 
     public void userConnected(final String userName) {
@@ -89,10 +77,6 @@ public class ServerLogger {
 
     public void alreadyJoined(int roomId, final String userToken) {
         warning("User" + userToken + " has already joined Room #" + roomId + "!");
-    }
-
-    public void userConnectionLost(final String userName) {
-        information(userName + " timed out and was disconnected from the server.");
     }
 
     public void roomInvalidToken(int roomId, final String userToken) {
@@ -124,7 +108,7 @@ public class ServerLogger {
     }
 
     public void serverOnline(int serverId, final String hostName) {
-        information("Server " + serverId + " connected from " + hostName+ ".");
+        information("Server " + serverId + " connected from " + hostName + ".");
     }
 
     public void userDisconnected(final String userName) {
@@ -165,18 +149,18 @@ public class ServerLogger {
         write(fileOutput, String.format("%s | INFORMATION | %s", generateFilename(), paramMessage));
     }
 
-    protected void write(final BufferedWriter buffer, final String message) {
+    private void write(final BufferedWriter buffer, final String message) {
 
         try {
             buffer.write(message);
             buffer.newLine();
         }
-        catch (IOException e) {
+        catch (final IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void removeUser(String userToken) {
+    public void removeUser(final String userToken) {
         information("User " + userToken + " is not connected to this server anymore!");
     }
 }

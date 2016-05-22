@@ -58,7 +58,7 @@ public class PrimaryServer extends Server {
         for (int i = 0; i < mostEmpty.size() ; i++){
 
             myServerListener.send(i, newRoom);
-            rooms.get(roomId).registerMirror(i);
+            rooms.get(roomId).registerServer(i);
 
             if (!serverDatabase.insertRoom(roomId, newRoom)) {
                 return ServerResponse.OperationFailed;

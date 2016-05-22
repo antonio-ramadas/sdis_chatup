@@ -38,7 +38,7 @@ public class SecondaryServerListener extends Listener {
 
         final ServerResponse operationResult = secondaryServer.insertMessage(paramMessage);
         final String userToken = paramMessage.getSender();
-        int roomId = paramMessage.getRoomId();
+        int roomId = paramMessage.getId();
 
         switch (operationResult) {
         case SuccessResponse:

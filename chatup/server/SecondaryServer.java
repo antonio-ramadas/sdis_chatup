@@ -14,7 +14,6 @@ import kryonet.KryoServer;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.sql.SQLException;
-import java.time.Instant;
 import java.util.Set;
 
 public class SecondaryServer extends Server {
@@ -176,7 +175,7 @@ public class SecondaryServer extends Server {
     public ServerResponse insertMessage(final Message paramMessage) {
 
         System.out.println("------ RegisterMessage ------");
-        System.out.println("roomId:"      + paramMessage.getRoomId());
+        System.out.println("roomId:"      + paramMessage.getId());
         System.out.println("userToken:"   + paramMessage.getSender());
         System.out.println("messageBody:" + paramMessage.getMessage());
         System.out.println("-----------------------------");
@@ -188,7 +187,7 @@ public class SecondaryServer extends Server {
             return ServerResponse.InvalidToken;
         }
 
-        final Room selectedRoom = rooms.get(paramMessage.getRoomId());
+        final Room selectedRoom = rooms.get(paramMessage.getId());
 
         if (selectedRoom == null) {
             return ServerResponse.RoomNotFound;
@@ -222,7 +221,7 @@ public class SecondaryServer extends Server {
             return ServerResponse.RoomNotFound;
         }
 
-        final Message userMessage = new Message(roomId, userToken, Instant.now().toEpochMilli(), messageBody);
+        final Message userMessage = new Message(roomId, userToken, messageBody);
         final Set<Integer> roomServers = selectedRoom.getServers();
 
         for (final Integer currentRoom : roomServers) {
@@ -306,14 +305,17 @@ public class SecondaryServer extends Server {
         System.out.println("serverId:" + serverId);
         System.out.println("--------------------------");
 
-		if (servers.containsKey(serverId)) {
-			servers.remove(serverId);
-		}
-		else {
-			return ServerResponse.ServerNotFound;
-		}
+        if (servers.get(serverId) == null) {
+            return ServerResponse.ServerNotFound;
+        }
 
-		return ServerResponse.SuccessResponse;
+        servers.remove(serverId);
+
+        rooms.forEach((roomId, room) -> {
+            room.removeMirror(serverId);
+        });
+
+        return ServerResponse.SuccessResponse;
 	}
 
 	@Override

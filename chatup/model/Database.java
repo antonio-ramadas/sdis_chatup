@@ -129,7 +129,7 @@ public class Database {
     public boolean insertMessage(final Message paramMessage) {
 
         try (final PreparedStatement stmt = dbConnection.prepareStatement(queryInsertMessage)) {
-            stmt.setInt(1, paramMessage.getRoomId());
+            stmt.setInt(1, paramMessage.getId());
             stmt.setString(2, paramMessage.getSender());
             stmt.setLong(3, paramMessage.getTimestamp());
             stmt.setString(4, paramMessage.getMessage());
