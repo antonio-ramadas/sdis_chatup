@@ -5,21 +5,17 @@ import chatup.http.ServerResponse;
 import chatup.main.ServerLogger;
 import chatup.model.Room;
 import chatup.tcp.*;
+
 import kryonet.Connection;
 import kryonet.KryoServer;
 
-import java.awt.*;
-import java.awt.List;
 import java.io.IOException;
-import java.sql.Array;
 import java.sql.SQLException;
 import java.util.*;
 
 public class PrimaryServer extends Server {
 
     private final PrimaryListener myServerListener;
-
-    private int sequenceRoom = 0;
 
     public PrimaryServer(int tcpPort, int httpPort) throws IOException, SQLException {
 
@@ -41,29 +37,6 @@ public class PrimaryServer extends Server {
     }
 
     private int sequenceRoom = 0;
-
-    public ServerResponse createRoom(final String roomName, final String roomPassword, final String roomOwner) {
-
-        final ArrayList<ServerInfo> serversList = new ArrayList<>();
-
-        Collections.addAll(servers.entrySet());
-        Collections.sort(serversList);
-
-        int n = (int) (Math.floor(servers.size() / 2) + 1);
-        final ArrayList<ServerInfo> mostEmpty = (ArrayList<ServerInfo>) serversList.subList(0, n);
-        final Room newRoom = new Room(roomName, roomPassword, roomOwner);
-
-        for (int i = 0; i < mostEmpty.size(); i++) {
-
-            myServerListener.send(i, newRoom);
-
-            if (!(rooms.put(++sequenceRoom, newRoom) == null && serverDatabase.insertRoom(sequenceRoom, newRoom))) {
-                return ServerResponse.OperationFailed;
-            }
-        }
-
-        return ServerResponse.SuccessResponse;
-    }
 
     @Override
     public ServerType getType() {

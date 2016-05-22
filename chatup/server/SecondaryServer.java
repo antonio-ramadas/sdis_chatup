@@ -84,7 +84,6 @@ public class SecondaryServer extends Server {
 		return ServerResponse.OperationFailed;
 	}
 
-    public ServerResponse registerMessage(int roomId, final Message paramMessage) {
     public int getId() {
         return serverId;
     }
@@ -282,9 +281,5 @@ public class SecondaryServer extends Server {
         selectedRoom.syncMessages(messageCache);
 
         return ServerResponse.SuccessResponse;
-    }
-
-    public ServerResponse createRoom(final String roomName, final String roomPassword, final String roomOwner) {
-        return ServerResponse.OperationFailed;
     }
 }
