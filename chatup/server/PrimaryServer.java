@@ -3,10 +3,8 @@ package chatup.server;
 import chatup.http.PrimaryDispatcher;
 import chatup.http.ServerResponse;
 import chatup.model.Message;
-import chatup.model.MessageCache;
 import chatup.model.Room;
 import chatup.tcp.*;
-import com.esotericsoftware.minlog.Log;
 
 import kryonet.Connection;
 import kryonet.KryoServer;
@@ -22,7 +20,7 @@ public class PrimaryServer extends Server {
 
     public PrimaryServer(int tcpPort, int httpPort) throws IOException, SQLException {
 
-        super(new PrimaryDispatcher(), httpPort);
+        super(new PrimaryDispatcher(), ServerType.PRIMARY, httpPort);
 
         final KryoServer myServer = new KryoServer(){
 
@@ -39,17 +37,10 @@ public class PrimaryServer extends Server {
         myServer.start();
     }
 
-    @Override
-    public ServerType getType() {
-        return ServerType.PRIMARY;
-    }
+    private int sequenceRoom;
 
     @Override
-    public int getId() {
-        return -1;
-    }
-
-    public ServerResponse createRoom(String roomName, String roomPassword, String roomOwner){
+    public ServerResponse createRoom(final String roomName, final String roomPassword, final String roomOwner) {
 
         final ArrayList<ServerInfo> serversList = new ArrayList<>();
 
@@ -57,12 +48,12 @@ public class PrimaryServer extends Server {
         Collections.sort(serversList);
 
         int n = (int)(Math.floor(servers.size()/2) + 1);
-
         int roomId = ++sequenceRoom;
-        final ArrayList<ServerInfo> mostEmpty = (ArrayList<ServerInfo>) serversList.subList(0, n);
         final Room newRoom = new Room(roomName, roomPassword, roomOwner);
 
         rooms.put(roomId, newRoom);
+
+       /* final ArrayList<ServerInfo> mostEmpty = (ArrayList<ServerInfo>) serversList.subList(0, n);
 
         for (int i = 0; i < mostEmpty.size() ; i++){
 
@@ -72,13 +63,66 @@ public class PrimaryServer extends Server {
             if (!serverDatabase.insertRoom(roomId, newRoom)) {
                 return ServerResponse.OperationFailed;
             }
+        }*/
+
+        return ServerResponse.SuccessResponse;
+    }
+
+    @Override
+    public ServerResponse deleteRoom(int roomId) {
+
+        System.out.println("roomId:" + roomId);
+
+        final Room selectedRoom = rooms.get(roomId);
+
+        if (selectedRoom == null) {
+            return ServerResponse.RoomNotFound;
+        }
+
+        final Set<Integer> roomServers = selectedRoom.getServers();
+        final DeleteRoom deleteRoom = new DeleteRoom(roomId);
+
+        for (final Integer serverId : roomServers) {
+            myServerListener.send(serverId, deleteRoom);
+        }
+
+        rooms.remove(roomId);
+
+        return ServerResponse.SuccessResponse;
+    }
+
+    @Override
+    public ServerResponse leaveRoom(int roomId, final String userToken) {
+
+        System.out.println("roomId:" + roomId);
+        System.out.println("userToken:" + userToken);
+
+        final String userRecord = users.get(userToken);
+
+        if (userRecord == null) {
+            return ServerResponse.InvalidToken;
+        }
+
+        final Room selectedRoom = rooms.get(roomId);
+
+        if (selectedRoom == null) {
+            return ServerResponse.RoomNotFound;
+        }
+
+        selectedRoom.removeUser(userToken);
+
+        final Set<Integer> roomServers = selectedRoom.getServers();
+        final LeaveRoom leaveRoom = new LeaveRoom(roomId, userToken);
+
+        for (final Integer serverId : roomServers) {
+            myServerListener.send(serverId, leaveRoom);
         }
 
         return ServerResponse.SuccessResponse;
     }
 
     @Override
-    public ServerResponse notifyMessage(int roomId, String userToken, String messageBody) {
+    public ServerResponse notifyMessage(int roomId, final String userToken, final String messageBody) {
 
         System.out.println("roomId:" + roomId);
         System.out.println("userToken:" + userToken);
@@ -107,27 +151,22 @@ public class PrimaryServer extends Server {
     }
 
     @Override
-    public ServerResponse registerMessage(int roomId, final Message paramMessage) {
-        return ServerResponse.OperationFailed;
-    }
-
-    @Override
-    public ServerResponse deleteRoom(int roomId) {
-        return ServerResponse.OperationFailed;
-    }
-
-    @Override
-    public ServerResponse leaveRoom(int roomId, final String userToken) {
-        return ServerResponse.OperationFailed;
-    }
-
-    @Override
     public ServerResponse joinRoom(int roomId, final String userToken) {
+
+        System.out.println("roomId:" + roomId);
+        System.out.println("token:" + userToken);
+
 
         final Room selectedRoom = rooms.get(roomId);
 
         if (selectedRoom == null || selectedRoom.hasUser(userToken)) {
             getLogger().alreadyJoined(roomId, userToken);
+            return ServerResponse.InvalidToken;
+        }
+
+        final String userEmail = users.get(userToken);
+
+        if (userEmail == null) {
             return ServerResponse.InvalidToken;
         }
 
@@ -138,7 +177,7 @@ public class PrimaryServer extends Server {
         }
 
         for (final Integer serverId : roomServers) {
-            myServerListener.send(serverId, new JoinRoom(roomId, userToken));
+            myServerListener.send(serverId, new JoinRoom(roomId, userEmail, userToken));
         }
 
         return ServerResponse.SuccessResponse;
@@ -157,7 +196,7 @@ public class PrimaryServer extends Server {
     }
 
     @Override
-    public ServerResponse removeServer(int serverId) {
+    public ServerResponse deleteServer(int serverId) {
 
         final ServerInfo selectedServer = servers.get(serverId);
 
@@ -170,7 +209,7 @@ public class PrimaryServer extends Server {
         servers.forEach((currentId, currentServer) -> {
 
             if (currentId != serverId) {
-                myServerListener.send(serverId, deleteServer);
+                myServerListener.send(currentId, deleteServer);
             }
         });
 
@@ -230,31 +269,15 @@ public class PrimaryServer extends Server {
         return ServerResponse.SuccessResponse;
     }
 
-    @Override
-    public ServerResponse syncRoom(int roomId, final MessageCache messageCache) {
+    public ServerResponse userLogin(final String userEmail, final String userToken) {
 
-        System.out.println("roomId:" + roomId);
-        System.out.println("#messages:" + messageCache.size());
+        System.out.println("email:" + userEmail);
+        System.out.println("token:" + userToken);
 
-        if (roomId < 0 || messageCache == null) {
-            return ServerResponse.MissingParameters;
+        if (userEmail.equals("marques999@gmail.com") && userToken.equals("14191091")) {
+            return ServerResponse.SuccessResponse;
         }
 
-        final Room selectedRoom = rooms.get(roomId);
-
-        if (selectedRoom == null) {
-            return ServerResponse.RoomNotFound;
-        }
-
-        final SyncRoom syncRoom = new SyncRoom(roomId, messageCache);
-        final Set<Integer> roomServers = selectedRoom.getServers();
-
-        if (roomServers == null || roomServers.isEmpty()) {
-            return ServerResponse.RoomNotFound;
-        }
-
-        servers.remove(serverId);
-
-        return ServerResponse.SuccessResponse;
+        return ServerResponse.AuthenticationFailed;
     }
 }

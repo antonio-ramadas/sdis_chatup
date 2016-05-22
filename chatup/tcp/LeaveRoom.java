@@ -1,6 +1,8 @@
 package chatup.tcp;
 
-public class LeaveRoom
+import java.io.Serializable;
+
+public class LeaveRoom implements Serializable
 {
     public String userToken;
 

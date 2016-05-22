@@ -1,6 +1,8 @@
 package chatup.tcp;
 
-public class ServerOnline
+import java.io.Serializable;
+
+public class ServerOnline implements Serializable
 {
     public int serverId;
     public int serverPort;

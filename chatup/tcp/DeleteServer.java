@@ -1,6 +1,8 @@
 package chatup.tcp;
 
-public class DeleteServer
+import java.io.Serializable;
+
+public class DeleteServer implements Serializable
 {
     public int serverId;
 

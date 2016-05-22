@@ -1,6 +1,8 @@
 package chatup.tcp;
 
-public class DeleteRoom
+import java.io.Serializable;
+
+public class DeleteRoom implements Serializable
 {
     public int roomId;
 

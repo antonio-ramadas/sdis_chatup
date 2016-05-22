@@ -1,4 +1,4 @@
-package chatup.tcp;
+package chatup.server;
 
 import chatup.model.Message;
 

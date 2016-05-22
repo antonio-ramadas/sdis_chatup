@@ -1,8 +1,10 @@
 package chatup.model;
 
+import java.io.Serializable;
+import java.time.Instant;
 import java.util.Objects;
 
-public class Message implements Comparable<Message> {
+public class Message implements Comparable<Message>, Serializable {
 
     private long messageTimestamp;
     private int messageRoom;
@@ -12,6 +14,10 @@ public class Message implements Comparable<Message> {
         setAuthor(messageAuthor);
         setMessage(messageContents);
         setTimestamp(messageTimestamp);
+    }
+
+    public Message(int roomId, final String messageAuthor, final String messageContents) {
+        this(roomId, messageAuthor, Instant.now().toEpochMilli(), messageContents);
     }
 
     private String messageAuthor;

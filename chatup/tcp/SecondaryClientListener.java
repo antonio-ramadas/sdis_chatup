@@ -3,13 +3,9 @@ package chatup.tcp;
 import chatup.http.ServerResponse;
 import chatup.server.SecondaryServer;
 
-import com.esotericsoftware.minlog.Log;
-
 import kryonet.Connection;
 import kryonet.KryoClient;
 import kryonet.Listener;
-
-import java.util.HashMap;
 
 public class SecondaryClientListener extends Listener {
 
@@ -48,6 +44,7 @@ public class SecondaryClientListener extends Listener {
         final ServerResponse operationResult = secondaryServer.joinRoom
         (
             joinRoom.roomId,
+            joinRoom.userEmail,
             joinRoom.userToken
         );
 

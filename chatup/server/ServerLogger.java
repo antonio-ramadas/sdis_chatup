@@ -99,6 +99,10 @@ public class ServerLogger {
         error("User " + userToken + " was not inside Room #" + roomId + "!");
     }
 
+    public void sendBlock(int roomId) {
+        information("Received message block from Room #" + roomId + "!");
+    }
+
     public void sendMessage(int roomId) {
         information("Received new message from Room #" + roomId + "!");
     }
@@ -170,5 +174,9 @@ public class ServerLogger {
         catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void removeUser(String userToken) {
+        information("User " + userToken + " is not connected to this server anymore!");
     }
 }

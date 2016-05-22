@@ -15,6 +15,9 @@ public class PrimaryDispatcher extends ServerDispatcher {
         case ChatupGlobals.RoomServiceUrl:
             new RoomServiceHandler(httpExchange).processRequest();
             break;
+        case ChatupGlobals.HeartbeatServiceUrl:
+            new HeartbeatServiceHandler(httpExchange).processRequest();
+            break;
         case ChatupGlobals.UserServiceUrl:
             new UserServiceHandler(httpExchange).processRequest();
             break;

@@ -1,9 +1,12 @@
 package chatup.model;
 
+import chatup.http.ServerResponse;
+
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.*;
 
-public class Room {
+public class Room implements Serializable {
 	
 	private String roomName;
 	private String roomPassword;
@@ -28,8 +31,8 @@ public class Room {
 		this(roomName, null, roomOwner);
 	}
 
-	public Message[] getMessages() {
-		return (Message[]) roomMessages.getArray();
+	public MessageCache<Integer, Message> getMessages() {
+		return roomMessages;
 	}
 
 	public int generateHash(final Message paramMessage) {
@@ -44,22 +47,23 @@ public class Room {
 
 	public boolean insertMessage(final Message paramMessage) {
 
-		if (roomUsers.contains(paramMessage.getSender())) {
+		final String userToken = paramMessage.getSender();
 
-			int messageKey = generateHash(paramMessage);
-
-			lastSync = Instant.now().getEpochSecond();
-
-			if (roomMessages.get(messageKey) != null) {
-				return false;
-			}
-
-			roomMessages.add(messageKey, paramMessage);
-
-			return true;
+		if (!roomUsers.contains(userToken)) {
+			roomUsers.add(userToken);
 		}
 
-		return false;
+		int messageKey = generateHash(paramMessage);
+
+		lastSync = Instant.now().getEpochSecond();
+
+		if (roomMessages.get(messageKey) != null) {
+			return false;
+		}
+
+		roomMessages.add(messageKey, paramMessage);
+
+		return true;
 	}
 
     public boolean registerMirror(int serverId) {
@@ -95,15 +99,11 @@ public class Room {
 		return true;
 	}
 
-	public boolean removeUser(final String userToken)  {
+	public void removeUser(final String userToken)  {
 
-		if (!roomUsers.contains(userToken)) {
-			return false;
+		if (roomUsers.contains(userToken)) {
+			roomUsers.remove(userToken);
 		}
-
-		roomUsers.remove(userToken);
-
-		return true;
 	}
 
 	public boolean isEmpty() {

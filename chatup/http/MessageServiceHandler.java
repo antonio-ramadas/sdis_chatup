@@ -2,6 +2,7 @@ package chatup.http;
 
 import chatup.main.ChatupGlobals;
 import chatup.main.ChatupServer;
+import chatup.model.MessageCache;
 import chatup.server.Server;
 import chatup.model.Message;
 
@@ -26,10 +27,9 @@ class MessageServiceHandler extends HttpDispatcher {
 
         if (userToken == null || roomId < 0) {
             sendError(ServerResponse.MissingParameters);
-        }
-        else {
+        } else {
 
-            final Message[] userMessages = serverInstance.retrieveMessages(userToken, roomId);
+            final Message[] userMessages = (Message[]) serverInstance.getMessages(userToken, roomId).getArray();
 
             if (userMessages != null) {
 
@@ -63,7 +63,11 @@ class MessageServiceHandler extends HttpDispatcher {
                 sendError(ServerResponse.MissingParameters);
             }
             else {
-                sendTextResponse(serverInstance.registerMessage(userToken, roomId, userMessage), HttpCommands.SendMessage);
+                sendTextResponse(serverInstance.insertMessage(new Message(
+                    roomId,
+                    userToken,
+                    userMessage
+                )), HttpCommands.SendMessage);
             }
         }
         else {

@@ -1,9 +1,11 @@
 package chatup.model;
 
+import java.io.Serializable;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class MessageCache<K, V> {
+public class MessageCache<K, V> implements Serializable {
 
     private final Map<K, V> cache;
 

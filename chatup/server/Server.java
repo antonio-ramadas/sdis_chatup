@@ -4,8 +4,10 @@ import chatup.http.HttpFields;
 import chatup.http.ServerResponse;
 import chatup.model.Database;
 import chatup.model.Message;
+import chatup.model.MessageCache;
 import chatup.model.Room;
 
+import chatup.tcp.SendMessage;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.Json;
 
@@ -16,33 +18,28 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.concurrent.Executors;
 
 public abstract class Server {
 
-    protected final Database serverDatabase = Database.getInstance();
-
-    private int httpPort;
-
-    private HttpServer httpServer;
-    private ServerLogger serverLogger;
     final Database serverDatabase = Database.getInstance();
     final HashMap<Integer, Room> rooms = new HashMap<>();
     final HashMap<Integer, ServerInfo> servers = new HashMap<>();
     final HashMap<String, String> users = new HashMap<>();
 
-    public ServerLogger getLogger() {
-        return serverLogger;
-    }
+    private HttpServer httpServer;
+    private ServerType serverType;
+    private ServerLogger serverLogger;
 
-    Server(final HttpHandler httpHandler, int httpPort) throws SQLException {
+    private int httpPort;
+
+    Server(final HttpHandler httpHandler, final ServerType paramType, int httpPort) throws SQLException {
 
         this.httpPort = httpPort;
         serverLogger = new ServerLogger(this);
+        serverType = paramType;
 
         try {
-            // TODO: clean up this mess
             //   final KeyStore serverKeystore = tcpConnection.getServerKeystore();
             //   final KeyManagerFactory kmf = serverKeystore.getKeyManager();
             //   final TrustManagerFactory tmf = serverKeystore.getTrustManager();
@@ -89,90 +86,75 @@ public abstract class Server {
         createRoom("MigaxPraSempre", null, "bca7cd6bdaf6efaf7ae8g5130ae76f8a");
     }
 
-    public abstract ServerResponse insertServer(int serverId, final String newIp, int newPort);
-    public abstract ServerResponse updateServer(int serverId, final String newIp, int newPort);
-    public abstract ServerResponse removeServer(int serverId);
-
-    public abstract ServerResponse syncRoom(int roomId, final MessageCache messageCache);
-
-    public ServerResponse leaveRoom(int roomId, final String userToken) {
-
-        if (userToken == null || roomId < 0) {
-            return ServerResponse.MissingParameters;
-        }
-
-        System.out.println("roomId:" + roomId);
-        System.out.println("token:" + userToken);
-
-        if (!rooms.containsKey(roomId)) {
-            return ServerResponse.RoomNotFound;
-        }
-
-        final Room selectedRoom = rooms.get(roomId);
-
-        if (selectedRoom.getOwner().equals(userToken)) {
-            rooms.remove(roomId);
-        }
-        else {
-            selectedRoom.removeUser(userToken);
-            notifyLeaveRoom(roomId, userToken);
-        }
-
-        return ServerResponse.SuccessResponse;
+    public ServerLogger getLogger() {
+        return serverLogger;
     }
 
-    public abstract ServerResponse userDisconnect(final String userToken, final String userEmail);
-
-    protected void notifyLeaveRoom(int roomId, final String userToken) {
-
-        final Room selectedRoom = rooms.get(roomId);
-
-        if (selectedRoom == null) {
-            return;
-        }
-
-        final Set<Integer> roomServers = selectedRoom.getServers();
-
-        if (roomServers == null || roomServers.isEmpty()) {
-            return;
-        }
+    public ServerType getType() {
+        return serverType;
     }
 
-    public abstract ServerResponse deleteRoom(int roomId);
-    public abstract ServerResponse createRoom(final String roomName, final String roomPassword, final String roomOwner);
+    public int getId() {
+        return -1;
+    }
+
+    /*
+     * SERVER MESSAGES
+     */
+    public ServerResponse insertServer(int serverId, final String serverAddress, int serverPort) {
+        throw new UnsupportedOperationException("InsertServer");
+    }
+
+    public ServerResponse updateServer(int serverId, final String serverAddress, int serverPort) {
+        throw new UnsupportedOperationException("UpdateServer");
+    }
+
+    public ServerResponse deleteServer(int serverId) {
+        throw new UnsupportedOperationException("DeleteServer");
+    }
+
+    /*
+     * USER SERVICE PROTOCOL
+     */
+
+    public ServerResponse userLogin(final String userToken, final String userEmail) {
+        throw new UnsupportedOperationException("UserLogin");
+    }
+
+    public ServerResponse userDisconnect(final String userToken, final String userEmail) {
+        throw new UnsupportedOperationException("UserLogin");
+    }
+
+    /*
+     * ROOM SERVICE PROTOCOL
+     */
+
+    public ServerResponse createRoom(final String roomName, final String roomPassword, final String roomOwner) {
+        throw new UnsupportedOperationException("CreateRoom");
+    }
+
+    public ServerResponse deleteRoom(int roomId) {
+        throw new UnsupportedOperationException("DeleteRoom");
+    }
 
     public ServerResponse joinRoom(int roomId, final String userToken) {
-
-        System.out.println("roomId:" + roomId);
-        System.out.println("token:" + userToken);
-
-        if (roomId < 0 || userToken == null) {
-            return ServerResponse.InvalidToken;
-        }
-
-        final Room selectedRoom = rooms.get(roomId);
-
-        if (selectedRoom == null) {
-            return ServerResponse.RoomNotFound;
-        }
-
-        if (selectedRoom.registerUser(userToken)) {
-            return ServerResponse.SuccessResponse;
-        }
-
-        return ServerResponse.OperationFailed;
+        throw new UnsupportedOperationException("JoinRoom");
     }
 
-    public ServerResponse userLogin(String userEmail, String userToken) {
+    public ServerResponse joinRoom(int roomId, final String userEmail, final String userToken) {
+        throw new UnsupportedOperationException("JoinRoom");
+    }
 
-        System.out.println("email:" + userEmail);
-        System.out.println("token:" + userToken);
+    public ServerResponse leaveRoom(int roomId, final String userToken) {
+        throw new UnsupportedOperationException("LeaveRoom");
+    }
 
-        if (userEmail.equals("marques999@gmail.com") && userToken.equals("14191091")) {
-            return ServerResponse.SuccessResponse;
-        }
+    public ServerResponse syncRoom(int roomId) {
+        throw new UnsupportedOperationException("SyncRoom");
+    }
 
-        return ServerResponse.AuthenticationFailed;
+    public ServerResponse syncRoom(int roomId, final MessageCache messageCache) {
+        throw new UnsupportedOperationException("SyncRoom");
     }
 
     public final JsonValue getRooms() {
@@ -180,28 +162,29 @@ public abstract class Server {
         final JsonValue newArray = Json.array();
 
         rooms.forEach((k, v) -> newArray.asArray()
-                .add(Json.object()
-                        .add(HttpFields.RoomName, v.getName())
-                        .add(HttpFields.UserToken, v.getOwner())
-                        .add(HttpFields.RoomPrivate, v.isPrivate())
-                        .add(HttpFields.RoomId, k)
-                ));
+            .add(Json.object()
+            .add(HttpFields.RoomName, v.getName())
+            .add(HttpFields.UserToken, v.getOwner())
+            .add(HttpFields.RoomPrivate, v.isPrivate())
+            .add(HttpFields.RoomId, k)
+        ));
 
         return newArray;
     }
 
-    public Message[] retrieveMessages(final String userToken, int roomId) {
-        return null;
+    /*
+     * MESSAGE SERVICE PROTOCOL
+     */
+
+    public MessageCache getMessages(final String userToken, int roomId) {
+        throw new UnsupportedOperationException("RetrieveMessages");
     }
 
-    public abstract ServerResponse registerMessage(int roomId, final Message paramMessage);
-    public abstract ServerResponse notifyMessage(int roomId, final String userToken, final String msgContents);
-    public abstract ServerType getType();
-
-    public int getId() {
-        return -1;
+    public ServerResponse insertMessage(final Message paramMessage) {
+        throw new UnsupportedOperationException("InsertMessage");
     }
 
-    public abstract ServerResponse deleteRoom(int roomId);
-    public abstract ServerResponse deleteServer(int serverId);
+    public ServerResponse notifyMessage(int roomId, final String userToken, final String msgContents) {
+        throw new UnsupportedOperationException("NotifyMessage");
+    }
 }

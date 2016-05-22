@@ -1,6 +1,8 @@
 package chatup.tcp;
 
-public class ServerOffline
+import java.io.Serializable;
+
+public class ServerOffline implements Serializable
 {
     public int serverId;
 

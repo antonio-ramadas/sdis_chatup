@@ -1,6 +1,8 @@
 package chatup.tcp;
 
-public class UserDisconnect
+import java.io.Serializable;
+
+public class UserDisconnect implements Serializable
 {
     public String userEmail;
     public String userToken;

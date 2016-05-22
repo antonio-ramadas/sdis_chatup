@@ -4,7 +4,7 @@ import chatup.model.Message;
 
 public class SendMessage
 {
-    public int roomId;
+    public int messageId;
 
     public SendMessage()
     {
@@ -12,7 +12,7 @@ public class SendMessage
 
     public SendMessage(int paramId, final Message paramMessage)
     {
-        roomId = paramId;
+        messageId = paramId;
         message = paramMessage;
     }
 

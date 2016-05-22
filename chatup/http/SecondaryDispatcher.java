@@ -1,6 +1,7 @@
 package chatup.http;
 
 import chatup.main.ChatupGlobals;
+
 import com.sun.net.httpserver.HttpExchange;
 
 public class SecondaryDispatcher extends ServerDispatcher {
@@ -13,6 +14,9 @@ public class SecondaryDispatcher extends ServerDispatcher {
         switch (urlQuery[1]) {
         case ChatupGlobals.MessageServiceUrl:
             new MessageServiceHandler(httpExchange).processRequest();
+            break;
+        case ChatupGlobals.HeartbeatServiceUrl:
+            new HeartbeatServiceHandler(httpExchange).processRequest();
             break;
         default:
             sendError(httpExchange, ServerResponse.InvalidService);

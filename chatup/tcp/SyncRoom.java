@@ -3,8 +3,10 @@ package chatup.tcp;
 import chatup.model.Message;
 import chatup.model.MessageCache;
 
-public class SyncRoom {
+import java.io.Serializable;
 
+public class SyncRoom implements Serializable
+{
     public int roomId;
     public int length;
 
@@ -13,19 +15,22 @@ public class SyncRoom {
         messageCache = new MessageCache(100);
     }
 
-    public SyncRoom(int paramId, int paramLength) {
+    public SyncRoom(int paramId, int paramLength)
+    {
         roomId = paramId;
         length = paramLength;
         messageCache = new MessageCache(length);
     }
 
-    public SyncRoom(int paramId, final MessageCache paramCache) {
+    public SyncRoom(int paramId, final MessageCache paramCache)
+    {
         roomId = paramId;
         length = paramCache.size();
         messageCache = paramCache;
     }
 
-    public void insert(int paramId, final Message paramMessage) {
+    public void insert(int paramId, final Message paramMessage)
+    {
         messageCache.add(paramId, paramMessage);
     }
 

@@ -1,7 +1,9 @@
 package chatup.tcp;
 
-public class CreateRoom {
+import java.io.Serializable;
 
+public class CreateRoom implements Serializable
+{
     public String roomName;
     public String roomPassword;
     public String roomOwner;

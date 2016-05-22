@@ -15,6 +15,7 @@ abstract class ServerDispatcher implements HttpHandler {
         final String errorResponse = Json.object().add("error", httpResponse.toString()).toString();
 
         try {
+
             httpExchange.sendResponseHeaders(404, errorResponse.length());
 
             try (final OutputStream os = httpExchange.getResponseBody()) {
