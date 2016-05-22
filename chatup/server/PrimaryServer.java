@@ -2,22 +2,21 @@ package chatup.server;
 
 import chatup.http.PrimaryDispatcher;
 import chatup.http.ServerResponse;
-import chatup.main.ServerLogger;
+import chatup.model.Message;
+import chatup.model.MessageCache;
 import chatup.model.Room;
 import chatup.tcp.*;
+import com.esotericsoftware.minlog.Log;
 import kryonet.Connection;
 import kryonet.KryoServer;
 
-import java.awt.*;
-import java.awt.List;
 import java.io.IOException;
-import java.sql.Array;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.*;
 
 public class PrimaryServer extends Server {
 
-    private final KryoServer myServer;
     private final PrimaryListener myServerListener;
 
     private int sequenceRoom = 0;
@@ -26,7 +25,7 @@ public class PrimaryServer extends Server {
 
         super(new PrimaryDispatcher(), httpPort);
 
-        myServer = new KryoServer(){
+        final KryoServer myServer = new KryoServer(){
 
             @Override
             protected Connection newConnection() {
@@ -46,86 +45,163 @@ public class PrimaryServer extends Server {
         return ServerType.PRIMARY;
     }
 
+    @Override
+    public int getId() {
+        return -1;
+    }
+
     public ServerResponse createRoom(String roomName, String roomPassword, String roomOwner){
 
-        ArrayList serversList = new ArrayList<ServerInfo>();
+        final ArrayList<ServerInfo> serversList = new ArrayList<>();
 
-        // fill array list
-        Iterator<HashMap.Entry<Integer, ServerInfo>> entries = servers.entrySet().iterator();
-        while (entries.hasNext()) {
-            HashMap.Entry<Integer, ServerInfo> entry = entries.next();
-            serversList.add(entry.getValue());
-        }
-
-        // sort array list
+        serversList.addAll(servers.values());
         Collections.sort(serversList);
 
         int n = (int)(Math.floor(servers.size()/2) + 1);
 
-        ArrayList<ServerInfo> mostEmpty = (ArrayList<ServerInfo>) serversList.subList(0, n);
+        int roomId = ++sequenceRoom;
+        final ArrayList<ServerInfo> mostEmpty = (ArrayList<ServerInfo>) serversList.subList(0, n);
+        final Room newRoom = new Room(roomName, roomPassword, roomOwner);
 
-        Room room = new Room(roomName, roomPassword, roomOwner);
+        rooms.put(roomId, newRoom);
 
         for (int i = 0; i < mostEmpty.size() ; i++){
-            myServerListener.send(i, room);
-            if (!(rooms.put(++sequenceRoom, room) == null && serverDatabase.insertRoom(sequenceRoom, room)))
+
+            myServerListener.send(i, newRoom);
+            rooms.get(roomId).registerMirror(i);
+
+            if (!serverDatabase.insertRoom(roomId, newRoom)) {
                 return ServerResponse.OperationFailed;
+            }
         }
 
         return ServerResponse.SuccessResponse;
     }
 
-    private boolean notifyJoinRoom(int roomId, final String userToken) {
+    @Override
+    public ServerResponse notifyMessage(int roomId, String userToken, String messageBody) {
+
+        System.out.println("roomId:" + roomId);
+        System.out.println("userToken:" + userToken);
+        System.out.println("messageBody:" + messageBody);
+
+        final String userRecord = users.get(userToken);
+
+        if (userRecord == null) {
+            return ServerResponse.InvalidToken;
+        }
+
+        final Room selectedRoom = rooms.get(roomId);
+
+        if (selectedRoom == null) {
+            return ServerResponse.RoomNotFound;
+        }
+
+        final Message userMessage = new Message(roomId, userToken, Instant.now().toEpochMilli(), messageBody);
+        final Set<Integer> roomServers = selectedRoom.getServers();
+
+        for (final Integer currentRoom : roomServers) {
+            System.out.println(currentRoom);
+        }
+
+        return ServerResponse.SuccessResponse;
+    }
+
+    @Override
+    public ServerResponse registerMessage(int roomId, final Message paramMessage) {
+        return ServerResponse.OperationFailed;
+    }
+
+    @Override
+    public ServerResponse deleteRoom(int roomId) {
+        return ServerResponse.OperationFailed;
+    }
+
+    @Override
+    public ServerResponse leaveRoom(int roomId, final String userToken) {
+        return ServerResponse.OperationFailed;
+    }
+
+    @Override
+    public ServerResponse joinRoom(int roomId, final String userToken) {
 
         final Room selectedRoom = rooms.get(roomId);
 
         if (selectedRoom == null || selectedRoom.hasUser(userToken)) {
-            ServerLogger.getInstance("0")
-                        .error("User" + userToken + " has already joined room \"" + selectedRoom.getName() + "\"!");
-            return false;
+            getLogger().alreadyJoined(roomId, userToken);
+            return ServerResponse.InvalidToken;
         }
 
         final Set<Integer> roomServers = selectedRoom.getServers();
 
         if (roomServers == null || roomServers.isEmpty()) {
-            ServerLogger.getInstance("0").debug("Room \"" + selectedRoom.getName() + "\" not found!");
-            return false;
+            return ServerResponse.RoomNotFound;
         }
 
         for (final Integer serverId : roomServers) {
             myServerListener.send(serverId, new JoinRoom(roomId, userToken));
         }
 
-        return true;
+        return ServerResponse.SuccessResponse;
     }
 
     @Override
-    public boolean insertServer(int serverId, final String newIp, int newPort) {
+    public ServerResponse insertServer(int serverId, final String serverAddress, int serverPort) {
 
-        final ServerInfo selectedServer = servers.get(serverId);
-
-        if (selectedServer != null) {
-            return false;
+        if (servers.containsKey(serverId)) {
+            return ServerResponse.OperationFailed;
         }
 
-        servers.put(serverId, new ServerInfo(newIp, newPort));
+        servers.put(serverId, new ServerInfo(serverAddress, serverPort));
 
-        return true;
+        return ServerResponse.SuccessResponse;
     }
 
     @Override
-    public boolean updateServer(int serverId, final String newIp, int newPort) {
+    public ServerResponse removeServer(int serverId) {
 
         final ServerInfo selectedServer = servers.get(serverId);
 
         if (selectedServer == null) {
-            return false;
+            return ServerResponse.ServerNotFound;
         }
 
-        selectedServer.setAddress(newIp);
-        selectedServer.setPort(newPort);
+        final DeleteServer deleteServer = new DeleteServer(serverId);
 
-        return true;
+        servers.forEach((currentId, currentServer) -> {
+
+            if (currentId != serverId) {
+                myServerListener.send(serverId, deleteServer);
+            }
+        });
+
+        servers.remove(serverId);
+
+        return ServerResponse.SuccessResponse;
+    }
+
+    @Override
+    public ServerResponse updateServer(int serverId, final String serverAddress, int serverPort) {
+
+        final ServerInfo selectedServer = servers.get(serverId);
+
+        if (selectedServer == null) {
+            return ServerResponse.ServerNotFound;
+        }
+
+        selectedServer.setAddress(serverAddress);
+        selectedServer.setPort(serverPort);
+
+        final ServerOnline serverOnline = new ServerOnline(serverId, serverAddress, serverPort);
+
+        servers.forEach((currentId, currentServer) -> {
+
+            if (currentId != serverId) {
+                myServerListener.send(currentId, serverOnline);
+            }
+        });
+
+        return ServerResponse.SuccessResponse;
     }
 
     @Override
@@ -140,32 +216,48 @@ public class PrimaryServer extends Server {
             return ServerResponse.InvalidToken;
         }
 
-        servers.forEach((severId, server) -> myServerListener.send(severId, new UserDisconnect(userToken, userEmail)));
+        final UserDisconnect userDisconnect = new UserDisconnect(userToken, userEmail);
+
+        servers.forEach((severId, server) -> {
+
+            if (server.hasUser(userToken)) {
+                server.removeUser(userToken);
+                myServerListener.send(severId, userDisconnect);
+            }
+        });
+
         users.remove(userToken);
 
         return ServerResponse.SuccessResponse;
     }
 
     @Override
-    public boolean removeServer(int serverId) {
+    public ServerResponse syncRoom(int roomId, final MessageCache messageCache) {
 
-        final ServerInfo selectedServer = servers.get(serverId);
+        System.out.println("roomId:" + roomId);
+        System.out.println("#messages:" + messageCache.size());
 
-        if (selectedServer == null) {
-            return false;
+        if (roomId < 0 || messageCache == null) {
+            return ServerResponse.MissingParameters;
         }
 
-        final String generatedMessage = ServerMessage.deleteServer(serverId);
+        final Room selectedRoom = rooms.get(roomId);
 
-        servers.forEach((currentId, currentServer) -> {
+        if (selectedRoom == null) {
+            return ServerResponse.RoomNotFound;
+        }
 
-            if (currentId != serverId) {
-                myServerListener.send(serverId, generatedMessage);
-            }
-        });
+        final SyncRoom syncRoom = new SyncRoom(roomId, messageCache);
+        final Set<Integer> roomServers = selectedRoom.getServers();
 
-        servers.remove(serverId);
+        if (roomServers == null || roomServers.isEmpty()) {
+            return ServerResponse.RoomNotFound;
+        }
 
-        return true;
+        for (final Integer serverId : roomServers) {
+            myServerListener.send(serverId, new JoinRoom(roomId, syncRoom));
+        }
+
+        return ServerResponse.SuccessResponse;
     }
 }

@@ -1,18 +1,20 @@
 package chatup.server;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class ServerInfo implements Comparable<ServerInfo> {
 
-    private int serverId;
-    private int serverPort;
-    private int numUsers;
+    private String serverAddress;
+    private Set<String> serverUsers;
 
     public ServerInfo(final String serverAddress, int serverPort) {
         setAddress(serverAddress);
         setPort(serverPort);
-        numUsers = 0;
+        serverUsers = new HashSet<>();
     }
 
-    private String serverAddress;
+    private int serverPort;
 
     public int getPort() {
         return serverPort;
@@ -30,17 +32,35 @@ public class ServerInfo implements Comparable<ServerInfo> {
         serverAddress = paramAddress;
     }
 
-    public int getNumUsers() { return numUsers; }
+    public int getNumberUsers() {
+        return serverUsers.size();
+    }
 
-    public void incNumUsers() { numUsers++; }
+    public boolean registerUser(final String userToken) {
+        return serverUsers.add(userToken);
+    }
+
+    public boolean removeUser(final String userToken) {
+        return serverUsers.remove(userToken);
+    }
 
     @Override
-    public int compareTo(ServerInfo o) {
-        if (numUsers < o.getNumUsers())
+    public int compareTo(final ServerInfo serverInfo) {
+
+        int otherUsers = serverInfo.getNumberUsers();
+
+        if (getNumberUsers() < otherUsers) {
             return -1;
-        else if (numUsers > o.getNumUsers())
+        }
+
+        if (getNumberUsers() > otherUsers) {
             return 1;
-        else
-            return 0;
+        }
+
+        return 0;
+    }
+
+    public boolean hasUser(final String userToken) {
+        return serverUsers.contains(userToken);
     }
 }

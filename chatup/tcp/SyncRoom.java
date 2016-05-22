@@ -19,6 +19,12 @@ public class SyncRoom {
         messageCache = new MessageCache(length);
     }
 
+    public SyncRoom(int paramId, final MessageCache paramCache) {
+        roomId = paramId;
+        length = paramCache.size();
+        messageCache = paramCache;
+    }
+
     public void insert(int paramId, final Message paramMessage) {
         messageCache.add(paramId, paramMessage);
     }

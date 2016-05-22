@@ -12,7 +12,7 @@ public class Room {
 	private Set<String> roomUsers;
 	private Set<Integer> roomServers;
 
-	public Room(final String paramName, final String paramPassword,final String paramOwner) {
+	public Room(final String paramName, final String paramPassword, final String paramOwner) {
 		roomName = paramName;
 		roomOwner = paramOwner;
 		roomPassword = paramPassword;

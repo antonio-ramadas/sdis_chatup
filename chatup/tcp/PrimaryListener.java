@@ -1,9 +1,8 @@
 package chatup.tcp;
 
+import chatup.http.ServerResponse;
 import chatup.server.PrimaryServer;
 import chatup.server.ServerConnection;
-
-import com.esotericsoftware.minlog.Log;
 
 import kryonet.Connection;
 import kryonet.KryoServer;
@@ -27,37 +26,36 @@ public class PrimaryListener extends Listener {
 
     private void leaveRoom(final ServerConnection serverConnection, final LeaveRoom leaveRoom) {
 
-        if (leaveRoom.userToken == null || leaveRoom.roomId < 0) {
-            return;
+        if (leaveRoom.userToken != null && leaveRoom.roomId >= 0) {
+            kryoServer.sendToAllExceptTCP(serverConnection.getId(), leaveRoom);
+            primaryServer.getLogger().leaveRoom(leaveRoom.userToken, leaveRoom.roomId);
         }
-
-        kryoServer.sendToAllExceptTCP(serverConnection.getId(), new LeaveRoom(leaveRoom.roomId, leaveRoom.userToken));
-        Log.info("primary", "User " + leaveRoom.userToken + " has left room " + leaveRoom.roomId);
     }
 
     private void serverOnline(final ServerConnection serverConnection, final ServerOnline serverOnline) {
 
         final InetSocketAddress serverSocket = serverConnection.getRemoteAddressTCP();
         final String serverAddress = serverSocket.getHostName();
+        int serverId = serverOnline.serverId;
         int serverPort = serverSocket.getPort();
 
-        if (primaryServer.insertServer(serverOnline.serverId, serverAddress, serverPort)) {
-            serverConnection.serverId = (serverOnline.serverId);
-            kryoServer.sendToAllExceptTCP(serverConnection.getId(), new ServerOnline(serverOnline.serverId));
-            myConnections.put(serverOnline.serverId, serverConnection.getId());
-            Log.info("primary", "Server " + serverOnline.serverId + " connected from " + serverSocket.getHostName() + ".");
-            Log.info("primary", "Inserting server " + serverOnline.serverId + " into local database...");
+        if (primaryServer.insertServer(serverId, serverAddress, serverPort) == ServerResponse.SuccessResponse) {
+            serverConnection.serverId = serverId;
+            kryoServer.sendToAllExceptTCP(serverConnection.getId(), serverOnline);
+            myConnections.put(serverId, serverConnection.getId());
+            primaryServer.getLogger().serverOnline(serverId, serverAddress);
+            primaryServer.getLogger().insertServer(serverId);
         }
         else {
 
-            if (primaryServer.updateServer(serverOnline.serverId, serverAddress, serverPort)) {
-                serverConnection.serverId = (serverOnline.serverId);
-                kryoServer.sendToAllExceptTCP(serverConnection.getId(), new ServerOnline(serverOnline.serverId, serverAddress, serverPort));
-                myConnections.put(serverOnline.serverId, serverConnection.getId());
-                Log.info("primary", "Server " + serverOnline.serverId + " connected from " + serverSocket.getHostName() + ".");
+            if (primaryServer.updateServer(serverId, serverAddress, serverPort) == ServerResponse.SuccessResponse) {
+                serverConnection.serverId = serverId;
+                kryoServer.sendToAllExceptTCP(serverConnection.getId(), serverOnline);
+                myConnections.put(serverId, serverConnection.getId());
+                primaryServer.getLogger().serverOnline(serverId, serverAddress);
             }
             else {
-                Log.error("primary", "Server " + serverOnline.serverId + " not found in database!");
+                primaryServer.getLogger().serverNotFound(serverId);
             }
         }
     }
@@ -67,7 +65,7 @@ public class PrimaryListener extends Listener {
 
         final ServerConnection serverConnection = (ServerConnection) paramConnection;
 
-        if (serverConnection.serverId < 0) {
+        if (serverConnection.serverId <= 0) {
             return;
         }
 
@@ -87,7 +85,7 @@ public class PrimaryListener extends Listener {
         if (serverConnection.serverId > 0) {
             kryoServer.sendToAllExceptTCP(serverConnection.getId(), new ServerOffline(serverConnection.serverId));
             myConnections.remove(serverConnection.serverId);
-            Log.info("primary", "Server " + serverConnection.serverId + " disconnected.");
+            primaryServer.getLogger().serverOffline(serverConnection.serverId);
         }
     }
 
@@ -97,7 +95,7 @@ public class PrimaryListener extends Listener {
             kryoServer.sendToTCP(myConnections.get(serverId), paramObject);
         }
         else {
-            Log.error("primary", "server " + serverId + " not found in database!");
+            primaryServer.getLogger().serverNotFound(serverId);
         }
     }
 }

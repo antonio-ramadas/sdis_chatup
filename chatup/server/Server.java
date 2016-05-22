@@ -4,6 +4,7 @@ import chatup.http.HttpFields;
 import chatup.http.ServerResponse;
 import chatup.model.Database;
 import chatup.model.Message;
+import chatup.model.MessageCache;
 import chatup.model.Room;
 
 import com.eclipsesource.json.JsonValue;
@@ -26,13 +27,19 @@ public abstract class Server {
     private int httpPort;
 
     private HttpServer httpServer;
+    private ServerLogger serverLogger;
     final HashMap<Integer, Room> rooms = new HashMap<>();
     final HashMap<Integer, ServerInfo> servers = new HashMap<>();
     final HashMap<String, String> users = new HashMap<>();
 
+    public ServerLogger getLogger() {
+        return serverLogger;
+    }
+
     Server(final HttpHandler httpHandler, int httpPort) throws SQLException {
 
         this.httpPort = httpPort;
+        serverLogger = new ServerLogger(this);
 
         try {
             // TODO: clean up this mess
@@ -82,9 +89,11 @@ public abstract class Server {
         createRoom("MigaxPraSempre", null, "bca7cd6bdaf6efaf7ae8g5130ae76f8a");
     }
 
-    public abstract boolean insertServer(int serverId, final String newIp, int newPort);
-    public abstract boolean updateServer(int serverId, final String newIp, int newPort);
-    public abstract boolean removeServer(int serverId);
+    public abstract ServerResponse insertServer(int serverId, final String newIp, int newPort);
+    public abstract ServerResponse updateServer(int serverId, final String newIp, int newPort);
+    public abstract ServerResponse removeServer(int serverId);
+
+    public abstract ServerResponse syncRoom(int roomId, final MessageCache messageCache);
 
     public ServerResponse leaveRoom(int roomId, final String userToken) {
 
@@ -129,6 +138,7 @@ public abstract class Server {
         }
     }
 
+    public abstract ServerResponse deleteRoom(int roomId);
     public abstract ServerResponse createRoom(final String roomName, final String roomPassword, final String roomOwner);
 
     public ServerResponse joinRoom(int roomId, final String userToken) {
@@ -184,9 +194,11 @@ public abstract class Server {
         return null;
     }
 
-    public ServerResponse registerMessage(final String userToken, int roomId, final String msgContents) {
-        return ServerResponse.OperationFailed;
-    }
-
+    public abstract ServerResponse registerMessage(int roomId, final Message paramMessage);
+    public abstract ServerResponse notifyMessage(int roomId, final String userToken, final String msgContents);
     public abstract ServerType getType();
+
+    public int getId() {
+        return -1;
+    }
 }
