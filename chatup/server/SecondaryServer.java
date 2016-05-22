@@ -3,6 +3,7 @@ package chatup.server;
 import chatup.http.SecondaryDispatcher;
 import chatup.http.ServerResponse;
 import chatup.main.ChatupGlobals;
+import chatup.model.Database;
 import chatup.model.MessageCache;
 import chatup.model.Room;
 import chatup.model.Message;
@@ -20,6 +21,7 @@ import java.util.Set;
 
 public class SecondaryServer extends Server {
 
+    private final Database serverDatabase;
     private final SecondaryServerListener myServerListener;
 	private final SecondaryClientListener myClientListener;
     private final HashMap<Integer, ServerInfo> servers;
@@ -36,6 +38,9 @@ public class SecondaryServer extends Server {
         //--------------------------------------------------------------------
         // 2) Ler para memória informações dos servidores armazenadas em disco
         //--------------------------------------------------------------------
+
+        serverId = paramId;
+        serverDatabase = new Database(this);
 
         final HashMap<Integer, ServerInfo> myServers = serverDatabase.getServers();
 
@@ -96,7 +101,6 @@ public class SecondaryServer extends Server {
         final KryoClient myClient = new KryoClient();
 
         myClientListener = new SecondaryClientListener(this, myClient);
-        serverId = paramId;
         TcpNetwork.register(myClient);
         myClient.addListener(myClientListener);
         myClient.start();

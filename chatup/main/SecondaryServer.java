@@ -16,7 +16,6 @@ public class SecondaryServer {
         }
 
         int serverId = 0;
-        int primaryIndex = 1;
         int tcpPort = ChatupGlobals.DefaultTcpPort;
 
         try {
@@ -34,8 +33,6 @@ public class SecondaryServer {
             catch (NumberFormatException ex) {
                 tcpPort = ChatupGlobals.DefaultTcpPort;
             }
-
-            primaryIndex++;
         }
 
         short httpPort = ChatupGlobals.DefaultHttpPort;
@@ -48,18 +45,16 @@ public class SecondaryServer {
             catch (NumberFormatException ex) {
                 httpPort = ChatupGlobals.DefaultHttpPort;
             }
-
-            primaryIndex++;
         }
 
-        int separatorPosition = args[primaryIndex].indexOf(':');
-        final String addressString = args[primaryIndex].substring(0, separatorPosition);
+        int separatorPosition = args[1].indexOf(':');
+        final String addressString = args[1].substring(0, separatorPosition);
 
         try {
 
             final ServerInfo primaryServer = new ServerInfo(
                 addressString,
-                Integer.parseInt(args[primaryIndex].substring(separatorPosition + 1))
+                Integer.parseInt(args[1].substring(separatorPosition + 1))
             );
 
            ChatupServer.initializeSecondary(serverId, primaryServer, httpPort, tcpPort);

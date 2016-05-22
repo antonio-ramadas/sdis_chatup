@@ -2,8 +2,8 @@ package chatup.server;
 
 public enum ServerType {
 
-    PRIMARY("Primary"),
-    SECONDARY("Secondary");
+    PRIMARY("primary"),
+    SECONDARY("secondary");
 
     ServerType(final String paramType) {
         serverType = paramType;

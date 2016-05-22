@@ -9,9 +9,7 @@ public class ChatupServer {
     private static Server serverInstance;
     private static ServerKeystore serverKeystore;
 
-    static boolean initializePrimary(int httpPort, int tcpPort) {
-
-        boolean exceptionThrown = false;
+    static void initializePrimary(int httpPort, int tcpPort) {
 
         try {
             serverKeystore = new ServerKeystore("server.jks", "123456");
@@ -19,15 +17,11 @@ public class ChatupServer {
         }
         catch (Exception ex) {
             System.out.println("Exception caught: " + ex.getMessage() + " in ChatupServer.contructor");
-            exceptionThrown = true;
+            System.exit(1);
         }
-
-        return exceptionThrown;
     }
 
-    static boolean initializeSecondary(int serverId, final ServerInfo primaryServer, int httpPort, int tcpPort) {
-
-        boolean exceptionThrown = false;
+    static void initializeSecondary(int serverId, final ServerInfo primaryServer, int httpPort, int tcpPort) {
 
         try {
             serverKeystore = new ServerKeystore("server.jks", "123456");
@@ -35,10 +29,8 @@ public class ChatupServer {
         }
         catch (Exception ex) {
             System.out.println("Exception caught: " + ex.getMessage() + " in ChatupServer.contructor");
-            exceptionThrown = true;
+            System.exit(1);
         }
-
-        return exceptionThrown;
     }
 
     public static Server getInstance() {

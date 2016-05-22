@@ -3,6 +3,7 @@ package chatup.server;
 import chatup.http.HttpFields;
 import chatup.http.PrimaryDispatcher;
 import chatup.http.ServerResponse;
+import chatup.model.Database;
 import chatup.model.RoomInfo;
 import chatup.tcp.*;
 
@@ -18,6 +19,7 @@ import java.util.*;
 
 public class PrimaryServer extends Server {
 
+    private final Database serverDatabase;
     private final PrimaryListener myServerListener;
     private final HashMap<Integer, ServerInfo> servers;
     private final HashMap<Integer, RoomInfo> rooms;
@@ -33,6 +35,8 @@ public class PrimaryServer extends Server {
         //--------------------------------------------------------------------
         // 2) Ler para memória informações dos servidores armazenadas em disco
         //--------------------------------------------------------------------
+
+        serverDatabase = new Database(this);
 
         final HashMap<Integer, ServerInfo> myServers = serverDatabase.getServers();
 

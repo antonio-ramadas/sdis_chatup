@@ -1,7 +1,6 @@
 package chatup.server;
 
 import chatup.http.ServerResponse;
-import chatup.model.Database;
 import chatup.model.Message;
 import chatup.model.MessageCache;
 import chatup.model.Room;
@@ -19,15 +18,14 @@ import java.util.concurrent.Executors;
 
 public abstract class Server {
 
-    final Database serverDatabase = Database.getInstance();
-
     HashMap<String, String> users;
 
-    private HttpServer httpServer;
     private ServerType serverType;
     private ServerLogger serverLogger;
 
     Server(final HttpHandler httpHandler, final ServerType paramType, int httpPort) throws SQLException {
+
+        final HttpServer httpServer;
 
         serverLogger = new ServerLogger(this);
         serverType = paramType;
@@ -37,7 +35,7 @@ public abstract class Server {
             //   final KeyManagerFactory kmf = serverKeystore.getKeyManager();
             //   final TrustManagerFactory tmf = serverKeystore.getTrustManager();
 
-            httpServer = HttpServer.create(new InetSocketAddress(httpPort), 0);
+          httpServer = HttpServer.create(new InetSocketAddress(httpPort), 0);
 
         /*    final SSLContext sslContext = SSLContext.getInstance("TLSv1");
 

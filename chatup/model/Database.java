@@ -1,13 +1,14 @@
 package chatup.model;
 
+import chatup.server.Server;
 import chatup.server.ServerInfo;
+import chatup.server.ServerType;
 
 import java.sql.*;
 import java.util.*;
 
 public class Database {
 
-    private static Database instance;
     private static final String ServerId = "id";
     private static final String ServerAddress = "address";
     private static final String ServerPort = "port";
@@ -21,21 +22,25 @@ public class Database {
     private static final String MessageTimestamp = "epoch";
     private static final String MessageRoom = "room";
 
-    private Database() throws SQLException {
-        dbConnection = DriverManager.getConnection("jdbc:sqlite:test.db");
+    public Database(final Server paramServer) throws SQLException {
+
+        final ServerType serverType = paramServer.getType();
+
+        if (serverType == ServerType.PRIMARY) {
+            dbConnection = DriverManager.getConnection("jdbc:sqlite:primary.db");
+        }
+        else {
+            dbConnection = DriverManager.getConnection(
+                "jdbc:sqlite:" +
+                paramServer.getType() + "-" +
+                paramServer.getId() + ".db"
+            );
+        }
+
         dbConnection.setAutoCommit(true);
     }
 
     private final Connection dbConnection;
-
-    public static Database getInstance() throws SQLException {
-
-        if (instance == null) {
-            instance = new Database();
-        }
-
-        return instance;
-    }
 
     private static final String queryInsertRoom = "INSERT INTO Rooms(id, name, password) VALUES(?, ?, ?)";
     private static final String querySelectRoomById = "SELECT * FROM Rooms WHERE id = ?";
@@ -157,7 +162,6 @@ public class Database {
     private final static String queryInsertMessage = "INSERT INTO Messages(room, token, epoch, message) VALUES(?, ?, ?, ?)";
     private final static String querySelectMessagesByRoomLimit = "SELECT * FROM Message WHERE room = ? ORDER BY epoch DESC LIMIT ";
     private final static String querySelectMessagesByRoom = "SELECT * FROM Messages WHERE room = ? ORDER BY epoch DESC";
-    private final static String querySelectMessageById = "SELECT * FROM Messages WHERE id = ?";
     private final static String queryDeleteMessage = "DELETE FROM Messages WHERE id = ?";
 
     public boolean insertMessage(final Message paramMessage) {
