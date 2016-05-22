@@ -4,7 +4,6 @@ import chatup.http.HttpFields;
 import chatup.http.ServerResponse;
 import chatup.model.Database;
 import chatup.model.Message;
-import chatup.model.MessageCache;
 import chatup.model.Room;
 
 import com.eclipsesource.json.JsonValue;
@@ -28,6 +27,7 @@ public abstract class Server {
 
     private HttpServer httpServer;
     private ServerLogger serverLogger;
+    final Database serverDatabase = Database.getInstance();
     final HashMap<Integer, Room> rooms = new HashMap<>();
     final HashMap<Integer, ServerInfo> servers = new HashMap<>();
     final HashMap<String, String> users = new HashMap<>();
@@ -201,4 +201,7 @@ public abstract class Server {
     public int getId() {
         return -1;
     }
+
+    public abstract ServerResponse deleteRoom(int roomId);
+    public abstract ServerResponse deleteServer(int serverId);
 }

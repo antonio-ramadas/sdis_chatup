@@ -50,24 +50,27 @@ public class Message implements Comparable<Message> {
     }
 
     @Override
-    public boolean equals(final Object other) {
-        return other instanceof Message
-            && ((Message) other).getRoomId() == messageRoom
-            && ((Message) other).getTimestamp() == messageTimestamp
-            && ((Message) other).getSender().equals(messageAuthor);
+    public boolean equals(final Object otherObject) {
+        return otherObject instanceof Message
+            && ((Message) otherObject).getRoomId() == messageRoom
+            && ((Message) otherObject).getTimestamp() == messageTimestamp
+            && ((Message) otherObject).getSender().equals(messageAuthor);
     }
 
     @Override
     public int hashCode() {
+
         int hash = 3;
+
         hash = 11 * hash + (int) (messageTimestamp ^ (messageTimestamp >>> 32));
         hash = 11 * hash + messageRoom;
         hash = 11 * hash + Objects.hashCode(messageAuthor);
+
         return hash;
     }
 
     @Override
-    public int compareTo(final Message other) {
-        return Long.compare(messageTimestamp, other.getTimestamp());
+    public int compareTo(final Message otherMessage) {
+        return Long.compare(messageTimestamp, otherMessage.getTimestamp());
     }
 }

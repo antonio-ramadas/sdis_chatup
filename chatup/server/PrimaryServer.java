@@ -7,6 +7,7 @@ import chatup.model.MessageCache;
 import chatup.model.Room;
 import chatup.tcp.*;
 import com.esotericsoftware.minlog.Log;
+
 import kryonet.Connection;
 import kryonet.KryoServer;
 
@@ -18,8 +19,6 @@ import java.util.*;
 public class PrimaryServer extends Server {
 
     private final PrimaryListener myServerListener;
-
-    private int sequenceRoom = 0;
 
     public PrimaryServer(int tcpPort, int httpPort) throws IOException, SQLException {
 
@@ -254,9 +253,7 @@ public class PrimaryServer extends Server {
             return ServerResponse.RoomNotFound;
         }
 
-        for (final Integer serverId : roomServers) {
-            myServerListener.send(serverId, new JoinRoom(roomId, syncRoom));
-        }
+        servers.remove(serverId);
 
         return ServerResponse.SuccessResponse;
     }
