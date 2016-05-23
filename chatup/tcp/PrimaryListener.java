@@ -37,6 +37,8 @@ public class PrimaryListener extends Listener {
         final InetSocketAddress serverSocket = serverConnection.getRemoteAddressTCP();
         int serverId = serverOnline.serverId;
 
+        primaryServer.serverOnline(serverConnection.serverId);
+
         if (primaryServer.insertServer(serverId, serverSocket.getHostName(), serverSocket.getPort()) == ServerResponse.SuccessResponse) {
             serverConnection.serverId = serverId;
             kryoServer.sendToAllExceptTCP(serverConnection.getId(), serverOnline);
@@ -87,6 +89,7 @@ public class PrimaryListener extends Listener {
             kryoServer.sendToAllExceptTCP(serverConnection.getId(), new ServerOffline(serverConnection.serverId));
             myConnections.remove(serverConnection.serverId);
             primaryServer.getLogger().serverOffline(serverConnection.serverId);
+            primaryServer.serverOffline(serverConnection.serverId);
         }
     }
 

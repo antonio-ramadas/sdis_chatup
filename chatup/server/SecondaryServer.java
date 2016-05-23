@@ -28,7 +28,7 @@ public class SecondaryServer extends Server {
     private final HashMap<Integer, ServerInfo> servers;
     private final HashMap<Integer, Room> rooms;
 
-	public SecondaryServer(int paramId, final ServerInfo paramPrimary, int tcpPort, int httpPort) throws SQLException, IOException {
+	public SecondaryServer(final ServerInfo paramPrimary, int tcpPort, int httpPort) throws SQLException, IOException {
 
         //----------------------------------------------------------------
         // 1) Inicializar servidor HTTPS para receber pedidos dos clientes
@@ -40,7 +40,7 @@ public class SecondaryServer extends Server {
         // 2) Ler para memória informações dos servidores armazenadas em disco
         //--------------------------------------------------------------------
 
-        serverId = paramId;
+        serverId = paramPrimary.getId();
         serverDatabase = new Database(this);
         serverLogger = new ServerLogger(this);
 
@@ -351,7 +351,7 @@ public class SecondaryServer extends Server {
 			return ServerResponse.OperationFailed;
 		}
 
-		servers.put(serverId, new ServerInfo(serverAddress, serverPort));
+		servers.put(serverId, new ServerInfo(serverId, serverAddress, serverPort));
 
 		return ServerResponse.SuccessResponse;
 	}

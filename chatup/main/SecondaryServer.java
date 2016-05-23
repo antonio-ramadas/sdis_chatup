@@ -53,11 +53,12 @@ public class SecondaryServer {
         try {
 
             final ServerInfo primaryServer = new ServerInfo(
+                serverId,
                 addressString,
                 Integer.parseInt(args[1].substring(separatorPosition + 1))
             );
 
-           ChatupServer.initializeSecondary(serverId, primaryServer, httpPort, tcpPort);
+           ChatupServer.initializeSecondary(primaryServer, httpPort, tcpPort);
         }
         catch (final NumberFormatException ex) {
             System.err.println("invalid primary server port, terminating application...");

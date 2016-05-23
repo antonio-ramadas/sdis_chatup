@@ -139,12 +139,25 @@ public class PrimaryServer extends Server {
     public ServerResponse createRoom(final String roomName, final String roomPassword, final String roomOwner) {
 
         final ArrayList<ServerInfo> serversList = new ArrayList<>();
+        final Iterator<HashMap.Entry<Integer, ServerInfo>> entries = servers.entrySet().iterator();
 
-        serversList.addAll(servers.values());
+        while (entries.hasNext()) {
+
+            final HashMap.Entry<Integer, ServerInfo> entry = entries.next();
+
+            if (entry.getValue().isOnline()) {
+                serversList.add(entry.getValue());
+            }
+        }
+
+        if (serversList.isEmpty()) {
+            return ServerResponse.ServiceOffline;
+        }
+
         Collections.sort(serversList);
 
-        int n = (int)(Math.floor(servers.size()/2) + 1);
         int roomId = ++sequenceRoom;
+        int n = (int)(Math.floor(servers.size() / 2) + 1);
         final RoomInfo newRoom = new RoomInfo(roomName, roomPassword, roomOwner);
 
         //----------------------------------------------------
@@ -162,17 +175,27 @@ public class PrimaryServer extends Server {
         // 3) Notificar os servidores mirror da criação desta sala
         //--------------------------------------------------------
 
-       /* final ArrayList<ServerInfo> mostEmpty = (ArrayList<ServerInfo>) serversList.subList(0, n);
+       final ArrayList<ServerInfo> mostEmpty = (ArrayList<ServerInfo>) serversList.subList(0, n);
 
         for (int i = 0; i < mostEmpty.size() ; i++){
 
-            myServerListener.send(i, newRoom);
-            rooms.get(roomId).registerServer(i);
+            final RoomInfo currentRoom = rooms.get(i);
+            int serverId = mostEmpty.get(i).getId();
 
-            if (!serverDatabase.insertRoom(roomId, newRoom)) {
-                return ServerResponse.OperationFailed;
+            if (currentRoom == null) {
+                return ServerResponse.RoomNotFound;
             }
-        }*/
+
+            myServerListener.send(serverId, newRoom);
+            currentRoom.registerServer(i);
+
+            if (serverDatabase.insertServerRoom(serverId, roomId)) {
+                currentRoom.registerServer(serverId);
+            }
+            else {
+                return ServerResponse.DatabaseError;
+            }
+        }
 
         return ServerResponse.SuccessResponse;
     }
@@ -372,7 +395,7 @@ public class PrimaryServer extends Server {
         //------------------------------------------------------
 
         if (serverDatabase.insertServer(serverId, serverAddress, serverPort)) {
-            servers.put(serverId, new ServerInfo(serverAddress, serverPort));
+            servers.put(serverId, new ServerInfo(serverId, serverAddress, serverPort));
         }
         else {
             return ServerResponse.DatabaseError;
@@ -417,6 +440,32 @@ public class PrimaryServer extends Server {
         else {
             return ServerResponse.DatabaseError;
         }
+
+        return ServerResponse.SuccessResponse;
+    }
+
+    public ServerResponse serverOnline(int serverId) {
+
+        final ServerInfo selectedServer = servers.get(serverId);
+
+        if (selectedServer == null) {
+            return ServerResponse.ServerNotFound;
+        }
+
+        selectedServer.setStatus(true);
+
+        return ServerResponse.SuccessResponse;
+    }
+
+    public ServerResponse serverOffline(int serverId) {
+
+        final ServerInfo selectedServer = servers.get(serverId);
+
+        if (selectedServer == null) {
+            return ServerResponse.ServerNotFound;
+        }
+
+        selectedServer.setStatus(false);
 
         return ServerResponse.SuccessResponse;
     }

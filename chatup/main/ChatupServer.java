@@ -21,11 +21,11 @@ public class ChatupServer {
         }
     }
 
-    static void initializeSecondary(int serverId, final ServerInfo primaryServer, int httpPort, int tcpPort) {
+    static void initializeSecondary(final ServerInfo primaryServer, int httpPort, int tcpPort) {
 
         try {
             serverKeystore = new ServerKeystore("server.jks", "123456");
-            serverInstance = new chatup.server.SecondaryServer(serverId, primaryServer, tcpPort, httpPort);
+            serverInstance = new chatup.server.SecondaryServer(primaryServer, tcpPort, httpPort);
         }
         catch (Exception ex) {
             System.out.println("Exception caught: " + ex.getMessage() + " in ChatupServer.contructor");

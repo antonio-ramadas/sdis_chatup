@@ -342,6 +342,7 @@ public class Database {
                 int serverId = rs.getInt(ServerId);
 
                 final ServerInfo newServer = new ServerInfo(
+                    serverId,
                     rs.getString(ServerAddress),
                     rs.getShort(ServerPort)
                 );

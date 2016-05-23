@@ -8,7 +8,8 @@ public class ServerInfo implements Comparable<ServerInfo> {
     private String serverAddress;
     private Set<String> serverUsers;
 
-    public ServerInfo(final String serverAddress, int serverPort) {
+    public ServerInfo(int serverId, final String serverAddress, int serverPort) {
+        setId(serverId);
         setAddress(serverAddress);
         setPort(serverPort);
         serverStatus = false;
@@ -16,7 +17,12 @@ public class ServerInfo implements Comparable<ServerInfo> {
     }
 
     private int serverPort;
+    private int serverId;
     private boolean serverStatus;
+
+    public int getId() {
+        return serverId;
+    }
 
     public int getPort() {
         return serverPort;
@@ -30,6 +36,9 @@ public class ServerInfo implements Comparable<ServerInfo> {
         return serverUsers;
     }
 
+    public void setId(int paramId) {
+        serverId = paramId;
+    }
     public void setPort(int paramPort) {
         serverPort = paramPort;
     }
