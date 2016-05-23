@@ -254,13 +254,15 @@ public class PrimaryServer extends Server {
 
     private void insertQueue(int serverId, final Object paramObject) {
 
-        CommandQueue serverMessages = messageQueue.get(serverId);
+        final CommandQueue serverMessages = messageQueue.get(serverId);
 
         if (serverMessages == null) {
-            serverMessages = messageQueue.put(serverId, new CommandQueue());
+            messageQueue.put(serverId, new CommandQueue());
+            messageQueue.get(serverId).put(paramObject);
         }
-
-        serverMessages.put(paramObject);
+        else {
+            serverMessages.put(paramObject);
+        }
     }
 
     @Override
@@ -436,6 +438,8 @@ public class PrimaryServer extends Server {
                 continue;
             }
 
+            System.out.println("server " + serverId + "is " + selectedServer.isOnline());
+
             if (selectedServer.isOnline()) {
 
                 serviceOffline = false;
@@ -448,6 +452,9 @@ public class PrimaryServer extends Server {
                 }
             }
         }
+
+        System.out.println(minimumLoad);
+        System.out.println(minimumServer);
 
         if (serviceOffline || minimumServer < 1) {
             // criar sala noutro servidor
@@ -552,6 +559,13 @@ public class PrimaryServer extends Server {
         // 3) Registar remoção desse servidor na base de dados
         //----------------------------------------------------
 
+        rooms.forEach((roomId, room) -> {
+
+            if (room.removeServer(serverId)) {
+                serverDatabase.deleteServerRoom(serverId, roomId);
+            }
+        });
+
         if (serverDatabase.deleteServer(serverId)) {
             servers.remove(serverId);
         }
@@ -639,6 +653,7 @@ public class PrimaryServer extends Server {
             }
 
             myServerListener.send(serverId, serverQueue);
+            messageQueue.remove(serverId);
         }
         else {
             selectedServer.setTimestamp(serverTimestamp);
@@ -680,12 +695,23 @@ public class PrimaryServer extends Server {
         // 2) Registar alterações do servidor na base de dados
         //----------------------------------------------------
 
-        if (serverDatabase.updateServer(serverInfo)) {
+        boolean sameInformation = true;
+
+        if (!selectedServer.getAddress().equals(serverInfo.getAddress())) {
             selectedServer.setAddress(serverInfo.getAddress());
-            selectedServer.setPort(serverInfo.getPort());
-            selectedServer.setTimestamp(serverInfo.getTimestamp());
+            sameInformation = false;
         }
-        else {
+
+        if (selectedServer.getPort() != serverInfo.getPort()) {
+            selectedServer.setPort(serverInfo.getPort());
+            sameInformation = false;
+        }
+
+        if (sameInformation) {
+            return ServerResponse.SuccessResponse;
+        }
+
+        if (!serverDatabase.updateServer(serverInfo)) {
             return ServerResponse.DatabaseError;
         }
 
@@ -716,7 +742,7 @@ public class PrimaryServer extends Server {
             }
         });
 
-        return ServerResponse.SuccessResponse;
+        return serverOnline(serverId, serverInfo.getTimestamp());
     }
 
     @Override

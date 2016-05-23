@@ -15,53 +15,44 @@ package google.collections;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*
 
-        import com.google.common.math.IntMath;
-        import com.google.j2objc.annotations.Weak;
-        import com.google.j2objc.annotations.WeakOuter;
-
-        import java.util.AbstractQueue;
-        import java.util.ArrayDeque;
-        import java.util.ArrayList;
-        import java.util.Collection;
-        import java.util.Collections;
-        import java.util.Comparator;
-        import java.util.ConcurrentModificationException;
-        import java.util.Iterator;
-        import java.util.List;
-        import java.util.NoSuchElementException;
-        import java.util.PriorityQueue;
-        import java.util.Queue;
-
+import java.util.AbstractQueue;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.ConcurrentModificationException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Queue;
 
 public final class MinMaxPriorityQueue<E> extends AbstractQueue<E> {
 
     public static <E extends Comparable<E>> MinMaxPriorityQueue<E> create() {
-        return new Builder<Comparable>(Ordering.natural()).create();
+        return new Builder<>(Ordering.natural()).create();
     }
 
-    public static <E extends Comparable<E>> MinMaxPriorityQueue<E> create(
-            Iterable<? extends E> initialContents) {
-        return new Builder<E>(Ordering.<E>natural()).create(initialContents);
+    public static <E extends Comparable<E>> MinMaxPriorityQueue<E> create(Iterable<? extends E> initialContents) {
+        return new Builder<>(Ordering.<E>natural()).create(initialContents);
     }
 
     public static <B> Builder<B> orderedBy(Comparator<B> comparator) {
-        return new Builder<B>(comparator);
+        return new Builder<>(comparator);
     }
 
     public static Builder<Comparable> expectedSize(int expectedSize) {
-        return new Builder<Comparable>(Ordering.natural()).expectedSize(expectedSize);
+        return new Builder<>(Ordering.natural()).expectedSize(expectedSize);
     }
 
     public static Builder<Comparable> maximumSize(int maximumSize) {
-        return new Builder<Comparable>(Ordering.natural()).maximumSize(maximumSize);
+        return new Builder<>(Ordering.natural()).maximumSize(maximumSize);
     }
 
     public static final class Builder<B> {
 
         private static final int UNSET_EXPECTED_SIZE = -1;
-
         private final Comparator<B> comparator;
         private int expectedSize = UNSET_EXPECTED_SIZE;
         private int maximumSize = Integer.MAX_VALUE;
@@ -170,10 +161,10 @@ public final class MinMaxPriorityQueue<E> extends AbstractQueue<E> {
     private int getMaxElementIndex() {
 
         switch (size) {
-        case 1:
-            return 0;
-        case 2:
-            return 1;
+            case 1:
+                return 0;
+            case 2:
+                return 1;
         }
 
         return (maxHeap.compareElements(1, 2) <= 0) ? 1 : 2;
@@ -228,8 +219,7 @@ public final class MinMaxPriorityQueue<E> extends AbstractQueue<E> {
 
             if (changes == null) {
                 return new MoveDesc<E>(actualLastElement, toTrickle);
-            }
-            else {
+            } else {
                 return new MoveDesc<E>(actualLastElement, changes.replaced);
             }
         }
@@ -246,8 +236,7 @@ public final class MinMaxPriorityQueue<E> extends AbstractQueue<E> {
 
         if (bubbledTo == vacated) {
             return heap.tryCrossOverAndBubbleUp(index, vacated, toTrickle);
-        }
-        else {
+        } else {
             return (bubbledTo < index) ? new MoveDesc<E>(toTrickle, elementData(index)) : null;
         }
     }
@@ -293,11 +282,11 @@ public final class MinMaxPriorityQueue<E> extends AbstractQueue<E> {
         return true;
     }
 
-    @WeakOuter
     private class Heap {
 
         final Ordering<E> ordering;
-        @Weak Heap otherHeap;
+
+        Heap otherHeap;
 
         Heap(Ordering<E> ordering) {
             this.ordering = ordering;
@@ -315,7 +304,7 @@ public final class MinMaxPriorityQueue<E> extends AbstractQueue<E> {
                 return null;
             }
 
-            E parent;
+            final E parent;
 
             if (crossOver < removeIndex) {
                 parent = elementData(removeIndex);
@@ -335,8 +324,7 @@ public final class MinMaxPriorityQueue<E> extends AbstractQueue<E> {
         void bubbleUp(int index, E x) {
 
             int crossOver = crossOverUp(index, x);
-
-            Heap heap;
+            final Heap heap;
 
             if (crossOver == index) {
                 heap = this;
@@ -523,7 +511,7 @@ public final class MinMaxPriorityQueue<E> extends AbstractQueue<E> {
         }
 
         private int getGrandparentIndex(int i) {
-            return getParentIndex(getParentIndex(i)); // (i - 3) / 4
+            return getParentIndex(getParentIndex(i));
         }
     }
 
@@ -555,6 +543,7 @@ public final class MinMaxPriorityQueue<E> extends AbstractQueue<E> {
                 return elementData(cursor);
             }
             else if (forgetMeNot != null) {
+
                 cursor = size();
                 lastFromForgetMeNot = forgetMeNot.poll();
 
@@ -563,6 +552,7 @@ public final class MinMaxPriorityQueue<E> extends AbstractQueue<E> {
                     return lastFromForgetMeNot;
                 }
             }
+
             throw new NoSuchElementException("iterator moved past last element in queue.");
         }
 
@@ -672,23 +662,19 @@ public final class MinMaxPriorityQueue<E> extends AbstractQueue<E> {
 
     private static final int DEFAULT_CAPACITY = 11;
 
-    static int initialQueueSize(
-            int configuredExpectedSize, int maximumSize, Iterable<?> initialContents) {
+    static int initialQueueSize(int configuredExpectedSize, int maximumSize, Iterable<?> initialContents) {
 
-        int result =
-                (configuredExpectedSize == Builder.UNSET_EXPECTED_SIZE)
-                        ? DEFAULT_CAPACITY
-                        : configuredExpectedSize;
+        int result = (configuredExpectedSize == Builder.UNSET_EXPECTED_SIZE) ? DEFAULT_CAPACITY : configuredExpectedSize;
 
         if (initialContents instanceof Collection) {
-            int initialSize = ((Collection<?>) initialContents).size();
-            result = Math.max(result, initialSize);
+            result = Math.max(result, ((Collection<?>) initialContents).size());
         }
 
         return capAtMaximumSize(result, maximumSize);
     }
 
     private void growIfNeeded() {
+
         if (size > queue.length) {
             int newCapacity = calculateNewCapacity();
             Object[] newQueue = new Object[newCapacity];
@@ -699,14 +685,15 @@ public final class MinMaxPriorityQueue<E> extends AbstractQueue<E> {
 
     private int calculateNewCapacity() {
         int oldCapacity = queue.length;
-        int newCapacity =
-                (oldCapacity < 64)
-                        ? (oldCapacity + 1) * 2
-                        : IntMath.checkedMultiply(oldCapacity / 2, 3);
+        int newCapacity = (oldCapacity < 64) ? (oldCapacity + 1) * 2 : checkedMultiply(oldCapacity / 2, 3);
         return capAtMaximumSize(newCapacity, maximumSize);
+    }
+
+    private int checkedMultiply(int a, int b) {
+        return (int) ((long) a * b);
     }
 
     private static int capAtMaximumSize(int queueSize, int maximumSize) {
         return Math.min(queueSize - 1, maximumSize) + 1; // don't overflow
     }
-}*/
+}

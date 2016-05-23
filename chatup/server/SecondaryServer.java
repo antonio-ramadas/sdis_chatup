@@ -5,7 +5,6 @@ import chatup.http.SecondaryDispatcher;
 import chatup.http.ServerResponse;
 import chatup.main.ChatupGlobals;
 import chatup.model.Database;
-import chatup.model.MessageCache;
 import chatup.model.Room;
 import chatup.model.Message;
 import chatup.tcp.*;
@@ -21,7 +20,7 @@ import java.net.InetAddress;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Set;
 
 public class SecondaryServer extends Server {
@@ -92,9 +91,14 @@ public class SecondaryServer extends Server {
         rooms.forEach((roomId, roomInformation) -> {
 
             final Set<Integer> roomServers = serverDatabase.getServerByRoom(roomId);
+            final LinkedList<Message> roomMessages = serverDatabase.getMessagesByRoom(roomId);
 
             if (roomServers != null) {
                 roomInformation.setServers(roomServers);
+            }
+
+            if (roomMessages != null) {
+                roomInformation.insertMessages(roomMessages);
             }
 
             if (getLogger().debugEnabled()) {
@@ -183,9 +187,6 @@ public class SecondaryServer extends Server {
 
     @Override
     public ServerResponse leaveRoom(int roomId, final String userToken) {
-
-        System.out.println("roomId:" + roomId);
-        System.out.println("userToken:" + userToken);
 
         final String userRecord = users.get(userToken);
 
@@ -289,12 +290,6 @@ public class SecondaryServer extends Server {
     @Override
     public ServerResponse notifyMessage(int roomId, final String userToken, final String messageBody) {
 
-        System.out.println("------ NotifyMessage ------");
-        System.out.println("roomId:"      + roomId);
-        System.out.println("userToken:"   + userToken);
-        System.out.println("messageBody:" + messageBody);
-        System.out.println("---------------------------");
-
         final String userRecord = users.get(userToken);
 
         if (userRecord == null) {
@@ -320,15 +315,11 @@ public class SecondaryServer extends Server {
 	@Override
 	public JsonValue getMessages(final String userToken, int roomId) {
 
-        System.out.println("------ RetrieveMessages ------");
-        System.out.println("roomId:" + roomId);
-        System.out.println("userToken:" + userToken);
-        System.out.println("------------------------------");
-
         final JsonValue jsonArray = Json.array();
         final String userRecord = users.get(userToken);
 
         if (userRecord == null) {
+            getLogger().userNotFound(userToken);
             return jsonArray;
         }
 
@@ -339,29 +330,25 @@ public class SecondaryServer extends Server {
             return jsonArray;
         }
 
-		if (!selectedRoom.hasUser(userToken)) {
+		/*if (!selectedRoom.hasUser(userToken)) {
 			return jsonArray;
-		}
+		}*/
 
-        final MessageCache myMessages = selectedRoom.getMessages();
+        final Message[] myMessages = selectedRoom.getMessages();
 
-        rooms.forEach((k, v) -> jsonArray.asArray()
-            .add(Json.object()
-            .add(HttpFields.RoomName, v.getName())
-             .add(HttpFields.UserToken, v.getOwner())
-             .add(HttpFields.RoomPrivate, v.isPrivate())
-             .add(HttpFields.RoomId, k)
-        ));
+        for (final Message currentMessage : myMessages) {
+            jsonArray.asArray().add(Json.object()
+                .add(HttpFields.MessageSender, currentMessage.getSender())
+                .add(HttpFields.MessageTimestamp, currentMessage.getTimestamp())
+                .add(HttpFields.MessageContents, currentMessage.getMessage())
+                .add(HttpFields.MessageRoomId, currentMessage.getId()));
+        }
 
         return jsonArray;
 	}
 
 	@Override
 	public ServerResponse insertServer(final ServerInfo serverInfo) {
-
-        //-------------------------------------------------------------
-        // 1) Verificar se servidor escolhido já existe na base de dados
-        //-------------------------------------------------------------
 
 		if (servers.containsKey(serverId)) {
 			return ServerResponse.OperationFailed;
@@ -425,19 +412,14 @@ public class SecondaryServer extends Server {
         serverTimestamp = Instant.now().getEpochSecond();
 
         rooms.forEach((roomId, room) -> {
-            room.removeMirror(serverId);
+            room.removeServer(serverId);
         });
 
         return ServerResponse.SuccessResponse;
 	}
 
 	@Override
-	public ServerResponse userDisconnect(final String userToken, final String userEmail) {
-
-        System.out.println("------ UserDisconnect ------");
-		System.out.println("userEmail:" + userEmail);
-		System.out.println("userToken:" + userToken);
-        System.out.println("----------------------------");
+	public ServerResponse userDisconnect(final String userEmail, final String userToken) {
 
 		final String userRecord = users.get(userToken);
 
@@ -493,11 +475,11 @@ public class SecondaryServer extends Server {
     }
 
     @Override
-    public ServerResponse syncRoom(int roomId, final MessageCache messageCache) {
+    public ServerResponse syncRoom(int roomId, final Message[] messageCache) {
 
         System.out.println("------ SyncRoom ------");
         System.out.println("roomId:" + roomId);
-        System.out.println("#messages:" + messageCache.size());
+        System.out.println("#messages:" + messageCache.length);
         System.out.println("----------------------");
 
         if (roomId < 0) {

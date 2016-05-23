@@ -201,10 +201,10 @@ public class SecondaryClientListener extends Listener {
 
         switch (operationResult) {
         case SuccessResponse:
-            secondaryServer.getLogger().userDisconnected(userDisconnect.userEmail);
+            secondaryServer.getLogger().userDisconnected(userDisconnect.userToken);
             break;
         case InvalidToken:
-            secondaryServer.getLogger().userNotFound(userDisconnect.userEmail);
+            secondaryServer.getLogger().userNotFound(userDisconnect.userToken);
             break;
         default:
             secondaryServer.getLogger().invalidCommand("UserDisconnect");

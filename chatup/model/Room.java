@@ -1,6 +1,7 @@
 package chatup.model;
 
 import java.time.Instant;
+import java.util.LinkedList;
 
 public class Room extends RoomInfo {
 
@@ -21,14 +22,14 @@ public class Room extends RoomInfo {
 		final String userToken = paramMessage.getSender();
 
 		if (roomUsers.contains(userToken)) {
-			roomMessages.add(paramMessage);
+			roomMessages.push(paramMessage);
 		}
 		else {
 			roomUsers.add(userToken);
-			roomMessages.add(paramMessage);
+			roomMessages.push(paramMessage);
 		}
 
-        lastSync = Instant.now().getEpochSecond();
+        lastSync = roomMessages.getLast().getTimestamp();
 
 		return true;
 	}
@@ -47,7 +48,7 @@ public class Room extends RoomInfo {
     }
 
     @Override
-	public boolean removeMirror(int serverId) {
+	public boolean removeServer(int serverId) {
 
 		if (!roomServers.contains(serverId)) {
 			return false;
@@ -90,11 +91,35 @@ public class Room extends RoomInfo {
         return lastSync;
     }
 
-	public final MessageCache getMessages() {
-		return roomMessages;
-	}
+    public void syncMessages(final Message[] messageCache) {
 
-    public void syncMessages(final MessageCache messageCache) {
-        roomMessages.putAll(messageCache.getCache());
+        for (final Message currentMessage : messageCache) {
+            roomMessages.push(currentMessage);
+        }
+
+        lastSync = roomMessages.getLast().getTimestamp();
+    }
+
+
+    @Override
+    public String toString() {
+        return super.toString() + " #numberMessages=" + roomMessages.size();
+    }
+
+    public Message[] getMessages() {
+        return roomMessages.getMessages(0);
+    }
+
+    public Message[] getMessages(long paramTimestamp) {
+        return roomMessages.getMessages(paramTimestamp);
+    }
+
+    public void insertMessages(final LinkedList<Message> paramMessages) {
+
+        for (final Message currentMessage : paramMessages) {
+            roomMessages.push(currentMessage);
+        }
+
+        lastSync = roomMessages.getLast().getTimestamp();
     }
 }

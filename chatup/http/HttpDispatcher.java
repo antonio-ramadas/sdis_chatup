@@ -134,14 +134,12 @@ abstract class HttpDispatcher {
         if (extractedCommand != null) {
 
             if (extractedCommand.isObject()) {
-                System.out.print("received valid " + commandName + " request!");
                 return extractedCommand.asObject();
             }
 
-            System.out.print("received invalid " + commandName + " request!");
             return null;
         }
-        System.out.print("received invalid " + commandName + " request!");
+
         return null;
     }
 

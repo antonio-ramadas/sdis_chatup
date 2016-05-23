@@ -40,13 +40,14 @@ public class RoomInfo implements Serializable {
         return true;
     }
 
-    public boolean removeMirror(int serverId) {
+    public boolean removeServer(int serverId) {
 
-        if (!roomServers.contains(serverId)) {
+        if (roomServers.contains(serverId)) {
+            roomServers.remove(serverId);
+        }
+        else {
             return false;
         }
-
-        roomServers.remove(serverId);
 
         return true;
     }

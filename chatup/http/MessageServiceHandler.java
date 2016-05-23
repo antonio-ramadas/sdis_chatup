@@ -11,6 +11,8 @@ import com.eclipsesource.json.JsonValue;
 
 import com.sun.net.httpserver.HttpExchange;
 
+import java.time.Instant;
+
 class MessageServiceHandler extends HttpDispatcher {
 
     MessageServiceHandler(final HttpExchange httpExchange) {
@@ -21,24 +23,17 @@ class MessageServiceHandler extends HttpDispatcher {
     public void parseGetRequest(final String[] getValues) {
 
         final Server serverInstance = ChatupServer.getInstance();
-        final String userToken = parseString(getValues[0], HttpFields.UserToken);
-        int roomId = parseInteger(getValues[1], HttpFields.RoomId);
+        final String userToken = parseString(getValues[1], HttpFields.UserToken);
+        int roomId = parseInteger(getValues[0], HttpFields.RoomId);
 
         if (userToken == null || roomId < 0) {
             sendError(ServerResponse.MissingParameters);
         }
         else {
 
-            final Message[] userMessages = (Message[]) serverInstance.getMessages(userToken, roomId).getArray();
+            final JsonValue jsonObject = serverInstance.getMessages(userToken, roomId);
 
-            if (userMessages != null) {
-
-                final JsonValue jsonObject = Json.array();
-
-                for (final Message userMessage : userMessages) {
-                    jsonObject.asArray().add(userMessage.getId());
-                }
-
+            if (jsonObject != null) {
                 sendJsonResponse(ServerResponse.SuccessResponse, jsonObject);
             }
             else {
@@ -58,13 +53,13 @@ class MessageServiceHandler extends HttpDispatcher {
             int roomId = jsonObject.getInt(HttpFields.RoomId, -1);
             final String userToken = jsonObject.getString(HttpFields.UserToken, null);
             final String messageBody = jsonObject.getString(HttpFields.MessageContents, null);
-            final Message userMessage = new Message(roomId, userToken, messageBody);
+            //final Message userMessage = new Message(roomId, userToken, Instant.now().toEpochMilli(), messageBody);
 
             if (roomId < 0 || userToken == null || messageBody == null) {
                 sendError(ServerResponse.MissingParameters);
             }
             else {
-                sendTextResponse(serverInstance.insertMessage(userMessage), HttpCommands.SendMessage);
+                sendJsonResponse(ServerResponse.SuccessResponse, jsonObject.add(HttpFields.MessageTimestamp, Instant.now().toEpochMilli()));
             }
         }
         else {

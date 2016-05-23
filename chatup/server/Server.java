@@ -2,14 +2,13 @@ package chatup.server;
 
 import chatup.http.ServerResponse;
 import chatup.model.Message;
-import chatup.model.MessageCache;
 import chatup.model.Room;
 
-import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonValue;
 
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import google.collections.MinMaxPriorityQueue;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -100,11 +99,11 @@ public abstract class Server {
     // USER: userLogin, userDisconnect
     //---------------------------------
 
-    public ServerResponse userLogin(final String userToken, final String userEmail) {
+    public ServerResponse userLogin(final String userEmail, final String userToken) {
         throw new UnsupportedOperationException("UserLogin");
     }
 
-    public ServerResponse userDisconnect(final String userToken, final String userEmail) {
+    public ServerResponse userDisconnect(final String userEmail, final String userToken) {
         throw new UnsupportedOperationException("UserLogin");
     }
 
@@ -140,7 +139,7 @@ public abstract class Server {
         throw new UnsupportedOperationException("SyncRoom");
     }
 
-    public ServerResponse syncRoom(int roomId, final MessageCache messageCache) {
+    public ServerResponse syncRoom(int roomId, final Message[] messageCache) {
         throw new UnsupportedOperationException("SyncRoom");
     }
 

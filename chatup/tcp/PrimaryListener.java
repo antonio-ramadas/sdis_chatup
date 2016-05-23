@@ -30,10 +30,6 @@ public class PrimaryListener extends Listener {
 
         final ServerConnection serverConnection = (ServerConnection) paramConnection;
 
-        if (serverConnection.serverId <= 0) {
-            return;
-        }
-
         if (paramObject instanceof ServerOnline) {
 
             final ServerInfo serverInfo;
@@ -59,20 +55,21 @@ public class PrimaryListener extends Listener {
                 );
             }
 
-            int serverId = serverOnline.serverId;
-
-            serverConnection.serverId = serverId;
+            serverConnection.serverId = serverOnline.serverId;
             kryoServer.sendToAllExceptTCP(serverConnection.getId(), serverOnline);
-            myConnections.put(serverId, serverConnection.getId());
+            myConnections.put(serverOnline.serverId, serverConnection.getId());
 
             final ServerResponse operationResult = primaryServer.insertServer(serverInfo);
 
             switch (operationResult) {
             case SuccessResponse:
-                primaryServer.getLogger().serverOnline(serverId, serverInfo.getAddress());
+                primaryServer.getLogger().serverOnline(serverOnline.serverId, serverInfo.getAddress());
                 break;
             case ServerNotFound:
-                primaryServer.getLogger().serverNotFound(serverId);
+                primaryServer.getLogger().serverNotFound(serverOnline.serverId);
+                break;
+            case DatabaseError:
+               System.out.println("error accessing database");
                 break;
             default:
                 primaryServer.getLogger().invalidCommand("ServerOnline");

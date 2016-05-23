@@ -60,7 +60,7 @@ public class ServerLogger {
     }
 
     public void invalidCommand(final String commandName) {
-        error(commandName + "received empty or invalid command!");
+        error(commandName + " received empty or invalid command!");
     }
 
     public void roomExists(final String roomName) {
@@ -80,11 +80,11 @@ public class ServerLogger {
     }
 
     public void alreadyJoined(int roomId, final String userToken) {
-        warning("User" + userToken + " has already joined Room #" + roomId + "!");
+        warning("User #" + userToken + " has already joined Room #" + roomId + "!");
     }
 
     public void roomInvalidToken(int roomId, final String userToken) {
-        error("User " + userToken + " was not inside Room #" + roomId + "!");
+        error("User #" + userToken + " was not inside Room #" + roomId + "!");
     }
 
     public void syncRoom(int roomId, int serverId) {
@@ -116,19 +116,19 @@ public class ServerLogger {
     }
 
     public void serverOnline(int serverId, final String hostName) {
-        information("Server " + serverId + " connected from " + hostName + ".");
+        information("Server #" + serverId + " connected from " + hostName + ".");
     }
 
-    public void userDisconnected(final String userName) {
-        information(userName + " has logged out");
+    public void userDisconnected(final String userToken) {
+        information("User #" + userToken + " has logged out");
     }
 
     public void createRoom(final String userToken, final String roomName) {
-        information("User " + userToken + " has created Room " + roomName + ".");
+        information("User #" + userToken + " has created Room " + roomName + ".");
     }
 
-    public void joinRoom(final String userName, int roomId) {
-        information(userName + " has joined Room #" + roomId + ".");
+    public void joinRoom(final String userToken, int roomId) {
+        information("User #" + userToken + " has joined Room #" + roomId + ".");
     }
 
     public void deleteRoom(int roomId) {
@@ -136,31 +136,35 @@ public class ServerLogger {
     }
 
     public void leaveRoom(final String userToken, int roomId) {
-        information("User " + userToken + " has left Room #" + roomId + ".");
+        information("User #" + userToken + " has left Room #" + roomId + ".");
     }
 
     private void warning(final String paramMessage) {
-        write(consoleOutput, "[WARNING] " + paramMessage);
-        write(fileOutput, String.format("%s | WARNING | %s", generateTimestamp(), paramMessage));
-        flush();
+        System.out.println("[WARNING] " + paramMessage);
+       // write(consoleOutput, "[WARNING] " + paramMessage);
+       // write(fileOutput, String.format("%s | WARNING | %s", generateTimestamp(), paramMessage));
+       // flush();
     }
 
     private void error(final String paramMessage) {
-        write(consoleOutput, "[ERROR]" + paramMessage);
-        write(fileOutput, String.format("%s | ERROR | %s", generateTimestamp(), paramMessage));
-        flush();
+        System.out.println("[ERROR] " + paramMessage);
+     //   write(consoleOutput, "[ERROR]" + paramMessage);
+     //   write(fileOutput, String.format("%s | ERROR | %s", generateTimestamp(), paramMessage));
+      //  flush();
     }
 
     private void debug(final String paramMessage) {
-        write(consoleOutput, "[DEBUG]" + paramMessage);
-        write(fileOutput, String.format("%s | DEBUG | %s", generateFilename(), paramMessage));
-        flush();
+        System.out.println("[DEBUG] " + paramMessage);
+       // write(consoleOutput, "[DEBUG]" + paramMessage);
+      //  write(fileOutput, String.format("%s | DEBUG | %s", generateFilename(), paramMessage));
+       // flush();
     }
 
     private void information(final String paramMessage) {
-        write(consoleOutput, "[INFORMATION]" + paramMessage);
-        write(fileOutput, String.format("%s | INFORMATION | %s", generateFilename(), paramMessage));
-        flush();
+        System.out.println("[INFORMATION] " + paramMessage);
+        //write(consoleOutput, "[INFORMATION]" + paramMessage);
+        //write(fileOutput, String.format("%s | INFORMATION | %s", generateFilename(), paramMessage));
+        //flush();
     }
 
     private void write(final BufferedWriter buffer, final String message) {
@@ -175,14 +179,14 @@ public class ServerLogger {
     }
 
     public void removeUser(final String userToken) {
-        information("User " + userToken + " is not connected to this server anymore!");
+        information("User #" + userToken + " is not connected to this server anymore!");
     }
 
     public boolean debugEnabled() {
         return true;
     }
 
-    public void userNotFound(final String userEmail) {
-        warning("User " + userEmail + " not registed on this server!");
+    public void userNotFound(final String userToken) {
+        warning("User #" + userToken + " not registed on this server!");
     }
 }

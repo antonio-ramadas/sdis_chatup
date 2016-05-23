@@ -89,13 +89,11 @@ public class Database {
 
                 if (rs.next()) {
 
-                    final Room newRoom = new Room(
+                    return new Room(
                         rs.getString(RoomName),
                         rs.getString(RoomPassword),
                         rs.getString(RoomOwner)
                     );
-
-                    return newRoom;
                 }
             }
         }
@@ -165,7 +163,6 @@ public class Database {
     }
 
     private final static String queryInsertMessage = "INSERT INTO Messages(room, token, epoch, message) VALUES(?, ?, ?, ?)";
-    private final static String querySelectMessagesByRoomLimit = "SELECT * FROM Message WHERE room = ? ORDER BY epoch DESC LIMIT ";
     private final static String querySelectMessagesByRoom = "SELECT * FROM Messages WHERE room = ? ORDER BY epoch DESC";
     private final static String queryDeleteMessage = "DELETE FROM Messages WHERE id = ?";
 
@@ -228,39 +225,8 @@ public class Database {
         return myMessages;
     }
 
-    public LinkedList<Message> getMessagesByRoom(int roomId, int messagesQuantity) {
-
-        final LinkedList<Message> myMessages = new LinkedList<>();
-        final String sqlQuery = querySelectMessagesByRoomLimit + messagesQuantity;
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(sqlQuery)) {
-
-            stmt.setInt(1, roomId);
-
-            try (final ResultSet rs = stmt.executeQuery()) {
-
-                while (rs.next()) {
-
-                    final Message newMessage = new Message(
-                        rs.getInt(MessageRoom),
-                        rs.getString(MessageAuthor),
-                        rs.getLong(MessageTimestamp),
-                        rs.getString(MessageContent)
-                    );
-
-                    myMessages.add(newMessage);;
-                }
-            }
-        }
-        catch (SQLException ex) {
-            return null;
-        }
-
-        return myMessages;
-    }
-
     private static final String queryInsertServer = "INSERT INTO Servers(id, address, port, timestamp) VALUES(?, ?, ?, ?)";
-    private static final String queryUpdateServer = "UPDATE Servers SET address = ?, port = ?, timestamp = ? WHERE id = ?";;
+    private static final String queryUpdateServer = "UPDATE Servers SET address = ?, port = ?, timestamp = ? WHERE id = ?";
     private static final String queryDeleteServer = "DELETE FROM Servers WHERE id = ?";
     private static final String querySelectServers = "SELECT * FROM Servers";
 
@@ -342,7 +308,7 @@ public class Database {
     }
 
     private static final String queryInsertRoomServer = "INSERT INTO ServerRooms(server, room) VALUES(?, ?)";
-    private static final String queryDeleteRoomServer = "DELETE FROM ServerRooms WHERE server = ? AND room = ?";;
+    private static final String queryDeleteRoomServer = "DELETE FROM ServerRooms WHERE server = ? AND room = ?";
     private static final String querySelectServersByRoom = "SELECT * FROM ServerRooms WHERE room = ?";
 
     public boolean insertServerRoom(int serverId, int roomId) {
@@ -401,11 +367,11 @@ public class Database {
     private static final String querySelectUserById = "SELECT * FROM Users WHERE token = ?";
     private static final String querySelectUserByEmail = "SELECT * FROM Users WHERE email = ?";
 
-    public boolean insertUser(String token, String email) {
+    public boolean insertUser(final String userToken, final String userEmail) {
 
         try (final PreparedStatement stmt = dbConnection.prepareStatement(queryInsertUser)) {
-            stmt.setString(1, token);
-            stmt.setString(2, email);
+            stmt.setString(1, userToken);
+            stmt.setString(2, userEmail);
             stmt.executeUpdate();
         }
         catch (SQLException ex) {
