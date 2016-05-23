@@ -1,5 +1,6 @@
 package chatup.server;
 
+import chatup.http.HttpFields;
 import chatup.http.SecondaryDispatcher;
 import chatup.http.ServerResponse;
 import chatup.main.ChatupGlobals;
@@ -9,6 +10,8 @@ import chatup.model.Room;
 import chatup.model.Message;
 import chatup.tcp.*;
 
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonValue;
 import kryonet.Connection;
 import kryonet.KryoClient;
 import kryonet.KryoServer;
@@ -16,7 +19,9 @@ import kryonet.KryoServer;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Set;
 
 public class SecondaryServer extends Server {
@@ -41,6 +46,7 @@ public class SecondaryServer extends Server {
         //--------------------------------------------------------------------
 
         serverId = paramPrimary.getId();
+        serverTimestamp = 0L;
         serverDatabase = new Database(this);
         serverLogger = new ServerLogger(this);
 
@@ -128,6 +134,7 @@ public class SecondaryServer extends Server {
 	}
 
 	private int serverId;
+    private long serverTimestamp;
 
     @Override
     public int getId() {
@@ -311,59 +318,67 @@ public class SecondaryServer extends Server {
     }
 
 	@Override
-	public MessageCache<Integer, Message> getMessages(final String userToken, int roomId) {
+	public JsonValue getMessages(final String userToken, int roomId) {
 
         System.out.println("------ RetrieveMessages ------");
         System.out.println("roomId:" + roomId);
         System.out.println("userToken:" + userToken);
         System.out.println("------------------------------");
 
+        final JsonValue jsonArray = Json.array();
         final String userRecord = users.get(userToken);
 
         if (userRecord == null) {
-            return null;
+            return jsonArray;
         }
 
 		final Room selectedRoom = rooms.get(roomId);
 
         if (selectedRoom == null) {
             getLogger().roomNotFound(roomId);
-            return null;
+            return jsonArray;
         }
 
 		if (!selectedRoom.hasUser(userToken)) {
-			return null;
+			return jsonArray;
 		}
 
-		return selectedRoom.getMessages();
+        final MessageCache myMessages = selectedRoom.getMessages();
+
+        rooms.forEach((k, v) -> jsonArray.asArray()
+            .add(Json.object()
+            .add(HttpFields.RoomName, v.getName())
+             .add(HttpFields.UserToken, v.getOwner())
+             .add(HttpFields.RoomPrivate, v.isPrivate())
+             .add(HttpFields.RoomId, k)
+        ));
+
+        return jsonArray;
 	}
 
 	@Override
-	public ServerResponse insertServer(int serverId, final String serverAddress, int serverPort) {
+	public ServerResponse insertServer(final ServerInfo serverInfo) {
 
-        System.out.println("------ InsertServer ------");
-        System.out.println("serverId:" + serverId);
-        System.out.println("serverAddress:" + serverAddress);
-        System.out.println("serverPort:" + serverPort);
-        System.out.println("--------------------------");
+        //-------------------------------------------------------------
+        // 1) Verificar se servidor escolhido já existe na base de dados
+        //-------------------------------------------------------------
 
 		if (servers.containsKey(serverId)) {
 			return ServerResponse.OperationFailed;
 		}
 
-		servers.put(serverId, new ServerInfo(serverId, serverAddress, serverPort));
+		servers.put(serverId, serverInfo);
+        serverTimestamp = Instant.now().getEpochSecond();
 
 		return ServerResponse.SuccessResponse;
 	}
 
 	@Override
-	public ServerResponse updateServer(int serverId, final String serverAddress, int serverPort) {
+	public ServerResponse updateServer(final ServerInfo serverInfo) {
 
-        System.out.println("------ UpdateServer ------");
-        System.out.println("serverId:" + serverId);
-        System.out.println("serverAddress:" + serverAddress);
-        System.out.println("serverPort:" + serverPort);
-        System.out.println("--------------------------");
+        //-----------------------------------------------------------
+        // 1) Verificar se servidor escolhido existe na base de dados
+        //-----------------------------------------------------------
 
         final ServerInfo selectedServer = servers.get(serverId);
 
@@ -371,8 +386,16 @@ public class SecondaryServer extends Server {
 			return ServerResponse.ServerNotFound;
 		}
 
-		selectedServer.setAddress(serverAddress);
-		selectedServer.setPort(serverPort);
+        if (serverDatabase.updateServer(serverInfo)) {
+            selectedServer.setAddress(serverInfo.getAddress());
+            selectedServer.setPort(serverInfo.getPort());
+            selectedServer.setTimestamp(serverInfo.getTimestamp());
+        }
+        else {
+            return ServerResponse.DatabaseError;
+        }
+
+        serverTimestamp = Instant.now().getEpochSecond();
 
 		return ServerResponse.SuccessResponse;
 	}
@@ -384,12 +407,26 @@ public class SecondaryServer extends Server {
         System.out.println("serverId:" + serverId);
         System.out.println("--------------------------");
 
+        //-----------------------------------------------------------
+        // 1) Verificar se servidor escolhido existe na base de dados
+        //-----------------------------------------------------------
+
         if (servers.get(serverId) == null) {
             return ServerResponse.ServerNotFound;
         }
 
-        servers.remove(serverId);
-        rooms.forEach((roomId, room) -> room.removeMirror(serverId));
+        if (serverDatabase.deleteServer(serverId)) {
+            servers.remove(serverId);
+        }
+        else {
+            return ServerResponse.DatabaseError;
+        }
+
+        serverTimestamp = Instant.now().getEpochSecond();
+
+        rooms.forEach((roomId, room) -> {
+            room.removeMirror(serverId);
+        });
 
         return ServerResponse.SuccessResponse;
 	}
@@ -408,12 +445,16 @@ public class SecondaryServer extends Server {
             return ServerResponse.InvalidToken;
 		}
 
-        if (!userRecord.equals(userEmail)) {
+        if (userRecord.equals(userEmail)) {
+            users.remove(userToken);
+        }
+        else {
             return ServerResponse.InvalidToken;
         }
 
-		rooms.forEach((roomId, room) -> room.removeUser(userToken));
-		users.remove(userToken);
+        rooms.forEach((roomId, room) -> {
+            room.removeUser(userToken);
+        });
 
 		return ServerResponse.SuccessResponse;
 	}
@@ -472,5 +513,9 @@ public class SecondaryServer extends Server {
         selectedRoom.syncMessages(messageCache);
 
         return ServerResponse.SuccessResponse;
+    }
+
+    public ServerOnline getInformation() {
+        return new ServerOnline(serverId, serverTimestamp);
     }
 }

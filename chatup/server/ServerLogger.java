@@ -152,11 +152,13 @@ public class ServerLogger {
     }
 
     private void debug(final String paramMessage) {
+        write(consoleOutput, "[DEBUG]" + paramMessage);
         write(fileOutput, String.format("%s | DEBUG | %s", generateFilename(), paramMessage));
         flush();
     }
 
     private void information(final String paramMessage) {
+        write(consoleOutput, "[INFORMATION]" + paramMessage);
         write(fileOutput, String.format("%s | INFORMATION | %s", generateFilename(), paramMessage));
         flush();
     }

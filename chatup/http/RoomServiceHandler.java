@@ -4,7 +4,6 @@ import chatup.main.ChatupGlobals;
 import chatup.main.ChatupServer;
 import chatup.server.Server;
 
-import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 
@@ -18,7 +17,7 @@ class RoomServiceHandler extends HttpDispatcher {
 
     @Override
     public void parseGetRequest(String[] getValues) {
-        sendJsonResponse(ServerResponse.SuccessResponse, Json.object().add(HttpCommands.RetrieveRooms, ChatupServer.getInstance().getRooms()));
+        sendJsonResponse(ServerResponse.SuccessResponse, ChatupServer.getInstance().getRooms());
     }
 
     @Override

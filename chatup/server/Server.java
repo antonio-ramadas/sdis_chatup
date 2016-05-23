@@ -5,6 +5,7 @@ import chatup.model.Message;
 import chatup.model.MessageCache;
 import chatup.model.Room;
 
+import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonValue;
 
 import com.sun.net.httpserver.HttpHandler;
@@ -83,11 +84,11 @@ public abstract class Server {
     // SERVER: insertServer, updateServer, deleteServer
     //---------------------------------------------------------------
 
-    public ServerResponse insertServer(int serverId, final String serverAddress, int serverPort) {
+    public ServerResponse insertServer(final ServerInfo serverInfo) {
         throw new UnsupportedOperationException("InsertServer");
     }
 
-    public ServerResponse updateServer(int serverId, final String serverAddress, int serverPort) {
+    public ServerResponse updateServer(final ServerInfo serverInfo) {
         throw new UnsupportedOperationException("UpdateServer");
     }
 
@@ -151,7 +152,7 @@ public abstract class Server {
     // MESSAGE: getMessages, insertMessage, notifyMessage
     //---------------------------------------------------
 
-    public MessageCache getMessages(final String userToken, int roomId) {
+    public JsonValue getMessages(final String userToken, int roomId) {
         throw new UnsupportedOperationException("RetrieveMessages");
     }
 

@@ -4,18 +4,18 @@ public enum ServerResponse {
 
     AuthenticationFailed("authenticationFailed"),
     DatabaseError("databaseError"),
-    EmptyResponse("emptyResponse"),
     InvalidCommand("unexpectedCommand"),
     InvalidMethod("invalidMethod"),
-    InvalidResponse("invalidResponse"),
     InvalidService("invalidService"),
     InvalidToken("invalidToken"),
     MissingParameters("missingParameters"),
     OperationFailed("operationFailed"),
     RoomNotFound("roomNotFound"),
-    ServiceOffline("serviceOffline"),
     ServerNotFound("serverNotFound"),
-    SuccessResponse("success"), WrongPassword("wrongPassword");
+    ServiceOffline("serviceOffline"),
+    SuccessResponse("success"),
+    WrongPassword("wrongPassword"),
+    AlreadyJoined("alreadyJoined");
 
     private final String responseMessage;
 

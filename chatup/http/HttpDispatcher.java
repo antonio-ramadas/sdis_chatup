@@ -32,8 +32,18 @@ abstract class HttpDispatcher {
 
         switch (requestMethod) {
         case "GET":
-            parseGetRequest(httpExchange.getRequestURI().getQuery().split("&"));
+
+            final String httpQuery = httpExchange.getRequestURI().getQuery();
+
+            if (httpQuery != null) {
+                parseGetRequest(httpQuery.split("&"));
+            }
+            else {
+                parseGetRequest(new String[]{});
+            }
+
             break;
+
         case "POST":
             parsePostRequest(Json.parse(parseRequestBody(httpExchange.getRequestBody())));
             break;
@@ -124,12 +134,14 @@ abstract class HttpDispatcher {
         if (extractedCommand != null) {
 
             if (extractedCommand.isObject()) {
+                System.out.print("received valid " + commandName + " request!");
                 return extractedCommand.asObject();
             }
 
+            System.out.print("received invalid " + commandName + " request!");
             return null;
         }
-
+        System.out.print("received invalid " + commandName + " request!");
         return null;
     }
 
@@ -173,8 +185,6 @@ abstract class HttpDispatcher {
             for (int n = in.read(buf); n > 0; n = in.read(buf)) {
                 out.write(buf, 0, n);
             }
-
-            System.out.println( new String(out.toByteArray(), ChatupGlobals.DefaultEncoding));
 
             return new String(out.toByteArray(), ChatupGlobals.DefaultEncoding);
         }

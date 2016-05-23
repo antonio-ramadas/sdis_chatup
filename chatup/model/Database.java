@@ -1,6 +1,7 @@
 package chatup.model;
 
 import chatup.server.Server;
+import chatup.server.ServerConnection;
 import chatup.server.ServerInfo;
 import chatup.server.ServerType;
 
@@ -22,6 +23,7 @@ public class Database {
     private static final String MessageAuthor = "author";
     private static final String MessageTimestamp = "epoch";
     private static final String MessageRoom = "room";
+    private static final String ServerTimestamp = "timestamp";
 
     public Database(final Server paramServer) throws SQLException {
 
@@ -257,22 +259,18 @@ public class Database {
         return myMessages;
     }
 
-    private static final String queryInsertServer = "INSERT INTO Servers(id, address, port) VALUES(?, ?, ?)";
-    private static final String queryUpdateServer = "UPDATE Servers SET address = ?, port = ? WHERE id = ?";;
-    private static final String querySelectServerById = "SELECT * FROM Servers WHERE id = ?";
+    private static final String queryInsertServer = "INSERT INTO Servers(id, address, port, timestamp) VALUES(?, ?, ?, ?)";
+    private static final String queryUpdateServer = "UPDATE Servers SET address = ?, port = ?, timestamp = ? WHERE id = ?";;
     private static final String queryDeleteServer = "DELETE FROM Servers WHERE id = ?";
     private static final String querySelectServers = "SELECT * FROM Servers";
 
-    public boolean insertServer(int serverId, final String serverAddress, int serverPort) {
-
-        if (serverExists(serverId)) {
-            return updateServer(serverId, serverAddress, serverPort);
-        }
+    public boolean insertServer(final ServerInfo paramServer) {
 
         try (final PreparedStatement stmt = dbConnection.prepareStatement(queryInsertServer)) {
-            stmt.setInt(1, serverId);
-            stmt.setString(2, serverAddress);
-            stmt.setInt(3, serverPort);
+            stmt.setInt(1, paramServer.getId());
+            stmt.setString(2, paramServer.getAddress());
+            stmt.setInt(3, paramServer.getPort());
+            stmt.setLong(4, paramServer.getTimestamp());
             stmt.executeUpdate();
         }
         catch (SQLException ex) {
@@ -295,12 +293,13 @@ public class Database {
         return true;
     }
 
-    public boolean updateServer(int serverId, final String serverAddress, int serverPort) {
+    public boolean updateServer(final ServerInfo serverInfo) {
 
         try (final PreparedStatement stmt = dbConnection.prepareStatement(queryUpdateServer)) {
-            stmt.setString(1, serverAddress);
-            stmt.setInt(2, serverPort);
-            stmt.setInt(3, serverId);
+            stmt.setString(1, serverInfo.getAddress());
+            stmt.setInt(2, serverInfo.getPort());
+            stmt.setLong(3, serverInfo.getTimestamp());
+            stmt.setInt(4, serverInfo.getId());
             stmt.executeUpdate();
         }
         catch (SQLException ex) {
@@ -308,26 +307,6 @@ public class Database {
         }
 
         return true;
-    }
-
-    private boolean serverExists(int serverId) {
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(querySelectServerById)) {
-
-            stmt.setInt(1, serverId);
-
-            try (final ResultSet rs = stmt.executeQuery()) {
-
-                if (rs.next()) {
-                    return true;
-                }
-            }
-        }
-        catch (SQLException ex) {
-            return false;
-        }
-
-        return false;
     }
 
     public final HashMap<Integer, ServerInfo> getServers() {
@@ -343,8 +322,9 @@ public class Database {
 
                 final ServerInfo newServer = new ServerInfo(
                     serverId,
+                    rs.getLong(ServerTimestamp),
                     rs.getString(ServerAddress),
-                    rs.getShort(ServerPort)
+                    rs.getInt(ServerPort)
                 );
 
                 myServers.put(serverId, newServer);

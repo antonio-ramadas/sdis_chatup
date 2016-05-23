@@ -1,47 +1,49 @@
 package chatup.model;
 
+import chatup.main.ChatupGlobals;
+
 import java.io.Serializable;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
-public class MessageCache<K, V> implements Serializable {
+public class MessageCache implements Serializable {
 
-    private final Map<K, V> cache;
+    private final PriorityQueue<Message> cache;
+    private final Set<Integer> messageIds;
 
-    public MessageCache(final int maxEntries) {
-
-        cache = new LinkedHashMap<K, V>((int) Math.ceil(maxEntries * 1.75), .75f, true) {
-
-            private static final long serialVersionUID = -1650698049637132983L;
-
-            @Override
-            public boolean removeEldestEntry(Map.Entry<K, V> eldest) {
-                return size() > maxEntries;
-            }
-        };
+    MessageCache() {
+        maximumLength = ChatupGlobals.DefaultCacheSize;
+        messageIds = new HashSet<>();
+        cache = new PriorityQueue<>();
     }
+
+    private int maximumLength;
 
     public Object[] getArray() {
-        return cache.values().toArray(new Object[cache.size()]);
+        return cache.toArray(new Object[cache.size()]);
     }
 
-    public void add(final K key, final V value) {
-        cache.put(key, value);
+    public void add(final Message paramMessage) {
+
+        if (messageIds.contains(paramMessage.getId())) {
+            return;
+        }
+
+        cache.add(paramMessage);
+
+        if (cache.size() > maximumLength) {
+            cache.poll();
+        }
     }
 
     public int size() {
         return cache.size();
     }
 
-    public final V get(final K key) {
-        return cache.get(key);
-    }
-
-    public final Map<K,V> getCache() {
+    final PriorityQueue<Message> getCache() {
         return cache;
     }
 
-    public void putAll(Map<K,V> otherMap) {
-        cache.putAll(otherMap);
+    void putAll(Collection<Message> paramCollection) {
+        paramCollection.forEach(this::add);
     }
 }

@@ -8,7 +8,9 @@ public class ChatupGlobals {
     public static final String UserServiceUrl = "UserService";
     public static final String RoomServiceUrl = "RoomService";
 
-    public static final int DefaultHttpPort = 8080;
-    public static final int DefaultTcpPort = 8085;
+    static final int DefaultHttpPort = 8080;
+    static final int DefaultTcpPort = 8085;
+
     public static final int DefaultTimeout = 5000;
+    public static final int DefaultCacheSize = 100;
 }

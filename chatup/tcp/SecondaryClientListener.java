@@ -1,7 +1,9 @@
 package chatup.tcp;
 
 import chatup.http.ServerResponse;
+import chatup.model.CommandQueue;
 import chatup.server.SecondaryServer;
+import chatup.server.ServerInfo;
 
 import kryonet.Connection;
 import kryonet.KryoClient;
@@ -128,6 +130,9 @@ public class SecondaryClientListener extends Listener {
         else if (paramObject instanceof LeaveRoom) {
             leaveRoom((LeaveRoom)paramObject);
         }
+        else if (paramObject instanceof CommandQueue) {
+            syncServer((CommandQueue)paramObject);
+        }
         else if (paramObject instanceof UserDisconnect) {
             userDisconnect((UserDisconnect) paramObject);
         }
@@ -142,6 +147,50 @@ public class SecondaryClientListener extends Listener {
         }
     }
 
+    private void updateServer(final ServerOnline serverOnline) {
+
+        int serverId = serverOnline.serverId;
+
+        final ServerInfo serverInfo = new ServerInfo(
+            serverId,
+            serverOnline.serverTimestamp,
+            serverOnline.serverAddress,
+            serverOnline.serverPort
+        );
+
+        final ServerResponse operationResult = secondaryServer.insertServer(serverInfo);
+
+        switch (operationResult) {
+        case SuccessResponse:
+            secondaryServer.getLogger().serverOnline(serverId, serverInfo.getAddress());
+            break;
+        case ServerNotFound:
+            secondaryServer.getLogger().serverNotFound(serverId);
+            break;
+        default:
+            secondaryServer.getLogger().invalidCommand("ServerOnline");
+            break;
+        }
+    }
+
+    private void syncServer(final CommandQueue messageQueue) {
+
+        while (!messageQueue.empty()) {
+
+            final Object paramObject = messageQueue.get();
+
+            if (paramObject instanceof DeleteRoom) {
+                deleteRoom((DeleteRoom) paramObject);
+            }
+            else if (paramObject instanceof ServerOnline) {
+                updateServer((ServerOnline)paramObject);
+            }
+            else if (paramObject instanceof DeleteServer) {
+                deleteServer((DeleteServer) paramObject);
+            }
+        }
+    }
+
     private void userDisconnect(final UserDisconnect userDisconnect) {
 
         final ServerResponse operationResult = secondaryServer.userDisconnect
@@ -151,20 +200,20 @@ public class SecondaryClientListener extends Listener {
         );
 
         switch (operationResult) {
-            case SuccessResponse:
-                secondaryServer.getLogger().userDisconnected(userDisconnect.userEmail);
-                break;
-            case InvalidToken:
-                secondaryServer.getLogger().userNotFound(userDisconnect.userEmail);
-                break;
-            default:
-                secondaryServer.getLogger().invalidCommand("UserDisconnect");
-                break;
+        case SuccessResponse:
+            secondaryServer.getLogger().userDisconnected(userDisconnect.userEmail);
+            break;
+        case InvalidToken:
+            secondaryServer.getLogger().userNotFound(userDisconnect.userEmail);
+            break;
+        default:
+            secondaryServer.getLogger().invalidCommand("UserDisconnect");
+            break;
         }
     }
 
     @Override
     public void connected(final Connection paramConnection) {
-        kryoClient.sendTCP(new ServerOnline(secondaryServer.getId()));
+        kryoClient.sendTCP(secondaryServer.getInformation());
     }
 }

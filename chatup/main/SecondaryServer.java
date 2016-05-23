@@ -2,6 +2,8 @@ package chatup.main;
 
 import chatup.server.ServerInfo;
 
+import java.time.Instant;
+
 public class SecondaryServer {
 
     private static void displayUsage() {
@@ -54,6 +56,7 @@ public class SecondaryServer {
 
             final ServerInfo primaryServer = new ServerInfo(
                 serverId,
+                Instant.now().getEpochSecond(),
                 addressString,
                 Integer.parseInt(args[1].substring(separatorPosition + 1))
             );

@@ -1,5 +1,6 @@
 package chatup.server;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -8,16 +9,18 @@ public class ServerInfo implements Comparable<ServerInfo> {
     private String serverAddress;
     private Set<String> serverUsers;
 
-    public ServerInfo(int serverId, final String serverAddress, int serverPort) {
+    public ServerInfo(int serverId, long serverTimestamp, final String serverAddress, int serverPort) {
         setId(serverId);
         setAddress(serverAddress);
         setPort(serverPort);
+        setTimestamp(serverTimestamp);
         serverStatus = false;
         serverUsers = new HashSet<>();
     }
 
     private int serverPort;
     private int serverId;
+    private long serverTimestamp;
     private boolean serverStatus;
 
     public int getId() {
@@ -26,6 +29,10 @@ public class ServerInfo implements Comparable<ServerInfo> {
 
     public int getPort() {
         return serverPort;
+    }
+
+    public long getTimestamp() {
+        return serverTimestamp;
     }
 
     public String getAddress() {
@@ -39,8 +46,13 @@ public class ServerInfo implements Comparable<ServerInfo> {
     public void setId(int paramId) {
         serverId = paramId;
     }
+
     public void setPort(int paramPort) {
         serverPort = paramPort;
+    }
+
+    public void setTimestamp(long paramTimestamp) {
+        serverTimestamp = paramTimestamp;
     }
 
     public void setAddress(final String paramAddress) {
@@ -99,5 +111,9 @@ public class ServerInfo implements Comparable<ServerInfo> {
     @Override
     public String toString() {
         return serverAddress + ":" + serverPort;
+    }
+
+    public void updateTimestamp() {
+        serverTimestamp = Instant.now().getEpochSecond();
     }
 }

@@ -1,6 +1,7 @@
 package chatup.model;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,12 +12,19 @@ public class RoomInfo implements Serializable {
     private String roomOwner;
 
     public RoomInfo(final String paramName, final String paramPassword, final String paramOwner) {
+        this(paramName, paramPassword, Instant.now().getEpochSecond(), paramOwner);
+    }
+
+    public RoomInfo(final String paramName, final String paramPassword, long paramTimestamp, final String paramOwner) {
         roomName = paramName;
         roomOwner = paramOwner;
         roomPassword = paramPassword;
+        roomTimestamp = paramTimestamp;
         roomUsers = new HashSet<>();
         roomServers = new HashSet<>();
     }
+
+    private long roomTimestamp;
 
     Set<String> roomUsers;
     Set<Integer> roomServers;
@@ -109,5 +117,9 @@ public class RoomInfo implements Serializable {
 
     public boolean validatePassword(String userPassword) {
         return roomPassword.equals(userPassword);
+    }
+
+    public long getTimestamp() {
+        return roomTimestamp;
     }
 }
