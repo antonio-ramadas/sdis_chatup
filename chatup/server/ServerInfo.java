@@ -39,11 +39,7 @@ public class ServerInfo implements Comparable<ServerInfo> {
         return serverAddress;
     }
 
-    public Set<String> getUsers() {
-        return serverUsers;
-    }
-
-    void setId(int paramId) {
+    private void setId(int paramId) {
         serverId = paramId;
     }
 
@@ -79,7 +75,7 @@ public class ServerInfo implements Comparable<ServerInfo> {
     public int compareTo(final ServerInfo serverInfo) {
 
         int thisUsers = serverUsers.size();
-        int otherUsers = serverInfo.getUsers().size();
+        int otherUsers = serverInfo.serverUsers.size();
 
         if (thisUsers < otherUsers) {
             return -1;

@@ -2,20 +2,21 @@ package chatup.http;
 
 public enum ServerResponse {
 
+    AlreadyJoined("alreadyJoined"),
     AuthenticationFailed("authenticationFailed"),
     DatabaseError("databaseError"),
-    InvalidCommand("unexpectedCommand"),
+    InvalidOperation("unexpectedCommand"),
     InvalidMethod("invalidMethod"),
     InvalidService("invalidService"),
     InvalidToken("invalidToken"),
     MissingParameters("missingParameters"),
     OperationFailed("operationFailed"),
+    RoomExists("roomExists"),
     RoomNotFound("roomNotFound"),
     ServerNotFound("serverNotFound"),
     ServiceOffline("serviceOffline"),
     SuccessResponse("success"),
-    WrongPassword("wrongPassword"),
-    AlreadyJoined("alreadyJoined"),;
+    WrongPassword("wrongPassword");
 
     private final String responseMessage;
 

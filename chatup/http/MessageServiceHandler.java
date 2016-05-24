@@ -2,6 +2,7 @@ package chatup.http;
 
 import chatup.main.ChatupGlobals;
 import chatup.main.ChatupServer;
+import chatup.model.Message;
 import chatup.server.Server;
 
 import com.eclipsesource.json.JsonObject;
@@ -51,17 +52,24 @@ class MessageServiceHandler extends HttpDispatcher {
             int roomId = jsonObject.getInt(HttpFields.RoomId, -1);
             final String userToken = jsonObject.getString(HttpFields.UserToken, null);
             final String messageBody = jsonObject.getString(HttpFields.MessageContents, null);
-            //final Message userMessage = new Message(roomId, userToken, Instant.now().toEpochMilli(), messageBody);
 
-            if (roomId < 0 || userToken == null || messageBody == null) {
+            if (roomId < 0 || userToken == null) {
+                sendError(ServerResponse.MissingParameters);
+            }
+            else if (messageBody == null || messageBody.isEmpty()) {
                 sendError(ServerResponse.MissingParameters);
             }
             else {
-                sendJsonResponse(ServerResponse.SuccessResponse, jsonObject.add(HttpFields.MessageTimestamp, Instant.now().toEpochMilli()));
+                sendJsonResponse(
+                    serverInstance.insertMessage(
+                        new Message(roomId, userToken, Instant.now().toEpochMilli(), messageBody)
+                    ),
+                    jsonObject.add(HttpFields.MessageTimestamp, Instant.now().toEpochMilli())
+                );
             }
         }
         else {
-            sendError(ServerResponse.InvalidCommand);
+            sendError(ServerResponse.InvalidOperation);
         }
     }
 }

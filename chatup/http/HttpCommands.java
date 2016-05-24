@@ -1,6 +1,8 @@
 package chatup.http;
 
 class HttpCommands {
+    static final String GenericError = "error";
+    static final String GenericSuccess = "success";
     static final String SendMessage = "SendMessage";
     static final String CreateRoom = "CreateRoom";
     static final String JoinRoom = "JoinRoom";

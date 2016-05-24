@@ -19,6 +19,7 @@ public class SecondaryClientListener extends Listener {
     private final KryoClient kryoClient;
     private final SecondaryServer secondaryServer;
 
+    // TODO: Verified!
     private void createRoom(final CreateRoom createRoom) {
 
         final ServerResponse operationResult = secondaryServer.createRoom
@@ -28,17 +29,21 @@ public class SecondaryClientListener extends Listener {
             createRoom.userToken
         );
 
-        if (operationResult == ServerResponse.SuccessResponse) {
+        switch (operationResult) {
+        case SuccessResponse:
             secondaryServer.registerUser(createRoom.userToken, createRoom.userEmail);
-        }
-        else if (operationResult == ServerResponse.OperationFailed) {
+            secondaryServer.getLogger().createRoom(createRoom.userToken, createRoom.roomName);
+            break;
+        case RoomExists:
             secondaryServer.getLogger().roomExists(createRoom.roomName);
-        }
-        else {
-            secondaryServer.getLogger().invalidCommand("CreateRoom");
+            break;
+        case DatabaseError:
+            secondaryServer.getLogger().databaseError();
+            break;
         }
     }
 
+    // TODO: Verified!
     private void joinRoom(final JoinRoom joinRoom) {
 
         final ServerResponse operationResult = secondaryServer.joinRoom
@@ -55,12 +60,13 @@ public class SecondaryClientListener extends Listener {
         case RoomNotFound:
             secondaryServer.getLogger().roomNotFound(joinRoom.roomId);
             break;
-        default:
-            secondaryServer.getLogger().invalidCommand("JoinRoom");
+        case AlreadyJoined:
+            secondaryServer.getLogger().alreadyJoined(joinRoom.roomId, joinRoom.userToken);
             break;
         }
     }
 
+    // TODO: Verified!
     private void leaveRoom(final LeaveRoom leaveRoom) {
 
         final ServerResponse operationResult = secondaryServer.leaveRoom
@@ -79,12 +85,10 @@ public class SecondaryClientListener extends Listener {
         case RoomNotFound:
             secondaryServer.getLogger().roomNotFound(leaveRoom.roomId);
             break;
-        default:
-            secondaryServer.getLogger().invalidCommand("LeaveRoom");
-            break;
         }
     }
 
+    // TODO: Verified!
     private void deleteRoom(final DeleteRoom deleteRoom) {
 
         final ServerResponse operationResult = secondaryServer.deleteRoom(deleteRoom.roomId);
@@ -96,12 +100,13 @@ public class SecondaryClientListener extends Listener {
         case RoomNotFound:
             secondaryServer.getLogger().roomNotFound(deleteRoom.roomId);
             break;
-        default:
-            secondaryServer.getLogger().invalidCommand("DeleteRoom");
+        case DatabaseError:
+            secondaryServer.getLogger().databaseError();
             break;
         }
     }
 
+    // TODO: Verified!
     private void deleteServer(final DeleteServer deleteServer) {
 
         final ServerResponse operationResult = secondaryServer.deleteServer(deleteServer.serverId);
@@ -113,14 +118,16 @@ public class SecondaryClientListener extends Listener {
         case ServerNotFound:
             secondaryServer.getLogger().serverNotFound(deleteServer.serverId);
             break;
-        default:
-            secondaryServer.getLogger().invalidCommand("DeleteServer");
+        case DatabaseError:
+            secondaryServer.getLogger().databaseError();
             break;
         }
     }
 
     @Override
     public void received(final Connection paramConnection, final Object paramObject) {
+
+        secondaryServer.getLogger().invalidOperation(paramObject);
 
         if (paramObject instanceof JoinRoom) {
             joinRoom((JoinRoom)paramObject);
@@ -143,30 +150,32 @@ public class SecondaryClientListener extends Listener {
         else if (paramObject instanceof DeleteServer) {
             deleteServer((DeleteServer)paramObject);
         }
+        else {
+            secondaryServer.getLogger().invalidOperation(paramObject);
+        }
     }
 
+    // TODO: Verified!
     private void updateServer(final ServerOnline serverOnline) {
 
-        int serverId = serverOnline.serverId;
-
         final ServerInfo serverInfo = new ServerInfo(
-            serverId,
+            serverOnline.serverId,
             serverOnline.serverTimestamp,
             serverOnline.serverAddress,
             serverOnline.serverPort
         );
 
-        final ServerResponse operationResult = secondaryServer.insertServer(serverInfo);
+        final ServerResponse operationResult = secondaryServer.updateServer(serverInfo);
 
         switch (operationResult) {
         case SuccessResponse:
-            secondaryServer.getLogger().serverOnline(serverId, serverInfo.getAddress());
+            secondaryServer.getLogger().serverOnline(serverOnline.serverId, serverInfo.getAddress());
             break;
         case ServerNotFound:
-            secondaryServer.getLogger().serverNotFound(serverId);
+            secondaryServer.getLogger().serverNotFound(serverOnline.serverId);
             break;
-        default:
-            secondaryServer.getLogger().invalidCommand("ServerOnline");
+        case DatabaseError:
+            secondaryServer.getLogger().databaseError();
             break;
         }
     }
@@ -186,12 +195,10 @@ public class SecondaryClientListener extends Listener {
             else if (paramObject instanceof DeleteServer) {
                 deleteServer((DeleteServer) paramObject);
             }
-            else {
-
-            }
         }
     }
 
+    // TODO: Verified!
     private void userDisconnect(final UserDisconnect userDisconnect) {
 
         final ServerResponse operationResult = secondaryServer.userDisconnect
@@ -206,9 +213,6 @@ public class SecondaryClientListener extends Listener {
             break;
         case InvalidToken:
             secondaryServer.getLogger().userNotFound(userDisconnect.userToken);
-            break;
-        default:
-            secondaryServer.getLogger().invalidCommand("UserDisconnect");
             break;
         }
     }

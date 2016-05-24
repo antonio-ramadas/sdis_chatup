@@ -17,7 +17,7 @@ public class ServerLogger {
             serverName = "primary";
         }
         else {
-            serverName = "secondary" + paramServer.getId();
+            serverName = "secondary-" + paramServer.getId();
         }
 
         if (createDirectory(serverName)) {
@@ -59,8 +59,8 @@ public class ServerLogger {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss' | '").format(new Date());
     }
 
-    public void invalidCommand(final String commandName) {
-        error(commandName + " received empty or invalid command!");
+    public void invalidOperation(final Object paramObject) {
+        error(paramObject.getClass().getSimpleName() + " received empty or invalid command!");
     }
 
     public void roomExists(final String roomName) {
@@ -84,15 +84,15 @@ public class ServerLogger {
     }
 
     public void roomInvalidToken(int roomId, final String userToken) {
-        error("User #" + userToken + " was not inside Room #" + roomId + "!");
+        error("Received message from User #" + userToken + ", but user is currently not inside Room #" + roomId + "!");
     }
 
     public void syncRoom(int roomId, int serverId) {
-        information("Sending Room $" + roomId + "$ metadata to server " + serverId + "...");
+        information("Sending Room #" + roomId + " metadata to Server #" + serverId + "...");
     }
 
-    public void updateRoom(final String roomName, int serverId) {
-        information("Received Room $" + roomName + "$ metadata from server " + serverId + "!");
+    public void updateRoom(final int roomId, int serverId) {
+        information("Received Room #" + roomId + " metadata from Server #" + serverId + "!");
     }
 
     public void sendMessage(int roomId) {
@@ -188,5 +188,9 @@ public class ServerLogger {
 
     public void userNotFound(final String userToken) {
         warning("User #" + userToken + " not registed on this server!");
+    }
+
+    public void databaseError() {
+        error("Database access error, could not save changes to disk!");
     }
 }

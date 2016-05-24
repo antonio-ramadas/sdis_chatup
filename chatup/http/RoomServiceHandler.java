@@ -32,7 +32,7 @@ class RoomServiceHandler extends HttpDispatcher {
             final String userPassword = jsonObject.getString(HttpFields.RoomPassword, null);
             final String userToken = jsonObject.getString(HttpFields.UserToken, null);
 
-            if (roomId < 0 || userToken == null) {
+            if (roomId < 0 || userToken == null || userToken.isEmpty()) {
                 sendError(ServerResponse.MissingParameters);
             }
             else {
@@ -40,7 +40,7 @@ class RoomServiceHandler extends HttpDispatcher {
             }
         }
         else {
-            sendError(ServerResponse.InvalidCommand);
+            sendError(ServerResponse.InvalidOperation);
         }
     }
 
@@ -56,7 +56,10 @@ class RoomServiceHandler extends HttpDispatcher {
             final String roomPassword = jsonObject.getString(HttpFields.RoomPassword, null);
             final String userToken = jsonObject.getString(HttpFields.UserToken, null);
 
-            if (roomName == null || userToken == null) {
+            if (roomName == null || roomName.isEmpty()) {
+                sendError(ServerResponse.MissingParameters);
+            }
+            else if (userToken == null || userToken.isEmpty()) {
                 sendError(ServerResponse.MissingParameters);
             }
             else {
@@ -64,7 +67,7 @@ class RoomServiceHandler extends HttpDispatcher {
             }
         }
         else {
-            sendError(ServerResponse.InvalidCommand);
+            sendError(ServerResponse.InvalidOperation);
         }
     }
 
@@ -79,7 +82,7 @@ class RoomServiceHandler extends HttpDispatcher {
             int roomId = jsonObject.getInt(HttpFields.RoomId, -1);
             final String userToken = jsonObject.getString(HttpFields.UserToken, null);
 
-            if (roomId < 0 || userToken == null) {
+            if (roomId < 0 || userToken == null || userToken.isEmpty()) {
                 sendError(ServerResponse.MissingParameters);
             }
             else {
@@ -87,7 +90,7 @@ class RoomServiceHandler extends HttpDispatcher {
             }
         }
         else {
-            sendError(ServerResponse.InvalidCommand);
+            sendError(ServerResponse.InvalidOperation);
         }
     }
 }

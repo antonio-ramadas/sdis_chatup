@@ -33,13 +33,15 @@ import java.nio.channels.Selector;
 class UdpConnection
 {
     InetSocketAddress connectedAddress;
-    DatagramChannel datagramChannel;
 
     private final ByteBuffer readBuffer;
     private final ByteBuffer writeBuffer;
     private final Serialization serialization;
-    private SelectionKey selectionKey;
     private final Object writeLock = new Object();
+
+    private DatagramChannel datagramChannel;
+    private SelectionKey selectionKey;
+
 
     UdpConnection(final Serialization serialization, int bufferSize)
     {
@@ -48,7 +50,7 @@ class UdpConnection
         writeBuffer = ByteBuffer.allocateDirect(bufferSize);
     }
 
-    int keepAliveMillis = 19000;
+    private int keepAliveMillis = 19000;
     private long lastCommunicationTime;
 
     void connect(Selector selector, InetSocketAddress remoteAddress) throws IOException

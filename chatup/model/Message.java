@@ -7,7 +7,7 @@ public class Message implements Comparable<Message>, Serializable {
     private long messageTimestamp;
     private int messageRoom;
 
-    Message(int roomId, final String messageAuthor, long messageTimestamp, final String messageContents) {
+    public Message(int roomId, final String messageAuthor, long messageTimestamp, final String messageContents) {
         setId(roomId);
         setAuthor(messageAuthor);
         setMessage(messageContents);

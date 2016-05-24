@@ -1,5 +1,6 @@
 package chatup.server;
 
+import chatup.model.MessageCache;
 import chatup.tcp.*;
 import com.esotericsoftware.kryo.Kryo;
 import kryonet.EndPoint;
@@ -13,6 +14,7 @@ class TcpNetwork {
         kryo.register(DeleteServer.class);
         kryo.register(JoinRoom.class);
         kryo.register(LeaveRoom.class);
+        kryo.register(MessageCache.class);
         kryo.register(ServerOffline.class);
         kryo.register(ServerOnline.class);
         kryo.register(SyncRoom.class);

@@ -37,7 +37,7 @@ public class Connection
     UdpConnection udp;
     InetSocketAddress udpRemoteAddress;
     private Listener[] listeners = {};
-    private Object listenerLock = new Object();
+    private final Object listenerLock = new Object();
     volatile boolean isConnected;
     volatile KryoNetException lastProtocolError;
 
@@ -110,7 +110,7 @@ public class Connection
         }
     }
 
-    public int sendUDP(Object object)
+    int sendUDP(Object object)
     {
         SocketAddress address = udpRemoteAddress;
 
@@ -194,16 +194,6 @@ public class Connection
         }
 
         setConnected(false);
-    }
-
-    public void setKeepAliveTCP(int keepAliveMillis)
-    {
-        tcp.keepAliveMillis = keepAliveMillis;
-    }
-
-    public void setTimeout(int timeoutMillis)
-    {
-        tcp.timeoutMillis = timeoutMillis;
     }
 
     public void addListener(Listener listener)

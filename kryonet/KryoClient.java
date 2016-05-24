@@ -54,11 +54,15 @@ public class KryoClient extends Connection implements EndPoint {
     private final Serialization serialization;
     private Selector selector;
     private int emptySelects;
-    private volatile boolean tcpRegistered, udpRegistered;
-    private Object tcpRegistrationLock = new Object();
-    private Object udpRegistrationLock = new Object();
+
+    private volatile boolean tcpRegistered;
+    private volatile boolean udpRegistered;
     private volatile boolean shutdown;
+
+    private final Object tcpRegistrationLock = new Object();
+    private final Object udpRegistrationLock = new Object();
     private final Object updateLock = new Object();
+
     private Thread updateThread;
     private int connectTimeout;
     private InetAddress connectHost;
@@ -110,11 +114,6 @@ public class KryoClient extends Connection implements EndPoint {
     public void connect (int timeout, String host, int tcpPort) throws IOException
     {
         connect(timeout, InetAddress.getByName(host), tcpPort, -1);
-    }
-
-    public void connect (int timeout, InetAddress host, int tcpPort) throws IOException
-    {
-        connect(timeout, host, tcpPort, -1);
     }
 
     private void connect (int timeout, InetAddress host, int tcpPort, int udpPort) throws IOException
@@ -330,7 +329,11 @@ public class KryoClient extends Connection implements EndPoint {
                                             {
                                                 tcpRegistered = true;
                                                 tcpRegistrationLock.notifyAll();
-                                                if (udp == null) setConnected(true);
+
+                                                if (udp == null)
+                                                {
+                                                    setConnected(true);
+                                                }
                                             }
 
                                             if (udp == null)
@@ -350,12 +353,6 @@ public class KryoClient extends Connection implements EndPoint {
                                             {
                                                 udpRegistered = true;
                                                 udpRegistrationLock.notifyAll();
-
-                                                if (DEBUG)
-                                                {
-                                                    debug("kryonet", "Port " + udp.datagramChannel.socket().getLocalPort() + "/UDP connected to: " + udp.connectedAddress);
-                                                }
-
                                                 setConnected(true);
                                             }
 
@@ -565,11 +562,6 @@ public class KryoClient extends Connection implements EndPoint {
     public void removeListener(final Listener listener)
     {
         super.removeListener(listener);
-    }
-
-    public void setKeepAliveUDP (int keepAliveMillis)
-    {
-        udp.keepAliveMillis = keepAliveMillis;
     }
 
     @Override

@@ -1,11 +1,13 @@
 package chatup.model;
 
 import chatup.main.ChatupGlobals;
+
 import google.collections.MinMaxPriorityQueue;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
-public class MessageCache {
+public class MessageCache implements Serializable {
 
     private MinMaxPriorityQueue<Message> myQueue;
 

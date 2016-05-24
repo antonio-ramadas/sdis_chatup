@@ -116,7 +116,7 @@ public class SecondaryServer extends Server {
         TcpNetwork.register(myClient);
         myClient.addListener(myClientListener);
         myClient.start();
-        myClient.connect(ChatupGlobals.DefaultTimeout, InetAddress.getByName(paramPrimary.getAddress()), paramPrimary.getPort());
+        myClient.connect(ChatupGlobals.DefaultTimeout, paramPrimary.getAddress(), paramPrimary.getPort());
 
         //--------------------------------------------------------------------------------
         // 6) Inicializar servidor TCP/SSL para receber pedidos dos servidores secundários
@@ -207,8 +207,8 @@ public class SecondaryServer extends Server {
 		}
 
 		if (selectedRoom.hasUser(userToken)) {
-			return ServerResponse.OperationFailed;
-		}
+            return ServerResponse.AlreadyJoined;
+        }
 
 		selectedRoom.registerUser(userToken);
 
@@ -488,8 +488,10 @@ public class SecondaryServer extends Server {
     @Override
     public ServerResponse syncRoom(int roomId, int serverId) {
 
+        System.out.println("------ SyncRoom ------");
         System.out.println("roomId:" + roomId);
         System.out.println("serverId:" + serverId);
+        System.out.println("--------------------------");
 
         final Room selectedRoom = rooms.get(roomId);
 
@@ -504,10 +506,12 @@ public class SecondaryServer extends Server {
 
     public ServerResponse updateRoom(final SyncRoomResponse updateRoom) {
 
+        System.out.println("------ UpdateRoom ------");
         System.out.println("roomId:" + updateRoom.roomId);
         System.out.println("roomTimestamp:" + updateRoom.roomTimestamp);
         System.out.println("#roomServers:" + updateRoom.roomServers.size());
         System.out.println("#roomUsers:" + updateRoom.roomUsers.size());
+        System.out.println("--------------------------");
 
         final Room selectedRoom = rooms.get(updateRoom.roomId);
 
@@ -546,7 +550,6 @@ public class SecondaryServer extends Server {
         return ServerResponse.OperationFailed;
     }
 
-    @Override
     public ServerResponse syncRoom(int roomId, final Message[] messageCache) {
 
         System.out.println("------ SyncRoom ------");

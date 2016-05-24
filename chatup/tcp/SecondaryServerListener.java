@@ -29,6 +29,8 @@ public class SecondaryServerListener extends Listener {
 
         final ServerConnection serverConnection = (ServerConnection) paramConnection;
 
+        secondaryServer.getLogger().invalidOperation(paramObject.getClass().getSimpleName());
+
         if (paramObject instanceof Message) {
             sendMessage((Message) paramObject);
         }
@@ -54,21 +56,19 @@ public class SecondaryServerListener extends Listener {
     private void sendMessage(final Message paramMessage) {
 
         final ServerResponse operationResult = secondaryServer.insertMessage(paramMessage);
-        final String userToken = paramMessage.getAuthor();
-        int roomId = paramMessage.getId();
 
         switch (operationResult) {
         case SuccessResponse:
-            secondaryServer.getLogger().sendMessage(roomId);
+            secondaryServer.getLogger().sendMessage(paramMessage.getId());
             break;
         case InvalidToken:
-            secondaryServer.getLogger().roomInvalidToken(roomId, userToken);
+            secondaryServer.getLogger().roomInvalidToken(paramMessage.getId(), paramMessage.getAuthor());
             break;
         case RoomNotFound:
-            secondaryServer.getLogger().roomNotFound(roomId);
+            secondaryServer.getLogger().roomNotFound(paramMessage.getId());
             break;
         default:
-            secondaryServer.getLogger().invalidCommand("SendMessage");
+            secondaryServer.getLogger().invalidOperation("SendMessage");
             break;
         }
     }
@@ -88,27 +88,26 @@ public class SecondaryServerListener extends Listener {
         case RoomNotFound:
             secondaryServer.getLogger().roomNotFound(syncRoom.roomId);
             break;
-        default:
-            secondaryServer.getLogger().invalidCommand("SyncRoom");
-            break;
         }
     }
 
     private void syncRoom(final ServerConnection paramConnection, final SyncRoomResponse updateRoom) {
 
         final ServerResponse operationResult = secondaryServer.updateRoom(updateRoom);
-        final String roomName = updateRoom.roomObject.getName();
 
         switch (operationResult) {
-            case SuccessResponse:
-                secondaryServer.getLogger().updateRoom(roomName, paramConnection.serverId);
-                break;
-            case RoomNotFound:
-                secondaryServer.getLogger().roomNotFound(roomName);
-                break;
-            default:
-                secondaryServer.getLogger().invalidCommand("SyncRoom");
-                break;
+        case SuccessResponse:
+            secondaryServer.getLogger().updateRoom(updateRoom.roomId, paramConnection.serverId);
+            break;
+        case RoomNotFound:
+            secondaryServer.getLogger().roomNotFound(updateRoom.roomId);
+            break;
+        case DatabaseError:
+            secondaryServer.getLogger().databaseError();
+            break;
+        default:
+            secondaryServer.getLogger().invalidOperation(updateRoom);
+            break;
         }
     }
 

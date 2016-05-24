@@ -12,7 +12,7 @@ abstract class ServerDispatcher implements HttpHandler {
 
     boolean sendError(final HttpExchange httpExchange, final ServerResponse httpResponse) {
 
-        final String errorResponse = Json.object().add("error", httpResponse.toString()).toString();
+        final String errorResponse = Json.object().add(HttpCommands.GenericError, httpResponse.toString()).toString();
 
         try {
 

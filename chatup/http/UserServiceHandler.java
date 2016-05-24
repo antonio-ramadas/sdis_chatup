@@ -26,7 +26,10 @@ class UserServiceHandler extends HttpDispatcher {
             final String userEmail = jsonObject.getString(HttpFields.UserEmail, null);
             final String userToken = jsonObject.getString(HttpFields.UserToken, null);
 
-            if (userEmail == null || userToken == null) {
+            if (userEmail == null || userEmail.isEmpty()) {
+                sendError(ServerResponse.MissingParameters);
+            }
+            else if (userToken == null || userToken.isEmpty()) {
                 sendError(ServerResponse.MissingParameters);
             }
             else {
@@ -34,7 +37,7 @@ class UserServiceHandler extends HttpDispatcher {
             }
         }
         else {
-            sendError(ServerResponse.InvalidCommand);
+            sendError(ServerResponse.InvalidOperation);
         }
     }
 
@@ -49,7 +52,10 @@ class UserServiceHandler extends HttpDispatcher {
             final String userEmail = jsonObject.getString(HttpFields.UserEmail, null);
             final String userToken = jsonObject.getString(HttpFields.UserToken, null);
 
-            if (userEmail == null || userToken == null) {
+            if (userEmail == null || userEmail.isEmpty()) {
+                sendError(ServerResponse.MissingParameters);
+            }
+            else if (userToken == null || userToken.isEmpty()) {
                 sendError(ServerResponse.MissingParameters);
             }
             else {
@@ -57,7 +63,7 @@ class UserServiceHandler extends HttpDispatcher {
             }
         }
         else {
-            sendError(ServerResponse.InvalidCommand);
+            sendError(ServerResponse.InvalidOperation);
         }
     }
 }

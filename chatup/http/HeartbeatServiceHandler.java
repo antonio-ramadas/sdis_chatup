@@ -27,7 +27,7 @@ class HeartbeatServiceHandler extends HttpDispatcher {
             sendHeartbeat(jsonObject.getString(HttpFields.UserToken, null));
         }
         else {
-            sendError(ServerResponse.InvalidCommand);
+            sendError(ServerResponse.InvalidOperation);
         }
     }
 
@@ -40,7 +40,7 @@ class HeartbeatServiceHandler extends HttpDispatcher {
             sendHeartbeat(jsonObject.getString(HttpFields.UserToken, null));
         }
         else {
-            sendError(ServerResponse.InvalidCommand);
+            sendError(ServerResponse.InvalidOperation);
         }
     }
 
@@ -53,7 +53,7 @@ class HeartbeatServiceHandler extends HttpDispatcher {
             sendHeartbeat(jsonObject.getString(HttpFields.UserToken, null));
         }
         else {
-            sendError(ServerResponse.InvalidCommand);
+            sendError(ServerResponse.InvalidOperation);
         }
     }
 

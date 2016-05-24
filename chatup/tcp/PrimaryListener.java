@@ -47,6 +47,7 @@ public class PrimaryListener extends Listener {
                 );
             }
             else {
+
                 serverInfo = new ServerInfo(
                     serverOnline.serverId,
                     serverOnline.serverTimestamp,
@@ -69,10 +70,10 @@ public class PrimaryListener extends Listener {
                 primaryServer.getLogger().serverNotFound(serverOnline.serverId);
                 break;
             case DatabaseError:
-               System.out.println("error accessing database");
+                primaryServer.getLogger().databaseError();
                 break;
             default:
-                primaryServer.getLogger().invalidCommand("ServerOnline");
+                primaryServer.getLogger().invalidOperation(serverOnline);
                 break;
             }
         }

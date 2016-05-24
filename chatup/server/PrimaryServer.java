@@ -213,12 +213,26 @@ public class PrimaryServer extends Server {
     @Override
     public ServerResponse createRoom(final String roomName, final String roomPassword, final String roomOwner) {
 
+        //-----------------------------------------------------------
+        // 1) Verificar se utilizador tem sessão iniciada no servidor
+        //-----------------------------------------------------------
+
+        final String userRecord = users.get(roomName);
+
+        if (userRecord == null) {
+            return ServerResponse.InvalidToken;
+        }
+
+        //--------------------------------------------------------
+        // 2) Calcular nível de replicação desejado para esta sala
+        //--------------------------------------------------------
+
         int roomId = ++sequenceRoom;
         int n = (int)(Math.floor(servers.size() / 2) + 1);
         final RoomInfo newRoom = new RoomInfo(roomName, roomPassword, roomOwner);
 
         //----------------------------------------------------
-        // 2) Registar alterações na base de dados do servidor
+        // 3) Registar alterações na base de dados do servidor
         //----------------------------------------------------
 
         if (serverDatabase.insertRoom(roomId, newRoom)) {
@@ -228,9 +242,9 @@ public class PrimaryServer extends Server {
             return ServerResponse.DatabaseError;
         }
 
-        //--------------------------------------------------------
-        // 3) Notificar os servidores mirror da criação desta sala
-        //--------------------------------------------------------
+        //-----------------------------------------------------------
+        // 4) Notificar os restantes servidores da criação desta sala
+        //-----------------------------------------------------------
 
         final ArrayList<ServerInfo> mostEmpty = cloneRoom(n);
 
@@ -289,9 +303,9 @@ public class PrimaryServer extends Server {
         final Set<Integer> roomServers = selectedRoom.getServers();
         final DeleteRoom deleteRoom = new DeleteRoom(roomId);
 
-        //------------------------------------------------------------
-        // 3) Notificar os servidores mirror das alterações efectuadas
-        //------------------------------------------------------------
+        //-----------------------------------------------------------------
+        // 3) Notificar os servidores secundários das alterações efectuadas
+        //-----------------------------------------------------------------
 
         for (final Integer serverId : roomServers) {
 
@@ -311,9 +325,9 @@ public class PrimaryServer extends Server {
             }
         }
 
-        //----------------------------------------------------
-        // 3) Registar alterações na base de dados do servidor
-        //----------------------------------------------------
+        //-------------------------------------------------------------
+        // 4) Registar alterações na base de dados do servidor primário
+        //-------------------------------------------------------------
 
         if (serverDatabase.deleteRoom(roomId)) {
             rooms.remove(roomId);
@@ -338,9 +352,9 @@ public class PrimaryServer extends Server {
             return ServerResponse.InvalidToken;
         }
 
-        //-------------------------------------------------------
-        // 2) Verificar se sala escolhida existe na base de dados
-        //-------------------------------------------------------
+        //-----------------------------------------------------------
+        // 2) Verificar se sala escolhida existe no servidor primário
+        //-----------------------------------------------------------
 
         final RoomInfo selectedRoom = rooms.get(roomId);
 
@@ -387,9 +401,9 @@ public class PrimaryServer extends Server {
             return ServerResponse.InvalidToken;
         }
 
-        //-------------------------------------------------------
-        // 2) Verificar se sala escolhida existe na base de dados
-        //-------------------------------------------------------
+        //-----------------------------------------------------------
+        // 2) Verificar se sala escolhida existe no servidor primário
+        //-----------------------------------------------------------
 
         final RoomInfo selectedRoom = rooms.get(roomId);
 
@@ -405,9 +419,9 @@ public class PrimaryServer extends Server {
             return ServerResponse.AlreadyJoined;
         }
 
-        //-------------------------------------------------------
-        // 4) Verificar palavra-passe introduzida pelo utilizador
-        //-------------------------------------------------------
+        //---------------------------------------------------------------
+        // 4) Verificar palavra-passe da sala introduzida pelo utilizador
+        //---------------------------------------------------------------
 
         if (selectedRoom.isPrivate()) {
 
@@ -500,19 +514,11 @@ public class PrimaryServer extends Server {
     @Override
     public ServerResponse insertServer(final ServerInfo serverInfo) {
 
-        //----------------------------------------------------
-        // 1) Verificar se servidor já existe na base de dados
-        //----------------------------------------------------
-
         int serverId = serverInfo.getId();
 
         if (servers.containsKey(serverId)) {
             return updateServer(serverInfo);
         }
-
-        //------------------------------------------------------
-        // 2) Registar inserção de novo servidor na base de dados
-        //------------------------------------------------------
 
         if (serverDatabase.insertServer(serverInfo)) {
             servers.put(serverId, serverInfo);
@@ -583,11 +589,11 @@ public class PrimaryServer extends Server {
     private ServerResponse deleteRooms() {
 
         final long currentTimestamp = Instant.now().getEpochSecond() - 3600;
-        final Iterator roomsIterator = rooms.entrySet().iterator();
+        final Iterator<Map.Entry<Integer, RoomInfo>> roomsIterator = rooms.entrySet().iterator();
 
         while (roomsIterator.hasNext()) {
 
-            final Map.Entry<Integer, RoomInfo> currentEntry = (Map.Entry)roomsIterator.next();
+            final Map.Entry<Integer, RoomInfo> currentEntry = roomsIterator.next();
             final RoomInfo selectedRoom = currentEntry.getValue();
 
             if (!selectedRoom.isEmpty() || selectedRoom.getTimestamp() > currentTimestamp) {
@@ -792,17 +798,9 @@ public class PrimaryServer extends Server {
 
     public ServerResponse userLogin(final String userEmail, final String userToken) {
 
-        //--------------------------------------------------------------
-        // 1) Verificar se utilizador já tem sessão iniciada no servidor
-        //--------------------------------------------------------------
-
         if (users.containsKey(userToken)) {
             return ServerResponse.InvalidToken;
         }
-
-        //----------------------------------------------------------
-        // 2) Registar início de sessão deste utilizador no servidor
-        //----------------------------------------------------------
 
         if (userEmail.equals("marques999@gmail.com") && userToken.equals("14191091")) {
             users.put(userToken, userEmail);

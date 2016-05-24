@@ -95,7 +95,7 @@ abstract class HttpDispatcher {
 
         try {
             sendResponse(
-                Json.object().add("error", serverResponse.toString()).toString(),
+                Json.object().add(HttpCommands.GenericError, serverResponse.toString()).toString(),
                 HttpURLConnection.HTTP_OK
             );
         }
@@ -123,7 +123,7 @@ abstract class HttpDispatcher {
 
             try {
                 sendResponse(
-                    Json.object().add("success", httpParameters).toString(),
+                    Json.object().add(HttpCommands.GenericSuccess, httpParameters).toString(),
                     HttpURLConnection.HTTP_OK
                 );
             }
@@ -144,7 +144,7 @@ abstract class HttpDispatcher {
 
             try {
                 sendResponse(
-                    Json.object().add("success", httpParameters).toString(),
+                    Json.object().add(HttpCommands.GenericSuccess, httpParameters).toString(),
                     HttpURLConnection.HTTP_OK
                 );
             }
@@ -210,7 +210,7 @@ abstract class HttpDispatcher {
 
         try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
-            byte buf[] = new byte[4096];
+            byte buf[] = new byte[ChatupGlobals.DefaultBuffer];
 
             for (int n = in.read(buf); n > 0; n = in.read(buf)) {
                 out.write(buf, 0, n);

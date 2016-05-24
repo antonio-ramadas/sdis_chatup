@@ -138,11 +138,11 @@ public abstract class Server {
         throw new UnsupportedOperationException("SyncRoom");
     }
 
-    public ServerResponse syncRoom(int roomId, final Message[] messageCache) {
-        throw new UnsupportedOperationException("SyncRoom");
+    public JsonValue getMessages(final String userToken, int roomId) {
+        throw new UnsupportedOperationException("RetrieveMessages");
     }
 
-    public ServerResponse updateRoom(final Room updateRoom) {
-        throw new UnsupportedOperationException("UpdateRoom");
+    public ServerResponse insertMessage(Message userMessage) {
+        throw new UnsupportedOperationException("InsertMessage");
     }
 }

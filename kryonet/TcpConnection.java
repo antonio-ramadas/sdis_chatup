@@ -33,16 +33,23 @@ import java.nio.channels.SocketChannel;
 class TcpConnection
 {
     SocketChannel socketChannel;
-    int keepAliveMillis = 8000;
-    final ByteBuffer readBuffer, writeBuffer;
+
+    final ByteBuffer readBuffer;
+    final ByteBuffer writeBuffer;
+
     boolean bufferPositionFix;
-    int timeoutMillis = 12000;
     float idleThreshold = 0.1f;
-    final Serialization serialization;
+
     private SelectionKey selectionKey;
 
-    private volatile long lastWriteTime, lastReadTime;
+    private volatile long lastWriteTime;
+    private volatile long lastReadTime;
+
+    private int keepAliveMillis = 8000;
+    private int timeoutMillis = 12000;
     private int currentObjectLength;
+
+    private final Serialization serialization;
     private final Object writeLock = new Object();
 
     TcpConnection(Serialization paramSerialization, int writeBufferSize, int objectBufferSize)
@@ -252,7 +259,7 @@ class TcpConnection
         return buffer.position() == 0;
     }
 
-    public int send(Connection connection, Object object) throws IOException
+    int send(final Connection paramConnection, final Object object) throws IOException
     {
         final SocketChannel socketChannel = this.socketChannel;
 
@@ -270,7 +277,7 @@ class TcpConnection
 
             try
             {
-                serialization.write(connection, writeBuffer, object);
+                serialization.write(paramConnection, writeBuffer, object);
             }
             catch (KryoNetException ex)
             {
@@ -298,7 +305,7 @@ class TcpConnection
         }
     }
 
-    public void close()
+    void close()
     {
         try
         {
@@ -318,12 +325,12 @@ class TcpConnection
         }
     }
 
-    public boolean needsKeepAlive(long time)
+    boolean needsKeepAlive(long time)
     {
         return socketChannel != null && keepAliveMillis > 0 && time - lastWriteTime > keepAliveMillis;
     }
 
-    public boolean isTimedOut(long time)
+    boolean isTimedOut(long time)
     {
         return socketChannel != null && timeoutMillis > 0 && time - lastReadTime > timeoutMillis;
     }
