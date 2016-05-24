@@ -15,7 +15,7 @@ public class RoomInfo implements Serializable {
         this(paramName, paramPassword, Instant.now().getEpochSecond(), paramOwner);
     }
 
-    public RoomInfo(final String paramName, final String paramPassword, long paramTimestamp, final String paramOwner) {
+    RoomInfo(final String paramName, final String paramPassword, long paramTimestamp, final String paramOwner) {
         roomName = paramName;
         roomOwner = paramOwner;
         roomPassword = paramPassword;

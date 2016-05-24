@@ -4,12 +4,10 @@ import chatup.tcp.*;
 import com.esotericsoftware.kryo.Kryo;
 import kryonet.EndPoint;
 
-public class TcpNetwork {
+class TcpNetwork {
 
-    private static Kryo kryo;
-
-    static public void register(final EndPoint endPoint) {
-        kryo = endPoint.getKryo();
+    static void register(final EndPoint endPoint) {
+        Kryo kryo = endPoint.getKryo();
         kryo.register(CreateRoom.class);
         kryo.register(DeleteRoom.class);
         kryo.register(DeleteServer.class);

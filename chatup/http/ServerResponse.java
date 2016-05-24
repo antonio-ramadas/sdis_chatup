@@ -15,7 +15,7 @@ public enum ServerResponse {
     ServiceOffline("serviceOffline"),
     SuccessResponse("success"),
     WrongPassword("wrongPassword"),
-    AlreadyJoined("alreadyJoined");
+    AlreadyJoined("alreadyJoined"),;
 
     private final String responseMessage;
 

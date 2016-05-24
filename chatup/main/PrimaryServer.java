@@ -1,9 +1,5 @@
 package chatup.main;
 
-import chatup.model.Message;
-import chatup.model.MessageCache;
-import google.collections.MinMaxPriorityQueue;
-
 class PrimaryServer {
 
     public static void main(String[] args) {

@@ -3,9 +3,7 @@ package chatup.http;
 import chatup.main.ChatupGlobals;
 import chatup.main.ChatupServer;
 import chatup.server.Server;
-import chatup.model.Message;
 
-import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 

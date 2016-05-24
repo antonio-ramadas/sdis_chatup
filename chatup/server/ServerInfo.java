@@ -43,27 +43,27 @@ public class ServerInfo implements Comparable<ServerInfo> {
         return serverUsers;
     }
 
-    public void setId(int paramId) {
+    void setId(int paramId) {
         serverId = paramId;
     }
 
-    public void setPort(int paramPort) {
+    void setPort(int paramPort) {
         serverPort = paramPort;
     }
 
-    public void setTimestamp(long paramTimestamp) {
+    void setTimestamp(long paramTimestamp) {
         serverTimestamp = paramTimestamp;
     }
 
-    public void setAddress(final String paramAddress) {
+    void setAddress(final String paramAddress) {
         serverAddress = paramAddress;
     }
 
-    public boolean registerUser(final String userToken) {
+    boolean registerUser(final String userToken) {
         return serverUsers.add(userToken);
     }
 
-    public boolean removeUser(final String userToken) {
+    boolean removeUser(final String userToken) {
 
         if (serverUsers.contains(userToken)) {
             serverUsers.remove(userToken);
@@ -92,7 +92,7 @@ public class ServerInfo implements Comparable<ServerInfo> {
         return 0;
     }
 
-    public void setStatus(boolean paramStatus) {
+    void setStatus(boolean paramStatus) {
         serverStatus = paramStatus;
     }
 

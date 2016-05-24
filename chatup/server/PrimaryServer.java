@@ -184,7 +184,7 @@ public class PrimaryServer extends Server {
         return (ArrayList<ServerInfo>) serversList.subList(0, replicationDegree);
     }
 
-    public ArrayList<ServerInfo> cloneRoom(int replicationDegree) {
+    private ArrayList<ServerInfo> cloneRoom(int replicationDegree) {
 
         final ArrayList<ServerInfo> serversList = new ArrayList<>();
 

@@ -39,22 +39,54 @@ abstract class HttpDispatcher {
                 parseGetRequest(httpQuery.split("&"));
             }
             else {
-                parseGetRequest(new String[]{});
+                sendError(ServerResponse.MissingParameters);
             }
 
             break;
 
         case "POST":
-            parsePostRequest(Json.parse(parseRequestBody(httpExchange.getRequestBody())));
+
+            final String postBody = parseRequestBody(httpExchange.getRequestBody());
+
+            if (postBody != null) {
+                parsePostRequest(Json.parse(postBody));
+            }
+            else {
+                sendError(ServerResponse.MissingParameters);
+            }
+
             break;
+
         case "PUT":
-            parsePutRequest(Json.parse(parseRequestBody(httpExchange.getRequestBody())));
+
+            final String putBody = parseRequestBody(httpExchange.getRequestBody());
+
+            if (putBody != null) {
+                parsePutRequest(Json.parse(putBody));
+            }
+            else {
+                sendError(ServerResponse.MissingParameters);
+            }
+
             break;
+
         case "DELETE":
-            parseDeleteRequest(Json.parse(parseRequestBody(httpExchange.getRequestBody())));
+
+            final String deleteBody = parseRequestBody(httpExchange.getRequestBody());
+
+            if (deleteBody != null) {
+                parseDeleteRequest(Json.parse(deleteBody));
+            }
+            else {
+                sendError(ServerResponse.MissingParameters);
+            }
+
             break;
+
         default:
+
             sendError(ServerResponse.InvalidMethod);
+
             break;
         }
     }

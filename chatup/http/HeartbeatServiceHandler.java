@@ -7,7 +7,7 @@ import com.eclipsesource.json.JsonValue;
 
 import com.sun.net.httpserver.HttpExchange;
 
-public class HeartbeatServiceHandler extends HttpDispatcher {
+class HeartbeatServiceHandler extends HttpDispatcher {
 
     HeartbeatServiceHandler(final HttpExchange httpExchange) {
         super(ChatupGlobals.HeartbeatServiceUrl, httpExchange);
