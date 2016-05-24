@@ -16,8 +16,7 @@ public class ChatupServer {
             serverInstance = new chatup.server.PrimaryServer(tcpPort, httpPort);
         }
         catch (Exception ex) {
-            System.out.println("Exception caught: " + ex.getMessage() + " in ChatupServer.contructor");
-            System.exit(1);
+            ChatupGlobals.abort(ex);
         }
     }
 
@@ -28,8 +27,7 @@ public class ChatupServer {
             serverInstance = new chatup.server.SecondaryServer(primaryServer, tcpPort, httpPort);
         }
         catch (Exception ex) {
-            System.out.println("Exception caught: " + ex.getMessage() + " in ChatupServer.contructor");
-            System.exit(1);
+            ChatupGlobals.abort(ex);
         }
     }
 

@@ -234,6 +234,10 @@ public class PrimaryServer extends Server {
 
         final ArrayList<ServerInfo> mostEmpty = cloneRoom(n);
 
+        if (mostEmpty == null || mostEmpty.isEmpty()) {
+            return ServerResponse.ServiceOffline;
+        }
+
         for (int i = 0; i < mostEmpty.size() ; i++){
 
             int serverId = mostEmpty.get(i).getId();
@@ -258,10 +262,10 @@ public class PrimaryServer extends Server {
 
         if (serverMessages == null) {
             messageQueue.put(serverId, new CommandQueue());
-            messageQueue.get(serverId).put(paramObject);
+            messageQueue.get(serverId).push(paramObject);
         }
         else {
-            serverMessages.put(paramObject);
+            serverMessages.push(paramObject);
         }
     }
 
@@ -576,7 +580,7 @@ public class PrimaryServer extends Server {
         return ServerResponse.SuccessResponse;
     }
 
-    public ServerResponse deleteRooms() {
+    private ServerResponse deleteRooms() {
 
         final long currentTimestamp = Instant.now().getEpochSecond() - 3600;
         final Iterator roomsIterator = rooms.entrySet().iterator();
@@ -586,7 +590,7 @@ public class PrimaryServer extends Server {
             final Map.Entry<Integer, RoomInfo> currentEntry = (Map.Entry)roomsIterator.next();
             final RoomInfo selectedRoom = currentEntry.getValue();
 
-            if (selectedRoom.getTimestamp() > currentTimestamp) {
+            if (!selectedRoom.isEmpty() || selectedRoom.getTimestamp() > currentTimestamp) {
                 continue;
             }
 

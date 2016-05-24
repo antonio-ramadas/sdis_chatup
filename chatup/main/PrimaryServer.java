@@ -5,8 +5,7 @@ class PrimaryServer {
     public static void main(String[] args) {
 
         if (args.length > 2) {
-            System.err.println("USAGE: chatup.main.PrimaryServer (<tcpPort>) (<httpPort>)");
-            System.exit(1);
+            ChatupGlobals.usage("(<tcpPort>) (<httpPort>)");
         }
 
         short tcpPort = ChatupGlobals.DefaultTcpPort;

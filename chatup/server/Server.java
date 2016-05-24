@@ -145,20 +145,4 @@ public abstract class Server {
     public ServerResponse updateRoom(final Room updateRoom) {
         throw new UnsupportedOperationException("UpdateRoom");
     }
-
-    //---------------------------------------------------
-    // MESSAGE: getMessages, insertMessage, notifyMessage
-    //---------------------------------------------------
-
-    public JsonValue getMessages(final String userToken, int roomId) {
-        throw new UnsupportedOperationException("RetrieveMessages");
-    }
-
-    public ServerResponse insertMessage(final Message paramMessage) {
-        throw new UnsupportedOperationException("InsertMessage");
-    }
-
-    public ServerResponse notifyMessage(int roomId, final String userToken, final String msgContents) {
-        throw new UnsupportedOperationException("NotifyMessage");
-    }
 }

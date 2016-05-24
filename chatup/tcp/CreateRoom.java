@@ -6,16 +6,18 @@ public class CreateRoom implements Serializable
 {
     public String roomName;
     public String roomPassword;
-    public String roomOwner;
+    public String userToken;
+    public String userEmail;
 
     public CreateRoom()
     {
     }
 
-    public CreateRoom(final String paramName, final String paramPassword, final String paramOwner)
+    public CreateRoom(final String paramName, final String paramPassword, final String paramOwner, final String paramEmail)
     {
         roomName = paramName;
         roomPassword = paramPassword;
-        roomOwner = paramOwner;
+        userEmail = paramEmail;
+        userToken = paramOwner;
     }
 }

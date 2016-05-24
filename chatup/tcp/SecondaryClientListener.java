@@ -25,19 +25,17 @@ public class SecondaryClientListener extends Listener {
         (
             createRoom.roomName,
             createRoom.roomPassword,
-            createRoom.roomOwner
+            createRoom.userToken
         );
 
-        switch (operationResult) {
-        case SuccessResponse:
-            secondaryServer.getLogger().createRoom(createRoom.roomOwner, createRoom.roomName);
-            break;
-        case OperationFailed:
+        if (operationResult == ServerResponse.SuccessResponse) {
+            secondaryServer.registerUser(createRoom.userToken, createRoom.userEmail);
+        }
+        else if (operationResult == ServerResponse.OperationFailed) {
             secondaryServer.getLogger().roomExists(createRoom.roomName);
-            break;
-        default:
+        }
+        else {
             secondaryServer.getLogger().invalidCommand("CreateRoom");
-            break;
         }
     }
 
@@ -177,7 +175,7 @@ public class SecondaryClientListener extends Listener {
 
         while (!messageQueue.empty()) {
 
-            final Object paramObject = messageQueue.get();
+            final Object paramObject = messageQueue.pop();
 
             if (paramObject instanceof DeleteRoom) {
                 deleteRoom((DeleteRoom) paramObject);
@@ -187,6 +185,9 @@ public class SecondaryClientListener extends Listener {
             }
             else if (paramObject instanceof DeleteServer) {
                 deleteServer((DeleteServer) paramObject);
+            }
+            else {
+
             }
         }
     }

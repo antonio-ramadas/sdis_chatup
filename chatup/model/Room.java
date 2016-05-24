@@ -1,7 +1,9 @@
 package chatup.model;
 
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
 
 public class Room extends RoomInfo {
 
@@ -17,9 +19,27 @@ public class Room extends RoomInfo {
 
 	private long lastSync;
 
+    public boolean updateUsers(final Set<String> paramUsers) {
+        return roomUsers.addAll(paramUsers);
+    }
+
+    public Set<Integer> updateServers(final Set<Integer> paramServers) {
+
+        final Set<Integer> newServers = new HashSet<>();
+
+        for (final Integer serverId : paramServers) {
+
+            if (roomServers.add(serverId)) {
+                newServers.add(serverId);
+            }
+        }
+
+        return newServers;
+    }
+
 	public boolean insertMessage(final Message paramMessage) {
 
-		final String userToken = paramMessage.getSender();
+		final String userToken = paramMessage.getAuthor();
 
 		if (roomUsers.contains(userToken)) {
 			roomMessages.push(paramMessage);
@@ -99,7 +119,6 @@ public class Room extends RoomInfo {
 
         lastSync = roomMessages.getLast().getTimestamp();
     }
-
 
     @Override
     public String toString() {

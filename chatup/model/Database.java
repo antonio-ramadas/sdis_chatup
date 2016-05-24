@@ -1,7 +1,6 @@
 package chatup.model;
 
 import chatup.server.Server;
-import chatup.server.ServerConnection;
 import chatup.server.ServerInfo;
 import chatup.server.ServerType;
 
@@ -10,20 +9,24 @@ import java.util.*;
 
 public class Database {
 
-    private static final String ServerId = "id";
     private static final String ServerAddress = "address";
+    private static final String ServerId = "id";
     private static final String ServerPort = "port";
+    private static final String ServerTimestamp = "timestamp";
     private static final String UserEmail = "email";
     private static final String UserToken = "token";
     private static final String RoomId = "id";
     private static final String RoomName = "name";
     private static final String RoomOwner = "owner";
     private static final String RoomPassword = "password";
-    private static final String MessageContent = "contents";
     private static final String MessageAuthor = "author";
-    private static final String MessageTimestamp = "epoch";
+    private static final String MessageContent = "contents";
     private static final String MessageRoom = "room";
-    private static final String ServerTimestamp = "timestamp";
+    private static final String MessageTimestamp = "epoch";
+
+    private static final String queryInsertRoom = "INSERT INTO Rooms(id, name, password, owner) VALUES(?, ?, ?, ?)";
+    private static final String queryDeleteRoom = "DELETE FROM Rooms WHERE id = ?";
+    private static final String querySelectRooms = "SELECT * FROM Rooms";
 
     public Database(final Server paramServer) throws SQLException {
 
@@ -44,11 +47,6 @@ public class Database {
     }
 
     private final Connection dbConnection;
-
-    private static final String queryInsertRoom = "INSERT INTO Rooms(id, name, password, owner) VALUES(?, ?, ?, ?)";
-    private static final String querySelectRoomById = "SELECT * FROM Rooms WHERE id = ?";
-    private static final String queryDeleteRoom = "DELETE FROM Rooms WHERE id = ?";
-    private static final String querySelectRooms = "SELECT * FROM Rooms";
 
     public boolean insertRoom(int roomId, final RoomInfo paramRoom) {
 
@@ -77,31 +75,6 @@ public class Database {
         }
 
         return true;
-    }
-
-    public final Room getRoom(int roomId) {
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(querySelectRoomById)) {
-
-            stmt.setInt(1, roomId);
-
-            try (final ResultSet rs = stmt.executeQuery()) {
-
-                if (rs.next()) {
-
-                    return new Room(
-                        rs.getString(RoomName),
-                        rs.getString(RoomPassword),
-                        rs.getString(RoomOwner)
-                    );
-                }
-            }
-        }
-        catch (SQLException ex) {
-            return null;
-        }
-
-        return null;
     }
 
     public HashMap<Integer, Room> getRooms() {
@@ -170,7 +143,7 @@ public class Database {
 
         try (final PreparedStatement stmt = dbConnection.prepareStatement(queryInsertMessage)) {
             stmt.setInt(1, paramMessage.getId());
-            stmt.setString(2, paramMessage.getSender());
+            stmt.setString(2, paramMessage.getAuthor());
             stmt.setLong(3, paramMessage.getTimestamp());
             stmt.setString(4, paramMessage.getMessage());
             stmt.executeUpdate();

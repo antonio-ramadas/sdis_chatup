@@ -6,15 +6,10 @@ import java.time.Instant;
 
 public class SecondaryServer {
 
-    private static void displayUsage() {
-        System.out.println("USAGE: chatup.main.SecondaryServer <serverId> primaryIp:primaryPort (<tcpPort>) (<httpPort>)");
-        System.exit(1);
-    }
-
     public static void main(String[] args) {
 
         if (args.length < 2 || args.length > 4) {
-            displayUsage();
+            ChatupGlobals.usage("<serverId> primaryIp:primaryPort (<tcpPort>) (<httpPort>)");
         }
 
         int serverId = 0;
@@ -24,7 +19,7 @@ public class SecondaryServer {
             serverId = Integer.parseInt(args[0]);
         }
         catch (NumberFormatException ex) {
-            displayUsage();
+            ChatupGlobals.abort(ex);
         }
 
         if (args.length > 2) {
@@ -64,8 +59,7 @@ public class SecondaryServer {
            ChatupServer.initializeSecondary(primaryServer, httpPort, tcpPort);
         }
         catch (final NumberFormatException ex) {
-            System.err.println("invalid primary server port, terminating application...");
-            System.exit(1);
+            ChatupGlobals.abort(ex);
         }
     }
 }

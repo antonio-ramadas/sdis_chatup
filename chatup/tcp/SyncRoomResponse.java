@@ -3,10 +3,12 @@ package chatup.tcp;
 import chatup.model.Room;
 
 import java.io.Serializable;
+import java.util.Set;
 
 public class SyncRoomResponse implements Serializable
 {
-    public Room roomObject;
+    public Set<Integer> roomServers;
+    public Set<String> roomUsers;
 
     public SyncRoomResponse()
     {
@@ -15,8 +17,11 @@ public class SyncRoomResponse implements Serializable
     public SyncRoomResponse(int paramId, final Room paramRoom)
     {
         roomId = paramId;
-        roomObject = paramRoom;
+        roomServers = paramRoom.getServers();
+        roomTimestamp = paramRoom.getTimestamp();
+        roomUsers = paramRoom.getUsers();
     }
 
     public int roomId;
+    public long roomTimestamp;
 }

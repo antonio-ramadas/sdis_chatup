@@ -1,22 +1,17 @@
 package chatup.model;
 
 import java.io.Serializable;
-import java.time.Instant;
 
 public class Message implements Comparable<Message>, Serializable {
 
     private long messageTimestamp;
     private int messageRoom;
 
-    public Message(int roomId, final String messageAuthor, long messageTimestamp, final String messageContents) {
+    Message(int roomId, final String messageAuthor, long messageTimestamp, final String messageContents) {
         setId(roomId);
         setAuthor(messageAuthor);
         setMessage(messageContents);
         setTimestamp(messageTimestamp);
-    }
-
-    public Message(int roomId, final String messageAuthor, final String messageContents) {
-        this(roomId, messageAuthor, Instant.now().toEpochMilli(), messageContents);
     }
 
     private String messageAuthor;
@@ -30,24 +25,24 @@ public class Message implements Comparable<Message>, Serializable {
         return messageTimestamp;
     }
 
-    public final String getMessage() {
-        return messageContents;
+    public final String getAuthor() {
+        return messageAuthor;
     }
 
-    public final String getSender() {
-        return messageAuthor;
+    public final String getMessage() {
+        return messageContents;
     }
 
     private void setId(int paramId) {
         messageRoom = paramId;
     }
 
-    private void setAuthor(final String paramAuthor) {
-        messageAuthor = paramAuthor;
-    }
-
     private void setTimestamp(long paramTimestamp) {
         messageTimestamp = paramTimestamp;
+    }
+
+    private void setAuthor(final String paramAuthor) {
+        messageAuthor = paramAuthor;
     }
 
     private void setMessage(final String paramMessage) {
@@ -59,7 +54,7 @@ public class Message implements Comparable<Message>, Serializable {
         return otherObject instanceof Message
             && ((Message) otherObject).getId() == messageRoom
             && ((Message) otherObject).getTimestamp() == messageTimestamp
-            && ((Message) otherObject).getSender().equals(messageAuthor);
+            && ((Message) otherObject).getAuthor().equals(messageAuthor);
     }
 
     @Override

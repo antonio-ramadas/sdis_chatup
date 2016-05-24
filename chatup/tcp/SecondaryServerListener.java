@@ -54,7 +54,7 @@ public class SecondaryServerListener extends Listener {
     private void sendMessage(final Message paramMessage) {
 
         final ServerResponse operationResult = secondaryServer.insertMessage(paramMessage);
-        final String userToken = paramMessage.getSender();
+        final String userToken = paramMessage.getAuthor();
         int roomId = paramMessage.getId();
 
         switch (operationResult) {

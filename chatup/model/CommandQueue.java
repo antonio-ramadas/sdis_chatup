@@ -12,7 +12,7 @@ public class CommandQueue implements Serializable {
         myQueue = new LinkedList<>();
     }
 
-    public void put(final Object paramObject) {
+    public void push(final Object paramObject) {
         myQueue.addLast(paramObject);
     }
 
@@ -20,7 +20,7 @@ public class CommandQueue implements Serializable {
         return myQueue.isEmpty();
     }
 
-    public final Object get() {
+    public final Object pop() {
         return myQueue.removeFirst();
     }
 }

@@ -138,6 +138,7 @@ public class SecondaryServer extends Server {
 	}
 
 	private int serverId;
+    private int roomSequence;
     private long serverTimestamp;
 
     @Override
@@ -149,10 +150,38 @@ public class SecondaryServer extends Server {
         return serverLogger;
     }
 
+    public void registerUser(final String userToken, final String userEmail) {
+
+        final String userRecord = users.get(userToken);
+
+        if (userRecord == null) {
+            users.put(userToken, userEmail);
+        }
+    }
+
     @Override
     public ServerResponse createRoom(final String roomName, final String roomPassword, final String roomOwner) {
 
-        rooms.put(1, new Room(roomName, roomPassword, roomOwner));
+        int roomId = ++roomSequence;
+
+        System.out.println("------ CreateRoom ------");
+        System.out.println("roomId:" + roomId);
+        System.out.println("roomName:" + roomName);
+        System.out.println("roomPassword:" + roomPassword);
+        System.out.println("roomOwner:" + roomOwner);
+
+        if (rooms.containsKey(roomId)) {
+            return ServerResponse.RoomNotFound;
+        }
+
+        final Room newRoom = new Room(roomName, roomPassword, roomOwner);
+
+        if (serverDatabase.insertRoom(roomId, newRoom)) {
+            rooms.put(1,newRoom );
+        }
+        else {
+            return ServerResponse.DatabaseError;
+        }
 
         return ServerResponse.SuccessResponse;
 	}
@@ -160,6 +189,7 @@ public class SecondaryServer extends Server {
     @Override
 	public ServerResponse joinRoom(int roomId, final String userEmail, final String userToken) {
 
+        System.out.println("------ JoinRoom ------");
         System.out.println("roomId:" + roomId);
         System.out.println("userEmail:" + userEmail);
         System.out.println("userToken:" + userToken);
@@ -252,22 +282,27 @@ public class SecondaryServer extends Server {
 
         final Set<String> roomUsers = selectedRoom.getUsers();
 
-        rooms.remove(roomId);
+        if (serverDatabase.deleteRoom(roomId)) {
+            rooms.remove(roomId);
+        }
+        else {
+            return ServerResponse.DatabaseError;
+        }
+
         cascadeRoom(roomUsers);
 
         return ServerResponse.SuccessResponse;
     }
 
-    @Override
     public ServerResponse insertMessage(final Message paramMessage) {
 
         System.out.println("------ RegisterMessage ------");
         System.out.println("roomId:"      + paramMessage.getId());
-        System.out.println("userToken:"   + paramMessage.getSender());
+        System.out.println("userToken:"   + paramMessage.getAuthor());
         System.out.println("messageBody:" + paramMessage.getMessage());
         System.out.println("-----------------------------");
 
-        final String userToken = paramMessage.getSender();
+        final String userToken = paramMessage.getAuthor();
         final String userRecord = users.get(userToken);
 
         if (userRecord == null) {
@@ -287,32 +322,31 @@ public class SecondaryServer extends Server {
         return ServerResponse.OperationFailed;
     }
 
-    @Override
-    public ServerResponse notifyMessage(int roomId, final String userToken, final String messageBody) {
+    public ServerResponse notifyMessage(final Message paramMessage) {
 
+        final String userToken = paramMessage.getAuthor();
         final String userRecord = users.get(userToken);
 
         if (userRecord == null) {
             return ServerResponse.InvalidToken;
         }
 
+        int roomId = paramMessage.getId();
         final Room selectedRoom = rooms.get(roomId);
 
         if (selectedRoom == null) {
             return ServerResponse.RoomNotFound;
         }
 
-        final Message userMessage = new Message(roomId, userToken, messageBody);
         final Set<Integer> roomServers = selectedRoom.getServers();
 
         for (final Integer currentRoom : roomServers) {
-            System.out.println(currentRoom);
+            myServerListener.sendServer(currentRoom, paramMessage);
         }
 
         return ServerResponse.SuccessResponse;
     }
 
-	@Override
 	public JsonValue getMessages(final String userToken, int roomId) {
 
         final JsonValue jsonArray = Json.array();
@@ -338,7 +372,7 @@ public class SecondaryServer extends Server {
 
         for (final Message currentMessage : myMessages) {
             jsonArray.asArray().add(Json.object()
-                .add(HttpFields.MessageSender, currentMessage.getSender())
+                .add(HttpFields.MessageSender, currentMessage.getAuthor())
                 .add(HttpFields.MessageTimestamp, currentMessage.getTimestamp())
                 .add(HttpFields.MessageContents, currentMessage.getMessage())
                 .add(HttpFields.MessageRoomId, currentMessage.getId()));
@@ -350,11 +384,23 @@ public class SecondaryServer extends Server {
 	@Override
 	public ServerResponse insertServer(final ServerInfo serverInfo) {
 
+        System.out.println("------ InsertServer ------");
+        System.out.println("serverId:" + serverInfo.getId());
+        System.out.println("serverAddress:" + serverInfo.getAddress());
+        System.out.println("serverPort:" + serverInfo.getPort());
+        System.out.println("--------------------------");
+
 		if (servers.containsKey(serverId)) {
-			return ServerResponse.OperationFailed;
+			return updateServer(serverInfo);
 		}
 
-		servers.put(serverId, serverInfo);
+		if (serverDatabase.insertServer(serverInfo)) {
+            servers.put(serverId, serverInfo);
+        }
+        else {
+            return ServerResponse.DatabaseError;
+        }
+
         serverTimestamp = Instant.now().getEpochSecond();
 
 		return ServerResponse.SuccessResponse;
@@ -363,9 +409,11 @@ public class SecondaryServer extends Server {
 	@Override
 	public ServerResponse updateServer(final ServerInfo serverInfo) {
 
-        //-----------------------------------------------------------
-        // 1) Verificar se servidor escolhido existe na base de dados
-        //-----------------------------------------------------------
+        System.out.println("------ UpdateServer ------");
+        System.out.println("serverId:" + serverInfo.getId());
+        System.out.println("serverAddress:" + serverInfo.getAddress());
+        System.out.println("serverPort:" + serverInfo.getPort());
+        System.out.println("--------------------------");
 
         final ServerInfo selectedServer = servers.get(serverId);
 
@@ -393,10 +441,6 @@ public class SecondaryServer extends Server {
         System.out.println("------ DeleteServer ------");
         System.out.println("serverId:" + serverId);
         System.out.println("--------------------------");
-
-        //-----------------------------------------------------------
-        // 1) Verificar se servidor escolhido existe na base de dados
-        //-----------------------------------------------------------
 
         if (servers.get(serverId) == null) {
             return ServerResponse.ServerNotFound;
@@ -461,7 +505,9 @@ public class SecondaryServer extends Server {
     public ServerResponse updateRoom(final SyncRoomResponse updateRoom) {
 
         System.out.println("roomId:" + updateRoom.roomId);
-        System.out.println("roomName:" + updateRoom.roomObject);
+        System.out.println("roomTimestamp:" + updateRoom.roomTimestamp);
+        System.out.println("#roomServers:" + updateRoom.roomServers.size());
+        System.out.println("#roomUsers:" + updateRoom.roomUsers.size());
 
         final Room selectedRoom = rooms.get(updateRoom.roomId);
 
@@ -469,9 +515,35 @@ public class SecondaryServer extends Server {
             return ServerResponse.RoomNotFound;
         }
 
-        rooms.put(updateRoom.roomId, updateRoom.roomObject);
+        boolean roomUpdated = false;
+        final Set<Integer> newServers = selectedRoom.updateServers(updateRoom.roomServers);
 
-        return ServerResponse.SuccessResponse;
+        if (newServers.size() > 0) {
+
+            roomUpdated = true;
+
+            for (final Integer serverId : newServers) {
+                serverDatabase.insertServerRoom(serverId, updateRoom.roomId);
+            }
+
+            final Set<Integer> deletedServers = selectedRoom.getServers();
+
+            deletedServers.removeAll(updateRoom.roomServers);
+
+            for (final Integer serverId : deletedServers) {
+                serverDatabase.deleteServerRoom(serverId, updateRoom.roomId);
+            }
+        }
+
+        if (selectedRoom.updateUsers(updateRoom.roomUsers)) {
+            roomUpdated = true;
+        }
+
+        if (roomUpdated) {
+            return ServerResponse.SuccessResponse;
+        }
+
+        return ServerResponse.OperationFailed;
     }
 
     @Override
