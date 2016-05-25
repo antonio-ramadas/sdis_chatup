@@ -2,6 +2,8 @@ package chatup.http;
 
 import chatup.main.ChatupGlobals;
 
+import chatup.main.ChatupServer;
+import chatup.server.Server;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 
@@ -14,8 +16,8 @@ class HeartbeatServiceHandler extends HttpDispatcher {
     }
 
     @Override
-    public void parseGetRequest(final String[] getValues) {
-        sendHeartbeat(parseString(getValues[0], HttpFields.UserToken));
+    public void parseGetRequest(final String[] jsonValue) {
+        sendHeartbeat(parseString(jsonValue[0], HttpFields.UserToken));
     }
 
     @Override
@@ -59,8 +61,16 @@ class HeartbeatServiceHandler extends HttpDispatcher {
 
     private void sendHeartbeat(final String userToken) {
 
+        final Server serverInstance = ChatupServer.getInstance();
+
         if (userToken != null) {
-            sendTextResponse(ServerResponse.SuccessResponse, "true");
+
+            if (serverInstance.validateToken(userToken)) {
+                sendTextResponse(ServerResponse.SuccessResponse, userToken);
+            }
+            else {
+                sendError(ServerResponse.InvalidToken);
+            }
         }
         else {
             sendError(ServerResponse.InvalidToken);

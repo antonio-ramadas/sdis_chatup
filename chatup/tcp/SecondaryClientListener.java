@@ -5,6 +5,7 @@ import chatup.model.CommandQueue;
 import chatup.server.SecondaryServer;
 import chatup.server.ServerInfo;
 
+import javafx.util.Pair;
 import kryonet.Connection;
 import kryonet.KryoClient;
 import kryonet.Listener;
@@ -46,14 +47,14 @@ public class SecondaryClientListener extends Listener {
     // TODO: Verified!
     private void joinRoom(final JoinRoom joinRoom) {
 
-        final ServerResponse operationResult = secondaryServer.joinRoom
+        final Pair<ServerResponse, ServerInfo> operationResult = secondaryServer.joinRoom
         (
             joinRoom.roomId,
             joinRoom.userEmail,
             joinRoom.userToken
         );
 
-        switch (operationResult) {
+        switch (operationResult.getKey()) {
         case SuccessResponse:
             secondaryServer.getLogger().joinRoom(joinRoom.userToken, joinRoom.roomId);
             break;
@@ -150,13 +151,13 @@ public class SecondaryClientListener extends Listener {
         else if (paramObject instanceof DeleteServer) {
             deleteServer((DeleteServer)paramObject);
         }
-        else {
-            secondaryServer.getLogger().invalidOperation(paramObject);
+        else if (paramObject instanceof UpdateServer) {
+            updateServer((UpdateServer)paramObject);
         }
     }
 
     // TODO: Verified!
-    private void updateServer(final ServerOnline serverOnline) {
+    private void updateServer(final UpdateServer serverOnline) {
 
         final ServerInfo serverInfo = new ServerInfo(
             serverOnline.serverId,
@@ -189,8 +190,8 @@ public class SecondaryClientListener extends Listener {
             if (paramObject instanceof DeleteRoom) {
                 deleteRoom((DeleteRoom) paramObject);
             }
-            else if (paramObject instanceof ServerOnline) {
-                updateServer((ServerOnline)paramObject);
+            else if (paramObject instanceof UpdateServer) {
+                updateServer((UpdateServer)paramObject);
             }
             else if (paramObject instanceof DeleteServer) {
                 deleteServer((DeleteServer) paramObject);

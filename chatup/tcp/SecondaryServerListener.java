@@ -29,8 +29,6 @@ public class SecondaryServerListener extends Listener {
 
         final ServerConnection serverConnection = (ServerConnection) paramConnection;
 
-        secondaryServer.getLogger().invalidOperation(paramObject.getClass().getSimpleName());
-
         if (paramObject instanceof Message) {
             sendMessage((Message) paramObject);
         }

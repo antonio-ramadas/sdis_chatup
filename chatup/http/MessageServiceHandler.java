@@ -22,8 +22,8 @@ class MessageServiceHandler extends HttpDispatcher {
     public void parseGetRequest(final String[] getValues) {
 
         final Server serverInstance = ChatupServer.getInstance();
-        final String userToken = parseString(getValues[1], HttpFields.UserToken);
-        int roomId = parseInteger(getValues[0], HttpFields.RoomId);
+        final String userToken = parseString(getValues[1], HttpFields.MessageSender);
+        int roomId = parseInteger(getValues[0], HttpFields.MessageRoomId);
 
         if (userToken == null || roomId < 0) {
             sendError(ServerResponse.MissingParameters);
@@ -49,8 +49,8 @@ class MessageServiceHandler extends HttpDispatcher {
 
         if (jsonObject != null) {
 
-            int roomId = jsonObject.getInt(HttpFields.RoomId, -1);
-            final String userToken = jsonObject.getString(HttpFields.UserToken, null);
+            int roomId = jsonObject.getInt(HttpFields.MessageRoomId, -1);
+            final String userToken = jsonObject.getString(HttpFields.MessageSender, null);
             final String messageBody = jsonObject.getString(HttpFields.MessageContents, null);
 
             if (roomId < 0 || userToken == null) {

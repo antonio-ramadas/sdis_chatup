@@ -11,12 +11,12 @@ import chatup.tcp.*;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonValue;
+import javafx.util.Pair;
 import kryonet.Connection;
 import kryonet.KryoClient;
 import kryonet.KryoServer;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.HashMap;
@@ -31,6 +31,7 @@ public class SecondaryServer extends Server {
 	private final SecondaryClientListener myClientListener;
     private final HashMap<Integer, ServerInfo> servers;
     private final HashMap<Integer, Room> rooms;
+    private int serverPort;
 
 	public SecondaryServer(final ServerInfo paramPrimary, int tcpPort, int httpPort) throws SQLException, IOException {
 
@@ -46,6 +47,7 @@ public class SecondaryServer extends Server {
 
         serverId = paramPrimary.getId();
         serverTimestamp = 0L;
+        serverPort = httpPort;
         serverDatabase = new Database(this);
         serverLogger = new ServerLogger(this);
 
@@ -187,12 +189,7 @@ public class SecondaryServer extends Server {
 	}
 
     @Override
-	public ServerResponse joinRoom(int roomId, final String userEmail, final String userToken) {
-
-        System.out.println("------ JoinRoom ------");
-        System.out.println("roomId:" + roomId);
-        System.out.println("userEmail:" + userEmail);
-        System.out.println("userToken:" + userToken);
+	public Pair<ServerResponse, ServerInfo> joinRoom(int roomId, final String userEmail, final String userToken) {
 
 		final String userRecord = users.get(userToken);
 
@@ -203,16 +200,16 @@ public class SecondaryServer extends Server {
 		final Room selectedRoom = rooms.get(roomId);
 
 		if (selectedRoom == null) {
-			return ServerResponse.RoomNotFound;
+			return new Pair<>(ServerResponse.RoomNotFound, null);
 		}
 
 		if (selectedRoom.hasUser(userToken)) {
-            return ServerResponse.AlreadyJoined;
+            return new Pair<>(ServerResponse.AlreadyJoined, null);
         }
 
 		selectedRoom.registerUser(userToken);
 
-		return ServerResponse.SuccessResponse;
+		return new Pair<>(ServerResponse.SuccessResponse, null);
 	}
 
     @Override
@@ -296,12 +293,6 @@ public class SecondaryServer extends Server {
 
     public ServerResponse insertMessage(final Message paramMessage) {
 
-        System.out.println("------ RegisterMessage ------");
-        System.out.println("roomId:"      + paramMessage.getId());
-        System.out.println("userToken:"   + paramMessage.getAuthor());
-        System.out.println("messageBody:" + paramMessage.getMessage());
-        System.out.println("-----------------------------");
-
         final String userToken = paramMessage.getAuthor();
         final String userRecord = users.get(userToken);
 
@@ -320,6 +311,11 @@ public class SecondaryServer extends Server {
         }
 
         return ServerResponse.OperationFailed;
+    }
+
+    @Override
+    public boolean validateToken(final String userToken) {
+        return users.containsKey(userToken);
     }
 
     public ServerResponse notifyMessage(final Message paramMessage) {
@@ -573,6 +569,6 @@ public class SecondaryServer extends Server {
     }
 
     public ServerOnline getInformation() {
-        return new ServerOnline(serverId, serverTimestamp);
+        return new ServerOnline(serverId, serverTimestamp, serverPort);
     }
 }

@@ -11,6 +11,7 @@ import chatup.tcp.*;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonValue;
 
+import javafx.util.Pair;
 import kryonet.Connection;
 import kryonet.KryoServer;
 
@@ -217,7 +218,7 @@ public class PrimaryServer extends Server {
         // 1) Verificar se utilizador tem sessão iniciada no servidor
         //-----------------------------------------------------------
 
-        final String userRecord = users.get(roomName);
+        final String userRecord = users.get(roomOwner);
 
         if (userRecord == null) {
             return ServerResponse.InvalidToken;
@@ -389,7 +390,7 @@ public class PrimaryServer extends Server {
     }
 
     @Override
-    public ServerResponse joinRoom(int roomId, final String userPassword, final String userToken) {
+    public Pair<ServerResponse, ServerInfo> joinRoom(int roomId, final String userPassword, final String userToken) {
 
         //-----------------------------------------------------------
         // 1) Verificar se utilizador tem sessão iniciada no servidor
@@ -398,7 +399,7 @@ public class PrimaryServer extends Server {
         final String userEmail = users.get(userToken);
 
         if (userEmail == null) {
-            return ServerResponse.InvalidToken;
+            return new Pair<>(ServerResponse.InvalidToken, null);
         }
 
         //-----------------------------------------------------------
@@ -408,7 +409,7 @@ public class PrimaryServer extends Server {
         final RoomInfo selectedRoom = rooms.get(roomId);
 
         if (selectedRoom == null) {
-            return ServerResponse.RoomNotFound;
+            return new Pair<>(ServerResponse.RoomNotFound, null);
         }
 
         //------------------------------------------------------------
@@ -416,7 +417,7 @@ public class PrimaryServer extends Server {
         //------------------------------------------------------------
 
         if (selectedRoom.hasUser(userToken)) {
-            return ServerResponse.AlreadyJoined;
+            return new Pair<>(ServerResponse.AlreadyJoined, null);
         }
 
         //---------------------------------------------------------------
@@ -426,7 +427,7 @@ public class PrimaryServer extends Server {
         if (selectedRoom.isPrivate()) {
 
             if (!selectedRoom.validatePassword(userPassword)) {
-                return ServerResponse.WrongPassword;
+                return new Pair<>(ServerResponse.WrongPassword, null);
             }
         }
 
@@ -437,7 +438,7 @@ public class PrimaryServer extends Server {
         final Set<Integer> roomServers = selectedRoom.getServers();
 
         if (roomServers == null || roomServers.isEmpty()) {
-            return ServerResponse.RoomNotFound;
+            return new Pair<>(ServerResponse.RoomNotFound, null);
         }
 
         //------------------------------------------------------------
@@ -476,7 +477,7 @@ public class PrimaryServer extends Server {
 
         if (serviceOffline || minimumServer < 1) {
             // criar sala noutro servidor
-            return ServerResponse.ServiceOffline;
+            return new Pair<>(ServerResponse.ServiceOffline, null);
         }
 
         //---------------------------------------------
@@ -495,7 +496,7 @@ public class PrimaryServer extends Server {
             currentServer.registerUser(userToken);
         }
         else {
-            return ServerResponse.ServerNotFound;
+            return new Pair<>(ServerResponse.ServerNotFound, null);
         }
 
         //--------------------------------------------------------------
@@ -508,7 +509,7 @@ public class PrimaryServer extends Server {
             myServerListener.send(serverId, joinRoom);
         }
 
-        return ServerResponse.SuccessResponse;
+        return new Pair<>(ServerResponse.SuccessResponse, currentServer);
     }
 
     @Override
@@ -725,11 +726,11 @@ public class PrimaryServer extends Server {
             return ServerResponse.DatabaseError;
         }
 
-        //----------------------------------------------------
-        // 3) Notificar os restantes servidores das alterações
-        //----------------------------------------------------
+        //---------------------------------------------------------------------------
+        // 3) Notificar os restantes servidores das alterações efectuadas no servidor
+        //---------------------------------------------------------------------------
 
-        final ServerOnline serverOnline = new ServerOnline
+        final UpdateServer updateServer = new UpdateServer
         (
             selectedServer.getId(),
             selectedServer.getTimestamp(),
@@ -744,10 +745,10 @@ public class PrimaryServer extends Server {
                 currentServer.updateTimestamp();
 
                 if (currentServer.isOnline()) {
-                    myServerListener.send(currentId, serverOnline);
+                    myServerListener.send(currentId, updateServer);
                 }
                 else {
-                    insertQueue(serverId, serverOnline);
+                    insertQueue(serverId, updateServer);
                 }
             }
         });
@@ -759,7 +760,7 @@ public class PrimaryServer extends Server {
     public ServerResponse userDisconnect(final String userEmail, final String userToken) {
 
         //-----------------------------------------------------------
-        // 1) verificar se utilizador tem sessão iniciada no servidor
+        // 1) Verificar se utilizador tem sessão iniciada no servidor
         //-----------------------------------------------------------
 
         final String userRecord = users.get(userToken);
@@ -769,7 +770,7 @@ public class PrimaryServer extends Server {
         }
 
         //-----------------------------------------------------------------------
-        // 2) Notificar os restantes servidores do fim da sessão deste utilizador
+        // 2) Notificar os restantes servidores do fim da sessão desse utilizador
         //-----------------------------------------------------------------------
 
         final UserDisconnect userDisconnect = new UserDisconnect(userToken, userEmail);
@@ -781,15 +782,15 @@ public class PrimaryServer extends Server {
             }
         });
 
-        //-------------------------------------------------------
-        // 2) Remover utilizador das salas existentes no servidor
-        //-------------------------------------------------------
+        //----------------------------------------------------------------
+        // 3) Remover utilizador das salas existentes no servidor primário
+        //----------------------------------------------------------------
 
         rooms.forEach((roomId, room) -> room.removeUser(userToken));
 
-        //-------------------------------------------------------
-        // 2) Remover utilizador da lista de utilizadores ligados
-        //-------------------------------------------------------
+        //-------------------------------------------------------------------
+        // 4) Remover utilizador da lista de utilizadores ligados ao servidor
+        //-------------------------------------------------------------------
 
         users.remove(userToken);
 
@@ -810,5 +811,9 @@ public class PrimaryServer extends Server {
         }
 
         return ServerResponse.SuccessResponse;
+    }
+
+    public boolean validateToken(final String userToken) {
+        return users.containsKey(userToken);
     }
 }

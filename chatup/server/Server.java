@@ -2,13 +2,13 @@ package chatup.server;
 
 import chatup.http.ServerResponse;
 import chatup.model.Message;
-import chatup.model.Room;
 
 import com.eclipsesource.json.JsonValue;
 
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
+import javafx.util.Pair;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
@@ -118,7 +118,7 @@ public abstract class Server {
         throw new UnsupportedOperationException("RetrieveRooms");
     }
 
-    public ServerResponse joinRoom(int roomId, final String userEmail, final String userToken) {
+    public Pair<ServerResponse, ServerInfo> joinRoom(int roomId, final String userEmail, final String userToken) {
         throw new UnsupportedOperationException("JoinRoom");
     }
 
@@ -145,4 +145,6 @@ public abstract class Server {
     public ServerResponse insertMessage(Message userMessage) {
         throw new UnsupportedOperationException("InsertMessage");
     }
+
+    public abstract boolean validateToken(String getValue);
 }

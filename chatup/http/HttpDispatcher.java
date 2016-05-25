@@ -35,11 +35,11 @@ abstract class HttpDispatcher {
 
             final String httpQuery = httpExchange.getRequestURI().getQuery();
 
-            if (httpQuery != null) {
-                parseGetRequest(httpQuery.split("&"));
+            if (httpQuery == null || httpQuery.isEmpty()) {
+                sendError(ServerResponse.MissingParameters);
             }
             else {
-                sendError(ServerResponse.MissingParameters);
+                parseGetRequest(httpQuery.split("&"));
             }
 
             break;
@@ -48,11 +48,11 @@ abstract class HttpDispatcher {
 
             final String postBody = parseRequestBody(httpExchange.getRequestBody());
 
-            if (postBody != null) {
-                parsePostRequest(Json.parse(postBody));
+            if (postBody == null || postBody.isEmpty()) {
+                sendError(ServerResponse.MissingParameters);
             }
             else {
-                sendError(ServerResponse.MissingParameters);
+                parsePostRequest(Json.parse(postBody));
             }
 
             break;
@@ -61,11 +61,11 @@ abstract class HttpDispatcher {
 
             final String putBody = parseRequestBody(httpExchange.getRequestBody());
 
-            if (putBody != null) {
-                parsePutRequest(Json.parse(putBody));
+            if (putBody == null || putBody.isEmpty()) {
+                sendError(ServerResponse.MissingParameters);
             }
             else {
-                sendError(ServerResponse.MissingParameters);
+                parsePutRequest(Json.parse(putBody));
             }
 
             break;
@@ -74,11 +74,11 @@ abstract class HttpDispatcher {
 
             final String deleteBody = parseRequestBody(httpExchange.getRequestBody());
 
-            if (deleteBody != null) {
-                parseDeleteRequest(Json.parse(deleteBody));
+            if (deleteBody == null || deleteBody.isEmpty()) {
+                sendError(ServerResponse.MissingParameters);
             }
             else {
-                sendError(ServerResponse.MissingParameters);
+                parseDeleteRequest(Json.parse(deleteBody));
             }
 
             break;

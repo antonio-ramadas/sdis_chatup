@@ -34,27 +34,14 @@ public class PrimaryListener extends Listener {
 
             final ServerInfo serverInfo;
             final ServerOnline serverOnline = (ServerOnline) paramObject;
+            final InetSocketAddress serverSocket = serverConnection.getRemoteAddressTCP();
 
-            if (serverOnline.serverAddress == null || serverOnline.serverPort < 1) {
-
-                final InetSocketAddress serverSocket = serverConnection.getRemoteAddressTCP();
-
-                serverInfo = new ServerInfo(
-                    serverOnline.serverId,
-                    serverOnline.serverTimestamp,
-                    serverSocket.getHostName(),
-                    serverSocket.getPort()
-                );
-            }
-            else {
-
-                serverInfo = new ServerInfo(
-                    serverOnline.serverId,
-                    serverOnline.serverTimestamp,
-                    serverOnline.serverAddress,
-                    serverOnline.serverPort
-                );
-            }
+            serverInfo = new ServerInfo(
+                serverOnline.serverId,
+                serverOnline.serverTimestamp,
+                serverSocket.getHostName(),
+                serverOnline.serverPort
+            );
 
             serverConnection.serverId = serverOnline.serverId;
             kryoServer.sendToAllExceptTCP(serverConnection.getId(), serverOnline);

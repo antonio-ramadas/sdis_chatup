@@ -2,12 +2,15 @@ package chatup.http;
 
 import chatup.main.ChatupGlobals;
 import chatup.main.ChatupServer;
+
 import chatup.server.Server;
+import chatup.server.ServerInfo;
 
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 
 import com.sun.net.httpserver.HttpExchange;
+import javafx.util.Pair;
 
 class RoomServiceHandler extends HttpDispatcher {
 
@@ -16,8 +19,27 @@ class RoomServiceHandler extends HttpDispatcher {
     }
 
     @Override
-    public void parseGetRequest(String[] getValues) {
-        sendJsonResponse(ServerResponse.SuccessResponse, ChatupServer.getInstance().getRooms());
+    public void parseGetRequest(final String[] jsonValue) {
+
+        final Server serverInstance = ChatupServer.getInstance();
+
+        if (jsonValue.length > 0) {
+
+            final String userToken = parseString(jsonValue[0], HttpFields.UserToken);
+
+            if (userToken == null) {
+                sendError(ServerResponse.InvalidToken);
+            }
+            else if (serverInstance.validateToken(userToken)){
+                sendJsonResponse(ServerResponse.SuccessResponse, ChatupServer.getInstance().getRooms());
+            }
+            else {
+                sendError(ServerResponse.InvalidToken);
+            }
+        }
+        else {
+            sendError(ServerResponse.MissingParameters);
+        }
     }
 
     @Override
@@ -36,7 +58,22 @@ class RoomServiceHandler extends HttpDispatcher {
                 sendError(ServerResponse.MissingParameters);
             }
             else {
-                sendJsonResponse(serverInstance.joinRoom(roomId, userPassword, userToken), jsonObject);
+
+                final Pair<ServerResponse, ServerInfo> serverPair = serverInstance.joinRoom(
+                    roomId, userPassword, userToken
+                );
+
+                final ServerResponse serverResponse = serverPair.getKey();
+                final ServerInfo serverInfo = serverPair.getValue();
+
+                if (serverResponse == ServerResponse.SuccessResponse) {
+                    sendJsonResponse(serverResponse, jsonObject
+                        .add("address", serverInfo.getAddress())
+                        .add("port", serverInfo.getPort()));
+                }
+                else {
+                    sendError(serverResponse);
+                }
             }
         }
         else {
