@@ -5,21 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="12837c42-8525-4718-b44a-390330e984d3" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/primary.db" afterPath="$PROJECT_DIR$/primary.db" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/http/HeartbeatServiceHandler.java" afterPath="$PROJECT_DIR$/chatup/http/HeartbeatServiceHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/http/MessageServiceHandler.java" afterPath="$PROJECT_DIR$/chatup/http/MessageServiceHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/model/Database.java" afterPath="$PROJECT_DIR$/chatup/model/Database.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/model/Message.java" afterPath="$PROJECT_DIR$/chatup/model/Message.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/model/MessageCache.java" afterPath="$PROJECT_DIR$/chatup/model/MessageCache.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/model/Room.java" afterPath="$PROJECT_DIR$/chatup/model/Room.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/PrimaryServer.java" afterPath="$PROJECT_DIR$/chatup/server/PrimaryServer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/SecondaryServer.java" afterPath="$PROJECT_DIR$/chatup/server/SecondaryServer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/TcpNetwork.java" afterPath="$PROJECT_DIR$/chatup/server/TcpNetwork.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/tcp/CreateRoom.java" afterPath="$PROJECT_DIR$/chatup/tcp/CreateRoom.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/tcp/PrimaryListener.java" afterPath="$PROJECT_DIR$/chatup/tcp/PrimaryListener.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/tcp/SecondaryClientListener.java" afterPath="$PROJECT_DIR$/chatup/tcp/SecondaryClientListener.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/tcp/SecondaryServerListener.java" afterPath="$PROJECT_DIR$/chatup/tcp/SecondaryServerListener.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/ServerInfo.java" afterPath="$PROJECT_DIR$/chatup/server/ServerInfo.java" />
     </list>
     <ignored path="sdis_chatup.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -42,10 +31,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="SecondaryServer.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="SecondaryServer.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/chatup/server/SecondaryServer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="176">
+            <state relative-caret-position="-487">
               <caret line="376" column="0" selection-start-line="376" selection-start-column="0" selection-end-line="376" selection-end-column="0" />
               <folding>
                 <element signature="imports" expanded="true" />
@@ -54,39 +43,25 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Room.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/chatup/model/Room.java">
+      <file leaf-file-name="CommandQueue.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/chatup/model/CommandQueue.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="561">
-              <caret line="40" column="0" selection-start-line="40" selection-start-column="0" selection-end-line="40" selection-end-column="0" />
+            <state relative-caret-position="170">
+              <caret line="10" column="25" selection-start-line="10" selection-start-column="25" selection-end-line="10" selection-end-column="25" />
               <folding>
-                <element signature="e#2770#2771#0" expanded="true" />
-                <element signature="e#2820#2821#0" expanded="true" />
-                <element signature="e#2877#2878#0" expanded="true" />
-                <element signature="e#2940#2941#0" expanded="true" />
+                <element signature="imports" expanded="true" />
+                <element signature="e#203#204#0" expanded="true" />
+                <element signature="e#247#248#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ServerOnline.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/chatup/tcp/ServerOnline.java">
+      <file leaf-file-name="Database.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/chatup/model/Database.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="68">
-              <caret line="4" column="18" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="25" />
-              <folding>
-                <element signature="e#290#291#0" expanded="true" />
-                <element signature="e#339#340#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Server.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/chatup/server/Server.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1955">
-              <caret line="140" column="24" selection-start-line="140" selection-start-column="24" selection-end-line="140" selection-end-column="24" />
+            <state relative-caret-position="1836">
+              <caret line="318" column="1" selection-start-line="318" selection-start-column="1" selection-end-line="318" selection-end-column="1" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -94,11 +69,67 @@
           </provider>
         </entry>
       </file>
+      <file leaf-file-name="UpdateServer.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/chatup/tcp/UpdateServer.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="136">
+              <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="32" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="PrimaryServer.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/chatup/server/PrimaryServer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="11883">
-              <caret line="721" column="67" selection-start-line="721" selection-start-column="67" selection-end-line="721" selection-end-column="67" />
+            <state relative-caret-position="-5270">
+              <caret line="214" column="11" selection-start-line="214" selection-start-column="11" selection-end-line="214" selection-end-column="11" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ServerInfo.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/chatup/server/ServerInfo.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1428">
+              <caret line="112" column="4" selection-start-line="112" selection-start-column="4" selection-end-line="112" selection-end-column="4" />
+              <folding>
+                <element signature="imports" expanded="true" />
+                <element signature="e#2373#2374#0" expanded="true" />
+                <element signature="e#2437#2438#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Message.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/chatup/model/Message.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="582">
+              <caret line="59" column="1" selection-start-line="59" selection-start-column="1" selection-end-line="59" selection-end-column="1" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Room.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/chatup/model/Room.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-1377">
+              <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="RoomInfo.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/chatup/model/RoomInfo.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-47">
+              <caret line="68" column="24" selection-start-line="68" selection-start-column="24" selection-end-line="68" selection-end-column="24" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -109,54 +140,11 @@
       <file leaf-file-name="MessageCache.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/chatup/model/MessageCache.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1292">
+            <state relative-caret-position="1126">
               <caret line="92" column="1" selection-start-line="92" selection-start-column="1" selection-end-line="92" selection-end-column="1" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="SecondaryServerListener.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/chatup/tcp/SecondaryServerListener.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="782">
-              <caret line="55" column="35" selection-start-line="55" selection-start-column="35" selection-end-line="55" selection-end-column="35" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="MessageServiceHandler.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/chatup/http/MessageServiceHandler.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="340">
-              <caret line="32" column="56" selection-start-line="32" selection-start-column="56" selection-end-line="32" selection-end-column="56" />
-              <folding>
-                <element signature="e#417#418#0" expanded="true" />
-                <element signature="e#485#486#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ServerOffline.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/chatup/tcp/ServerOffline.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="68">
-              <caret line="4" column="13" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="13" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PrimaryListener.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/chatup/tcp/PrimaryListener.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="629">
-              <caret line="47" column="33" selection-start-line="47" selection-start-column="33" selection-end-line="47" selection-end-column="33" />
-              <folding />
             </state>
           </provider>
         </entry>
@@ -201,7 +189,6 @@
         <option value="$PROJECT_DIR$/chatup/model/CommandQueue.java" />
         <option value="$PROJECT_DIR$/chatup/tcp/SyncRoomResponse.java" />
         <option value="$PROJECT_DIR$/chatup/model/RoomInfo.java" />
-        <option value="$PROJECT_DIR$/chatup/server/ServerInfo.java" />
         <option value="$PROJECT_DIR$/kryonet/KryoClient.java" />
         <option value="$PROJECT_DIR$/kryonet/Connection.java" />
         <option value="$PROJECT_DIR$/kryonet/UdpConnection.java" />
@@ -227,11 +214,12 @@
         <option value="$PROJECT_DIR$/chatup/tcp/SecondaryServerListener.java" />
         <option value="$PROJECT_DIR$/chatup/tcp/SecondaryClientListener.java" />
         <option value="$PROJECT_DIR$/chatup/tcp/PrimaryListener.java" />
-        <option value="$PROJECT_DIR$/chatup/server/PrimaryServer.java" />
         <option value="$PROJECT_DIR$/chatup/http/MessageServiceHandler.java" />
         <option value="$PROJECT_DIR$/chatup/model/MessageCache.java" />
-        <option value="$PROJECT_DIR$/chatup/model/Room.java" />
         <option value="$PROJECT_DIR$/chatup/server/SecondaryServer.java" />
+        <option value="$PROJECT_DIR$/chatup/model/Room.java" />
+        <option value="$PROJECT_DIR$/chatup/server/ServerInfo.java" />
+        <option value="$PROJECT_DIR$/chatup/server/PrimaryServer.java" />
       </list>
     </option>
   </component>
@@ -713,7 +701,14 @@
       <option name="project" value="LOCAL" />
       <updated>1464117486975</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="message service improvements">
+      <created>1464211285949</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1464211285949</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
@@ -800,7 +795,8 @@
     <MESSAGE value="serverinfo now has serverId" />
     <MESSAGE value="sends and receives messages" />
     <MESSAGE value="fixed compile errors and bugs" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed compile errors and bugs" />
+    <MESSAGE value="message service improvements" />
+    <option name="LAST_COMMIT_MESSAGE" value="message service improvements" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -813,14 +809,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/kryonet/EndPoint.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="25" column="17" selection-start-line="25" selection-start-column="17" selection-end-line="25" selection-end-column="17" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/kryonet/FrameworkMessage.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="714">
@@ -832,6 +820,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="289">
           <caret line="17" column="36" selection-start-line="17" selection-start-column="36" selection-end-line="17" selection-end-column="36" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -854,6 +843,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="459">
           <caret line="36" column="1" selection-start-line="36" selection-start-column="1" selection-end-line="36" selection-end-column="1" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -861,6 +851,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
           <caret line="4" column="38" selection-start-line="4" selection-start-column="24" selection-end-line="4" selection-end-column="38" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -868,6 +859,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-766">
           <caret line="140" column="12" selection-start-line="140" selection-start-column="12" selection-end-line="140" selection-end-column="12" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -890,6 +882,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
           <caret line="4" column="0" selection-start-line="4" selection-start-column="0" selection-end-line="18" selection-end-column="35" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -897,6 +890,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="153">
           <caret line="18" column="39" selection-start-line="18" selection-start-column="39" selection-end-line="18" selection-end-column="39" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -920,6 +914,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="514">
           <caret line="36" column="1" selection-start-line="36" selection-start-column="1" selection-end-line="36" selection-end-column="1" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -931,57 +926,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/chatup/model/Database.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1918">
-          <caret line="318" column="1" selection-start-line="318" selection-start-column="1" selection-end-line="318" selection-end-column="1" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/chatup/model/Message.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1003">
-          <caret line="59" column="1" selection-start-line="59" selection-start-column="1" selection-end-line="59" selection-end-column="1" />
-          <folding>
-            <element signature="e#549#550#0" expanded="true" />
-            <element signature="e#583#584#0" expanded="true" />
-            <element signature="e#617#618#0" expanded="true" />
-            <element signature="e#656#657#0" expanded="true" />
-            <element signature="e#695#696#0" expanded="true" />
-            <element signature="e#731#732#0" expanded="true" />
-            <element signature="e#771#772#0" expanded="true" />
-            <element signature="e#809#810#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/chatup/model/RoomInfo.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="514">
-          <caret line="125" column="1" selection-start-line="125" selection-start-column="1" selection-end-line="125" selection-end-column="1" />
-          <folding>
-            <element signature="e#1778#1779#0" expanded="true" />
-            <element signature="e#1820#1821#0" expanded="true" />
-            <element signature="e#1854#1855#0" expanded="true" />
-            <element signature="e#1897#1898#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/chatup/model/CommandQueue.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="10" column="25" selection-start-line="10" selection-start-column="25" selection-end-line="10" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/chatup/http/SecondaryDispatcher.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="221">
           <caret line="15" column="24" selection-start-line="15" selection-start-column="24" selection-end-line="15" selection-end-column="24" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -989,6 +938,11 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-120">
           <caret line="16" column="4" selection-start-line="16" selection-start-column="4" selection-end-line="16" selection-end-column="4" />
+          <folding>
+            <element signature="imports" expanded="false" />
+            <element signature="e#414#415#0" expanded="false" />
+            <element signature="e#479#480#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -996,6 +950,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="221">
           <caret line="15" column="28" selection-start-line="15" selection-start-column="28" selection-end-line="15" selection-end-column="28" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1003,6 +958,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
           <caret line="4" column="13" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="13" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1014,17 +970,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/chatup/tcp/UpdateServer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/chatup/tcp/UserDisconnect.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
           <caret line="4" column="13" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="13" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1060,13 +1010,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/chatup/server/ServerInfo.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="203">
-          <caret line="61" column="12" selection-start-line="61" selection-start-column="12" selection-end-line="61" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/chatup/server/ServerKeystore.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-187">
@@ -1098,6 +1041,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
           <caret line="4" column="13" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="13" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1105,6 +1049,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="221">
           <caret line="16" column="1" selection-start-line="16" selection-start-column="1" selection-end-line="16" selection-end-column="1" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1120,6 +1065,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
           <caret line="4" column="13" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="13" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1162,16 +1108,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/chatup/server/PrimaryServer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="11883">
-          <caret line="721" column="67" selection-start-line="721" selection-start-column="67" selection-end-line="721" selection-end-column="67" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/chatup/tcp/SecondaryServerListener.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="782">
@@ -1184,16 +1120,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="135">
           <caret line="118" column="21" selection-start-line="118" selection-start-column="21" selection-end-line="118" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/chatup/model/MessageCache.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1292">
-          <caret line="92" column="1" selection-start-line="92" selection-start-column="1" selection-end-line="92" selection-end-column="1" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1218,25 +1144,108 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/chatup/model/CommandQueue.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="10" column="25" selection-start-line="10" selection-start-column="25" selection-end-line="10" selection-end-column="25" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#203#204#0" expanded="true" />
+            <element signature="e#247#248#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/chatup/model/Message.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="582">
+          <caret line="59" column="1" selection-start-line="59" selection-start-column="1" selection-end-line="59" selection-end-column="1" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/chatup/model/Room.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="561">
-          <caret line="40" column="0" selection-start-line="40" selection-start-column="0" selection-end-line="40" selection-end-column="0" />
+        <state relative-caret-position="-1377">
+          <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://C:/Program Files/Java/jdk1.8.0_45/jre/lib/rt.jar!/java/util/Set.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="208">
+          <caret line="27" column="12" selection-start-line="27" selection-start-column="12" selection-end-line="27" selection-end-column="12" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/chatup/model/RoomInfo.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-47">
+          <caret line="68" column="24" selection-start-line="68" selection-start-column="24" selection-end-line="68" selection-end-column="24" />
           <folding>
-            <element signature="e#2770#2771#0" expanded="true" />
-            <element signature="e#2820#2821#0" expanded="true" />
-            <element signature="e#2877#2878#0" expanded="true" />
-            <element signature="e#2940#2941#0" expanded="true" />
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/chatup/model/MessageCache.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1126">
+          <caret line="92" column="1" selection-start-line="92" selection-start-column="1" selection-end-line="92" selection-end-column="1" />
+          <folding>
+            <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/chatup/server/SecondaryServer.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="176">
+        <state relative-caret-position="-487">
           <caret line="376" column="0" selection-start-line="376" selection-start-column="0" selection-end-line="376" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/chatup/model/Database.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1836">
+          <caret line="318" column="1" selection-start-line="318" selection-start-column="1" selection-end-line="318" selection-end-column="1" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/chatup/tcp/UpdateServer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="136">
+          <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="32" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/chatup/server/PrimaryServer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-5270">
+          <caret line="214" column="11" selection-start-line="214" selection-start-column="11" selection-end-line="214" selection-end-column="11" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/chatup/server/ServerInfo.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1428">
+          <caret line="112" column="4" selection-start-line="112" selection-start-column="4" selection-end-line="112" selection-end-column="4" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#2373#2374#0" expanded="true" />
+            <element signature="e#2437#2438#0" expanded="true" />
           </folding>
         </state>
       </provider>

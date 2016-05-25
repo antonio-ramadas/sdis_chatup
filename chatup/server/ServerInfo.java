@@ -1,6 +1,7 @@
 package chatup.server;
 
 import java.time.Instant;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -96,11 +97,11 @@ public class ServerInfo implements Comparable<ServerInfo> {
         return serverUsers.contains(userToken);
     }
 
-    public boolean isOnline() {
+    boolean isOnline() {
         return serverStatus;
     }
 
-    public int getLoad() {
+    int getLoad() {
         return serverUsers.size();
     }
 
@@ -109,7 +110,7 @@ public class ServerInfo implements Comparable<ServerInfo> {
         return serverAddress + ":" + serverPort;
     }
 
-    public void updateTimestamp() {
+    void updateTimestamp() {
         serverTimestamp = Instant.now().getEpochSecond();
     }
 }
