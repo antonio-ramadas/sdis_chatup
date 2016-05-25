@@ -17,50 +17,8 @@ class HeartbeatServiceHandler extends HttpDispatcher {
 
     @Override
     public void parseGetRequest(final String[] jsonValue) {
-        sendHeartbeat(parseString(jsonValue[0], HttpFields.UserToken));
-    }
 
-    @Override
-    public void parsePostRequest(final JsonValue jsonValue) {
-
-        final JsonObject jsonObject = extractCommand(jsonValue, HttpCommands.SendMessage);
-
-        if (jsonObject != null) {
-            sendHeartbeat(jsonObject.getString(HttpFields.UserToken, null));
-        }
-        else {
-            sendError(ServerResponse.InvalidOperation);
-        }
-    }
-
-    @Override
-    public void parsePutRequest(final JsonValue jsonValue) {
-
-        final JsonObject jsonObject = extractCommand(jsonValue, HttpCommands.SendMessage);
-
-        if (jsonObject != null) {
-            sendHeartbeat(jsonObject.getString(HttpFields.UserToken, null));
-        }
-        else {
-            sendError(ServerResponse.InvalidOperation);
-        }
-    }
-
-    @Override
-    public void parseDeleteRequest(final JsonValue jsonValue) {
-
-        final JsonObject jsonObject = extractCommand(jsonValue, HttpCommands.SendMessage);
-
-        if (jsonObject != null) {
-            sendHeartbeat(jsonObject.getString(HttpFields.UserToken, null));
-        }
-        else {
-            sendError(ServerResponse.InvalidOperation);
-        }
-    }
-
-    private void sendHeartbeat(final String userToken) {
-
+        final String userToken = parseString(jsonValue[0], HttpFields.UserToken);
         final Server serverInstance = ChatupServer.getInstance();
 
         if (userToken != null) {

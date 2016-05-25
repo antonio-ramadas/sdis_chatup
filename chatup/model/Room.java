@@ -1,5 +1,7 @@
 package chatup.model;
 
+import com.eclipsesource.json.JsonArray;
+
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -133,12 +135,8 @@ public class Room extends RoomInfo {
         return roomMessages.getMessages(paramTimestamp);
     }
 
-    public void insertMessages(final LinkedList<Message> paramMessages) {
-
-        for (final Message currentMessage : paramMessages) {
-            roomMessages.push(currentMessage);
-        }
-
+    public void insertMessages(final MessageCache paramMessages) {
+        roomMessages = paramMessages;
         lastSync = roomMessages.getLast().getTimestamp();
     }
 }

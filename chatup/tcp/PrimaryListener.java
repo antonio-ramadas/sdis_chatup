@@ -32,11 +32,10 @@ public class PrimaryListener extends Listener {
 
         if (paramObject instanceof ServerOnline) {
 
-            final ServerInfo serverInfo;
             final ServerOnline serverOnline = (ServerOnline) paramObject;
             final InetSocketAddress serverSocket = serverConnection.getRemoteAddressTCP();
 
-            serverInfo = new ServerInfo(
+            final ServerInfo serverInfo = new ServerInfo(
                 serverOnline.serverId,
                 serverOnline.serverTimestamp,
                 serverSocket.getHostName(),
@@ -46,6 +45,7 @@ public class PrimaryListener extends Listener {
             serverConnection.serverId = serverOnline.serverId;
             kryoServer.sendToAllExceptTCP(serverConnection.getId(), serverOnline);
             myConnections.put(serverOnline.serverId, serverConnection.getId());
+            primaryServer.insertServer(serverInfo);
 
             final ServerResponse operationResult = primaryServer.insertServer(serverInfo);
 

@@ -719,7 +719,7 @@ public class PrimaryServer extends Server {
         }
 
         if (sameInformation) {
-            return ServerResponse.SuccessResponse;
+            return serverOnline(serverId, serverInfo.getTimestamp());
         }
 
         if (!serverDatabase.updateServer(serverInfo)) {

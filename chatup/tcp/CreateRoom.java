@@ -1,23 +1,28 @@
 package chatup.tcp;
 
+import chatup.model.Room;
+
 import java.io.Serializable;
 
 public class CreateRoom implements Serializable
 {
+    public String userEmail;
+    public String userToken;
     public String roomName;
     public String roomPassword;
-    public String userToken;
-    public String userEmail;
 
     public CreateRoom()
     {
     }
 
-    public CreateRoom(final String paramName, final String paramPassword, final String paramOwner, final String paramEmail)
+    public int roomId;
+
+    public CreateRoom(int paramId, final Room paramRoom, final String paramEmail)
     {
-        roomName = paramName;
-        roomPassword = paramPassword;
+        roomId = paramId;
+        roomName = paramRoom.getName();
+        roomPassword = paramRoom.getPassword();
+        userToken = paramRoom.getOwner();
         userEmail = paramEmail;
-        userToken = paramOwner;
     }
 }

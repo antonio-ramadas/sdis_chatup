@@ -5,13 +5,14 @@ import chatup.http.SecondaryDispatcher;
 import chatup.http.ServerResponse;
 import chatup.main.ChatupGlobals;
 import chatup.model.Database;
+import chatup.model.MessageCache;
 import chatup.model.Room;
 import chatup.model.Message;
 import chatup.tcp.*;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonValue;
-import javafx.util.Pair;
+
 import kryonet.Connection;
 import kryonet.KryoClient;
 import kryonet.KryoServer;
@@ -20,7 +21,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Set;
 
 public class SecondaryServer extends Server {
@@ -93,11 +93,12 @@ public class SecondaryServer extends Server {
         rooms.forEach((roomId, roomInformation) -> {
 
             final Set<Integer> roomServers = serverDatabase.getServerByRoom(roomId);
-            final LinkedList<Message> roomMessages = serverDatabase.getMessagesByRoom(roomId);
 
             if (roomServers != null) {
                 roomInformation.setServers(roomServers);
             }
+
+            final MessageCache roomMessages = serverDatabase.getMessagesByRoom(roomId);
 
             if (roomMessages != null) {
                 roomInformation.insertMessages(roomMessages);
@@ -140,7 +141,6 @@ public class SecondaryServer extends Server {
 	}
 
 	private int serverId;
-    private int roomSequence;
     private long serverTimestamp;
 
     @Override
@@ -161,25 +161,27 @@ public class SecondaryServer extends Server {
         }
     }
 
-    @Override
-    public ServerResponse createRoom(final String roomName, final String roomPassword, final String roomOwner) {
-
-        int roomId = ++roomSequence;
+    public ServerResponse createRoom(final CreateRoom createRoom) {
 
         System.out.println("------ CreateRoom ------");
-        System.out.println("roomId:" + roomId);
-        System.out.println("roomName:" + roomName);
-        System.out.println("roomPassword:" + roomPassword);
-        System.out.println("roomOwner:" + roomOwner);
+        System.out.println("roomId:" + createRoom.roomId);
+        System.out.println("roomName:" + createRoom.roomName);
+        System.out.println("roomPassword:" + createRoom.roomPassword);
+        System.out.println("roomOwner:" + createRoom.userToken);
 
-        if (rooms.containsKey(roomId)) {
+        if (rooms.containsKey(createRoom.roomId)) {
             return ServerResponse.RoomNotFound;
         }
 
-        final Room newRoom = new Room(roomName, roomPassword, roomOwner);
+        final Room serializedRoom = new Room
+        (
+            createRoom.roomName,
+            createRoom.roomPassword,
+            createRoom.userToken
+        );
 
-        if (serverDatabase.insertRoom(roomId, newRoom)) {
-            rooms.put(1,newRoom );
+        if (serverDatabase.insertRoom(createRoom.roomId, serializedRoom)) {
+            rooms.put(createRoom.roomId, serializedRoom );
         }
         else {
             return ServerResponse.DatabaseError;
@@ -188,28 +190,28 @@ public class SecondaryServer extends Server {
         return ServerResponse.SuccessResponse;
 	}
 
-    @Override
-	public Pair<ServerResponse, ServerInfo> joinRoom(int roomId, final String userEmail, final String userToken) {
+	public ServerResponse joinRoom(final JoinRoom joinRoom) {
 
-		final String userRecord = users.get(userToken);
+        final String userToken = joinRoom.userToken;
+		final String userRecord = users.get(joinRoom.userToken);
 
 		if (userRecord == null) {
-			users.put(userToken, userEmail);
+			users.put(userToken, joinRoom.userEmail);
 		}
 
-		final Room selectedRoom = rooms.get(roomId);
+		final Room selectedRoom = rooms.get(joinRoom.roomId);
 
 		if (selectedRoom == null) {
-			return new Pair<>(ServerResponse.RoomNotFound, null);
+			return ServerResponse.RoomNotFound;
 		}
 
 		if (selectedRoom.hasUser(userToken)) {
-            return new Pair<>(ServerResponse.AlreadyJoined, null);
+            return ServerResponse.AlreadyJoined;
         }
 
 		selectedRoom.registerUser(userToken);
 
-		return new Pair<>(ServerResponse.SuccessResponse, null);
+		return ServerResponse.SuccessResponse;
 	}
 
     @Override
@@ -306,11 +308,23 @@ public class SecondaryServer extends Server {
             return ServerResponse.RoomNotFound;
         }
 
-        if (selectedRoom.insertMessage(paramMessage)) {
-            return ServerResponse.SuccessResponse;
+        if (serverDatabase.insertMessage(paramMessage)) {
+
+            if (selectedRoom.insertMessage(paramMessage)) {
+
+                final Set<Integer> roomServers = selectedRoom.getServers();
+
+                for (final Integer serverId : roomServers) {
+                    myServerListener.sendServer(serverId, paramMessage);
+                }
+
+                return ServerResponse.SuccessResponse;
+            }
+
+            return ServerResponse.OperationFailed;
         }
 
-        return ServerResponse.OperationFailed;
+        return ServerResponse.DatabaseError;
     }
 
     @Override
@@ -318,63 +332,50 @@ public class SecondaryServer extends Server {
         return users.containsKey(userToken);
     }
 
-    public ServerResponse notifyMessage(final Message paramMessage) {
-
-        final String userToken = paramMessage.getAuthor();
-        final String userRecord = users.get(userToken);
-
-        if (userRecord == null) {
-            return ServerResponse.InvalidToken;
-        }
-
-        int roomId = paramMessage.getId();
-        final Room selectedRoom = rooms.get(roomId);
-
-        if (selectedRoom == null) {
-            return ServerResponse.RoomNotFound;
-        }
-
-        final Set<Integer> roomServers = selectedRoom.getServers();
-
-        for (final Integer currentRoom : roomServers) {
-            myServerListener.sendServer(currentRoom, paramMessage);
-        }
-
-        return ServerResponse.SuccessResponse;
-    }
-
 	public JsonValue getMessages(final String userToken, int roomId) {
 
-        final JsonValue jsonArray = Json.array();
+        final JsonValue messagesArray = Json.array();
         final String userRecord = users.get(userToken);
 
         if (userRecord == null) {
             getLogger().userNotFound(userToken);
-            return jsonArray;
+            return messagesArray;
         }
 
 		final Room selectedRoom = rooms.get(roomId);
 
         if (selectedRoom == null) {
             getLogger().roomNotFound(roomId);
-            return jsonArray;
+            return messagesArray;
         }
 
-		/*if (!selectedRoom.hasUser(userToken)) {
-			return jsonArray;
-		}*/
+		if (!selectedRoom.hasUser(userToken)) {
+			return messagesArray;
+		}
 
         final Message[] myMessages = selectedRoom.getMessages();
 
         for (final Message currentMessage : myMessages) {
-            jsonArray.asArray().add(Json.object()
+            messagesArray.asArray().add(Json.object()
                 .add(HttpFields.MessageSender, currentMessage.getAuthor())
                 .add(HttpFields.MessageTimestamp, currentMessage.getTimestamp())
                 .add(HttpFields.MessageContents, currentMessage.getMessage())
                 .add(HttpFields.MessageRoomId, currentMessage.getId()));
         }
 
-        return jsonArray;
+        final Set<String> roomUsers = selectedRoom.getUsers();
+        final JsonValue usersArray = Json.array();
+
+        for (final String otherToken : roomUsers) {
+
+            final String otherEmail = users.get(otherToken);
+
+            if (otherEmail != null) {
+                usersArray.asArray().add(otherEmail);
+            }
+        }
+
+        return Json.object().add("users", usersArray).add("messages", messagesArray);
 	}
 
 	@Override

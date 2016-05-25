@@ -53,9 +53,7 @@ public class SecondaryServerListener extends Listener {
 
     private void sendMessage(final Message paramMessage) {
 
-        final ServerResponse operationResult = secondaryServer.insertMessage(paramMessage);
-
-        switch (operationResult) {
+        switch (secondaryServer.insertMessage(paramMessage)) {
         case SuccessResponse:
             secondaryServer.getLogger().sendMessage(paramMessage.getId());
             break;
@@ -91,9 +89,7 @@ public class SecondaryServerListener extends Listener {
 
     private void syncRoom(final ServerConnection paramConnection, final SyncRoomResponse updateRoom) {
 
-        final ServerResponse operationResult = secondaryServer.updateRoom(updateRoom);
-
-        switch (operationResult) {
+        switch (secondaryServer.updateRoom(updateRoom)) {
         case SuccessResponse:
             secondaryServer.getLogger().updateRoom(updateRoom.roomId, paramConnection.serverId);
             break;

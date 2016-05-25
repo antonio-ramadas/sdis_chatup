@@ -5,7 +5,6 @@ import chatup.model.CommandQueue;
 import chatup.server.SecondaryServer;
 import chatup.server.ServerInfo;
 
-import javafx.util.Pair;
 import kryonet.Connection;
 import kryonet.KryoClient;
 import kryonet.Listener;
@@ -23,14 +22,7 @@ public class SecondaryClientListener extends Listener {
     // TODO: Verified!
     private void createRoom(final CreateRoom createRoom) {
 
-        final ServerResponse operationResult = secondaryServer.createRoom
-        (
-            createRoom.roomName,
-            createRoom.roomPassword,
-            createRoom.userToken
-        );
-
-        switch (operationResult) {
+        switch (secondaryServer.createRoom(createRoom)) {
         case SuccessResponse:
             secondaryServer.registerUser(createRoom.userToken, createRoom.userEmail);
             secondaryServer.getLogger().createRoom(createRoom.userToken, createRoom.roomName);
@@ -47,14 +39,7 @@ public class SecondaryClientListener extends Listener {
     // TODO: Verified!
     private void joinRoom(final JoinRoom joinRoom) {
 
-        final Pair<ServerResponse, ServerInfo> operationResult = secondaryServer.joinRoom
-        (
-            joinRoom.roomId,
-            joinRoom.userEmail,
-            joinRoom.userToken
-        );
-
-        switch (operationResult.getKey()) {
+        switch (secondaryServer.joinRoom(joinRoom)) {
         case SuccessResponse:
             secondaryServer.getLogger().joinRoom(joinRoom.userToken, joinRoom.roomId);
             break;
@@ -92,9 +77,7 @@ public class SecondaryClientListener extends Listener {
     // TODO: Verified!
     private void deleteRoom(final DeleteRoom deleteRoom) {
 
-        final ServerResponse operationResult = secondaryServer.deleteRoom(deleteRoom.roomId);
-
-        switch (operationResult) {
+        switch (secondaryServer.deleteRoom(deleteRoom.roomId)) {
         case SuccessResponse:
             secondaryServer.getLogger().deleteRoom(deleteRoom.roomId);
             break;
@@ -110,9 +93,7 @@ public class SecondaryClientListener extends Listener {
     // TODO: Verified!
     private void deleteServer(final DeleteServer deleteServer) {
 
-        final ServerResponse operationResult = secondaryServer.deleteServer(deleteServer.serverId);
-
-        switch (operationResult) {
+        switch (secondaryServer.deleteServer(deleteServer.serverId)) {
         case SuccessResponse:
             secondaryServer.getLogger().deleteServer(deleteServer.serverId);
             break;
@@ -127,8 +108,6 @@ public class SecondaryClientListener extends Listener {
 
     @Override
     public void received(final Connection paramConnection, final Object paramObject) {
-
-        secondaryServer.getLogger().invalidOperation(paramObject);
 
         if (paramObject instanceof JoinRoom) {
             joinRoom((JoinRoom)paramObject);
@@ -159,7 +138,8 @@ public class SecondaryClientListener extends Listener {
     // TODO: Verified!
     private void updateServer(final UpdateServer serverOnline) {
 
-        final ServerInfo serverInfo = new ServerInfo(
+        final ServerInfo serverInfo = new ServerInfo
+        (
             serverOnline.serverId,
             serverOnline.serverTimestamp,
             serverOnline.serverAddress,

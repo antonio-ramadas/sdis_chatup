@@ -53,7 +53,7 @@ class MessageServiceHandler extends HttpDispatcher {
             final String userToken = jsonObject.getString(HttpFields.MessageSender, null);
             final String messageBody = jsonObject.getString(HttpFields.MessageContents, null);
 
-            if (roomId < 0 || userToken == null) {
+            if (roomId < 0 || userToken == null || userToken.isEmpty()) {
                 sendError(ServerResponse.MissingParameters);
             }
             else if (messageBody == null || messageBody.isEmpty()) {

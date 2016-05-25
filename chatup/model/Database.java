@@ -13,8 +13,6 @@ public class Database {
     private static final String ServerId = "id";
     private static final String ServerPort = "port";
     private static final String ServerTimestamp = "timestamp";
-    private static final String UserEmail = "email";
-    private static final String UserToken = "token";
     private static final String RoomId = "id";
     private static final String RoomName = "name";
     private static final String RoomOwner = "owner";
@@ -23,7 +21,6 @@ public class Database {
     private static final String MessageContent = "contents";
     private static final String MessageRoom = "room";
     private static final String MessageTimestamp = "epoch";
-
     private static final String queryInsertRoom = "INSERT INTO Rooms(id, name, password, owner) VALUES(?, ?, ?, ?)";
     private static final String queryDeleteRoom = "DELETE FROM Rooms WHERE id = ?";
     private static final String querySelectRooms = "SELECT * FROM Rooms";
@@ -137,7 +134,6 @@ public class Database {
 
     private final static String queryInsertMessage = "INSERT INTO Messages(room, token, epoch, message) VALUES(?, ?, ?, ?)";
     private final static String querySelectMessagesByRoom = "SELECT * FROM Messages WHERE room = ? ORDER BY epoch DESC";
-    private final static String queryDeleteMessage = "DELETE FROM Messages WHERE id = ?";
 
     public boolean insertMessage(final Message paramMessage) {
 
@@ -155,22 +151,9 @@ public class Database {
         return true;
     }
 
-    public boolean deleteMessage(int messageId) {
+    public MessageCache getMessagesByRoom(int roomId) {
 
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(queryDeleteMessage)) {
-            stmt.setInt(1, messageId);
-            stmt.executeUpdate();
-        }
-        catch (SQLException ex) {
-            return false;
-        }
-
-        return true;
-    }
-
-    public LinkedList<Message> getMessagesByRoom(int roomId) {
-
-        final LinkedList<Message> myMessages = new LinkedList<>();
+        final MessageCache myMessages = new MessageCache();
 
         try (final PreparedStatement stmt = dbConnection.prepareStatement(querySelectMessagesByRoom)) {
 
@@ -187,7 +170,7 @@ public class Database {
                         rs.getString(MessageContent)
                     );
 
-                    myMessages.add(newMessage);
+                    myMessages.push(newMessage);
                 }
             }
         }
@@ -248,7 +231,7 @@ public class Database {
         return true;
     }
 
-    public final HashMap<Integer, ServerInfo> getServers() {
+    public HashMap<Integer, ServerInfo> getServers() {
 
         final HashMap<Integer, ServerInfo> myServers = new HashMap<>();
 
@@ -332,120 +315,5 @@ public class Database {
         }
 
         return myServers;
-    }
-
-    private static final String queryInsertUser = "INSERT INTO Users(token, email) VALUES(?, ?)";
-    private static final String queryUpdateUser = "UPDATE Users SET token = ? WHERE token = ?";
-    private static final String queryDeleteUser = "DELETE FROM Users WHERE token = ?";
-    private static final String querySelectUserById = "SELECT * FROM Users WHERE token = ?";
-    private static final String querySelectUserByEmail = "SELECT * FROM Users WHERE email = ?";
-
-    public boolean insertUser(final String userToken, final String userEmail) {
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(queryInsertUser)) {
-            stmt.setString(1, userToken);
-            stmt.setString(2, userEmail);
-            stmt.executeUpdate();
-        }
-        catch (SQLException ex) {
-            return false;
-        }
-
-        return true;
-    }
-
-    public boolean deleteUser(final String userToken) {
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(queryDeleteUser)) {
-            stmt.setString(1, userToken);
-            stmt.executeUpdate();
-        }
-        catch (SQLException ex) {
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean userExists(final String userToken) {
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(querySelectUserById)) {
-
-            stmt.setString(1, userToken);
-
-            try (final ResultSet rs = stmt.executeQuery()) {
-
-                if (rs.next()) {
-                    return true;
-                }
-            }
-        }
-        catch (SQLException ex) {
-            return false;
-        }
-
-        return false;
-    }
-
-    public boolean updateUser(final String oldToken, final String newToken) {
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(queryUpdateUser)) {
-            stmt.setString(1, newToken);
-            stmt.setString(2, oldToken);
-            stmt.executeUpdate();
-        }
-        catch (SQLException ex) {
-            return false;
-        }
-
-        return true;
-    }
-
-    public Map.Entry<String, String> getUserByEmail(String email) {
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(querySelectUserByEmail)) {
-
-            stmt.setString(1, email);
-
-            try (final ResultSet rs = stmt.executeQuery()) {
-
-                if (rs.next()) {
-
-                    return new AbstractMap.SimpleEntry<>(
-                        rs.getString(UserToken),
-                        rs.getString(UserEmail)
-                    );
-                }
-            }
-        }
-        catch (SQLException ex) {
-            return null;
-        }
-
-        return null;
-    }
-
-    public Map.Entry<String, String> getUserByToken(final String userToken) {
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(querySelectUserById)) {
-
-            stmt.setString(1, userToken);
-
-            try (final ResultSet rs = stmt.executeQuery()) {
-
-                if (rs.next()) {
-
-                    return new AbstractMap.SimpleEntry<>(
-                        rs.getString(UserToken),
-                        rs.getString(UserEmail)
-                    );
-                }
-            }
-        }
-        catch (SQLException ex) {
-            return null;
-        }
-
-        return null;
     }
 }

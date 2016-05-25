@@ -4,18 +4,18 @@ import java.io.Serializable;
 
 public class Message implements Comparable<Message>, Serializable {
 
-    private long messageTimestamp;
-    private int messageRoom;
-
-    public Message(int roomId, final String messageAuthor, long messageTimestamp, final String messageContents) {
-        setId(roomId);
-        setAuthor(messageAuthor);
-        setMessage(messageContents);
-        setTimestamp(messageTimestamp);
-    }
-
     private String messageAuthor;
     private String messageContents;
+
+    public Message(int paramId, final String paramAuthor, long paramTimestamp, final String paramContents) {
+        messageRoom = paramId;
+        messageAuthor = paramAuthor;
+        messageContents = paramContents;
+        messageTimestamp = paramTimestamp;
+    }
+
+    private long messageTimestamp;
+    private int messageRoom;
 
     public int getId() {
         return messageRoom;
@@ -31,22 +31,6 @@ public class Message implements Comparable<Message>, Serializable {
 
     public final String getMessage() {
         return messageContents;
-    }
-
-    private void setId(int paramId) {
-        messageRoom = paramId;
-    }
-
-    private void setTimestamp(long paramTimestamp) {
-        messageTimestamp = paramTimestamp;
-    }
-
-    private void setAuthor(final String paramAuthor) {
-        messageAuthor = paramAuthor;
-    }
-
-    private void setMessage(final String paramMessage) {
-        messageContents = paramMessage;
     }
 
     @Override

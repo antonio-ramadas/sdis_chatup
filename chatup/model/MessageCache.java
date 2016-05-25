@@ -5,6 +5,7 @@ import chatup.main.ChatupGlobals;
 import google.collections.MinMaxPriorityQueue;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Comparator;
 
 public class MessageCache implements Serializable {
@@ -43,16 +44,25 @@ public class MessageCache implements Serializable {
     }
 
     public final Message[] toArray() {
-        return myQueue.toArray(new Message[myQueue.size()]);
+
+        final ArrayList<Message> returnQueue = new ArrayList<>();
+
+        for (Message mostRecent = pop(); mostRecent != null; mostRecent = pop()) {
+            returnQueue.add(mostRecent);
+        }
+
+        myQueue.addAll(returnQueue);
+
+        return returnQueue.toArray(new Message[returnQueue.size()]);
     }
 
     public final Message[] getMessages(long paramTimestamp) {
 
-        if (paramTimestamp <= 0) {
-            return toArray();
+        if (myQueue.isEmpty()) {
+            return new Message[]{};
         }
 
-        if (getFirst().getTimestamp() >= paramTimestamp) {
+        if (paramTimestamp <= 0 || getFirst().getTimestamp() >= paramTimestamp) {
             return toArray();
         }
 
