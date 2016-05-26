@@ -1,17 +1,12 @@
 package chatup.server;
 
-import chatup.http.HttpFields;
-import chatup.http.SecondaryDispatcher;
-import chatup.http.ServerResponse;
+import chatup.http.*;
 import chatup.main.ChatupGlobals;
 import chatup.model.Database;
 import chatup.model.MessageCache;
 import chatup.model.Room;
 import chatup.model.Message;
 import chatup.tcp.*;
-
-import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonValue;
 
 import kryonet.Connection;
 import kryonet.KryoClient;
@@ -33,6 +28,7 @@ public class SecondaryServer extends Server {
     private final SecondaryServerListener mServerListener;
     private final HashMap<Integer, ServerInfo> servers;
     private final HashMap<Integer, Room> rooms;
+
     private int serverPort;
 
 	public SecondaryServer(final ServerInfo paramPrimary, int tcpPort, int httpPort) throws SQLException, IOException {
@@ -236,6 +232,18 @@ public class SecondaryServer extends Server {
         return ServerResponse.SuccessResponse;
 	}
 
+    private void notifyComet() {
+
+        for (final CometRequest cometRequest : pendingRequests) {
+
+            if (users.containsKey(cometRequest.getToken())) {
+                cometRequest.send();
+            }
+        }
+
+        pendingRequests.clear();
+    }
+
     private ServerResponse createConnection(int serverId) {
 
         final KryoClient kryoClient = new KryoClient();
@@ -300,6 +308,7 @@ public class SecondaryServer extends Server {
         }
 
 		selectedRoom.registerUser(userToken);
+        notifyComet();
 
 		return ServerResponse.SuccessResponse;
 	}
@@ -326,6 +335,8 @@ public class SecondaryServer extends Server {
         else {
             return ServerResponse.OperationFailed;
         }
+
+        notifyComet();
 
         return ServerResponse.SuccessResponse;
     }
@@ -395,6 +406,8 @@ public class SecondaryServer extends Server {
                     mServerListener.sendServer(serverId, paramMessage);
                 }
 
+                notifyComet();
+
                 return ServerResponse.SuccessResponse;
             }
 
@@ -409,54 +422,37 @@ public class SecondaryServer extends Server {
         return users.containsKey(userToken);
     }
 
-    @Override
-	public JsonValue getMessages(final String userToken, int roomId, long roomTimestamp) {
+    private ArrayList<CometRequest> pendingRequests = new ArrayList<>();
 
-        final JsonValue messagesArray = Json.array();
+    @Override
+	public ServerResponse getMessages(final HttpDispatcher httpExchange, final String userToken, int roomId, long roomTimestamp) {
+
         final String userRecord = users.get(userToken);
 
         if (userRecord == null) {
-            serverLogger.userNotFound(userToken);
-            return messagesArray;
+            return ServerResponse.InvalidToken;
         }
 
 		final Room selectedRoom = rooms.get(roomId);
 
         if (selectedRoom == null) {
-            serverLogger.roomNotFound(roomId);
-            return messagesArray;
+            return ServerResponse.RoomNotFound;
         }
 
 		if (!selectedRoom.hasUser(userToken)) {
-			return messagesArray;
+			return ServerResponse.InvalidToken;
 		}
 
-        final ArrayList<Message> myMessages = selectedRoom.getMessages(roomTimestamp);
+        final CometRequest cometRequest = new CometRequest(selectedRoom, userToken, roomTimestamp, httpExchange);
 
-        for (int i = myMessages.size() - 1; i >= 0; i--) {
-
-            final Message currentMessage = myMessages.get(i);
-
-            messagesArray.asArray().add(Json.object()
-                .add(HttpFields.MessageSender, currentMessage.getAuthor())
-                .add(HttpFields.MessageTimestamp, currentMessage.getTimestamp())
-                .add(HttpFields.MessageContents, currentMessage.getMessage())
-                .add(HttpFields.MessageRoomId, currentMessage.getId()));
+        if (roomTimestamp <= 0L) {
+            cometRequest.send();
+        }
+        else {
+            pendingRequests.add(cometRequest);
         }
 
-        final Set<String> roomUsers = selectedRoom.getUsers();
-        final JsonValue usersArray = Json.array();
-
-        for (final String otherToken : roomUsers) {
-
-            final String otherEmail = users.get(otherToken);
-
-            if (otherEmail != null) {
-                usersArray.asArray().add(otherEmail);
-            }
-        }
-
-        return Json.object().add("users", usersArray).add("messages", messagesArray);
+        return ServerResponse.SuccessResponse;
 	}
 
 	@Override

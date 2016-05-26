@@ -1,5 +1,6 @@
 package chatup.server;
 
+import chatup.http.HttpDispatcher;
 import chatup.http.ServerResponse;
 import chatup.model.Message;
 
@@ -19,6 +20,11 @@ public abstract class Server {
 
     final HashMap<String, String> users = new HashMap<>();
     private ServerType serverType;
+
+    public HashMap<String, String> getUsers()
+    {
+        return users;
+    }
 
     Server(final HttpHandler httpHandler, final ServerType paramType, int httpPort) throws SQLException {
 
@@ -138,7 +144,7 @@ public abstract class Server {
         throw new UnsupportedOperationException("SyncRoom");
     }
 
-    public JsonValue getMessages(final String userToken, int roomId, long roomTimestamp) {
+    public ServerResponse getMessages(final HttpDispatcher httpExchange, final String userToken, int roomId, long roomTimestamp) {
         throw new UnsupportedOperationException("RetrieveMessages");
     }
 

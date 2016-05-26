@@ -31,7 +31,7 @@ class RoomServiceHandler extends HttpDispatcher {
                 sendError(ServerResponse.InvalidToken);
             }
             else if (serverInstance.validateToken(userToken)){
-                sendJsonResponse(ServerResponse.SuccessResponse, ChatupServer.getInstance().getRooms());
+                sendJsonResponse(ServerResponse.SuccessResponse, serverInstance.getRooms());
             }
             else {
                 sendError(ServerResponse.InvalidToken);

@@ -15,7 +15,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 
-abstract class HttpDispatcher {
+public abstract class HttpDispatcher {
 
     private final String httpService;
     private final HttpExchange httpExchange;

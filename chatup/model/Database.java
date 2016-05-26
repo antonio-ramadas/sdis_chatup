@@ -148,7 +148,7 @@ public class Database {
         return myRooms;
     }
 
-    private final static String queryInsertMessage = "INSERT INTO Messages(room, token, epoch, message) VALUES(?, ?, ?, ?)";
+    private final static String queryInsertMessage = "INSERT INTO Messages(room, author, epoch, contents) VALUES(?, ?, ?, ?)";
     private final static String querySelectMessagesByRoom = "SELECT * FROM Messages WHERE room = ? ORDER BY epoch DESC";
 
     public boolean insertMessage(final Message paramMessage) {

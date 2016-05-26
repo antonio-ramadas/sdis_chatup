@@ -31,12 +31,9 @@ class MessageServiceHandler extends HttpDispatcher {
         }
         else {
 
-            final JsonValue jsonObject = serverInstance.getMessages(userToken, roomId, roomTimestamp);
+            final ServerResponse serverResponse = serverInstance.getMessages(this, userToken,roomId,roomTimestamp);
 
-            if (jsonObject != null) {
-                sendJsonResponse(ServerResponse.SuccessResponse, jsonObject);
-            }
-            else {
+            if (serverResponse != ServerResponse.SuccessResponse) {
                 sendError(ServerResponse.OperationFailed);
             }
         }
