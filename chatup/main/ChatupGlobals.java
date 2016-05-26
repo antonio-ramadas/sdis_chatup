@@ -35,7 +35,7 @@ public class ChatupGlobals {
         System.exit(1);
     }
 
-    static void abort(final ServerType serverType, final Exception paramException) {
+    public static void abort(final ServerType serverType, final Exception paramException) {
 
         final StackTraceElement stackTrace = Thread.currentThread().getStackTrace()[2];
 

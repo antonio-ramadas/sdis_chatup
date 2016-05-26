@@ -137,6 +137,7 @@ public class PrimaryServer extends Server {
         return newArray;
     }
 
+    // TODO: verificar a atribuição das salas aos servidores, testar em casos excepcionais (ver também @createRoom)
     private ArrayList<ServerInfo> cloneRoom(int replicationDegree) {
 
         final ArrayList<ServerInfo> serversList = new ArrayList<>();
@@ -163,6 +164,7 @@ public class PrimaryServer extends Server {
         return (ArrayList<ServerInfo>) serversList.subList(0, replicationDegree);
     }
 
+    // TODO: verificar algoritmo de replicação de emergência de uma sala (ver também @joinRoom)
     private Pair<ServerResponse, ServerInfo> relocateRoom(int roomId) {
 
         final RoomInfo selectedRoom = rooms.get(roomId);
@@ -211,6 +213,7 @@ public class PrimaryServer extends Server {
         return new Pair<>(ServerResponse.SuccessResponse, selectedServer);
     }
 
+    // TODO: verificar a atribuição das salas aos servidores, testar em casos excepcionais (ver também @cloneRoom)
     @Override
     public ServerResponse createRoom(final String roomName, final String roomPassword, final String roomOwner) {
 
@@ -267,8 +270,6 @@ public class PrimaryServer extends Server {
             }
         }
 
-        System.out.println("number of mirrors: " + newRoom.getServers().size());
-
         for (final ServerInfo serverInformation : mostEmpty) {
             myServerListener.send(serverInformation.getId(), newRoom);
         }
@@ -276,6 +277,7 @@ public class PrimaryServer extends Server {
         return ServerResponse.SuccessResponse;
     }
 
+    // TODO: Verified!
     private void insertQueue(int serverId, final Object paramObject) {
 
         final CommandQueue serverMessages = messageQueue.get(serverId);
@@ -397,6 +399,8 @@ public class PrimaryServer extends Server {
         return ServerResponse.SuccessResponse;
     }
 
+    // TODO: entrar numa sala quando nenhum dos servidores está disponível
+    // TODO: verificar se servidor primário replica a sala num outro servidor disponível
     @Override
     public Pair<ServerResponse, ServerInfo> joinRoom(int roomId, final String userPassword, final String userToken) {
 
@@ -543,6 +547,7 @@ public class PrimaryServer extends Server {
         return serverOnline(serverId, serverInfo.getTimestamp());
     }
 
+    // TODO: desenvolver algoritmo para apagar servidores inactivos (24 horas ou mais de downtime)
     @Override
     public ServerResponse deleteServer(int serverId) {
 
@@ -578,9 +583,9 @@ public class PrimaryServer extends Server {
             }
         });
 
-        //----------------------------------------------------
-        // 3) Registar remoção desse servidor na base de dados
-        //----------------------------------------------------
+        //---------------------------------------------------
+        // 3) Registar alterações efectuadas na base de dados
+        //---------------------------------------------------
 
         rooms.forEach((roomId, room) -> {
 
@@ -599,6 +604,7 @@ public class PrimaryServer extends Server {
         return ServerResponse.SuccessResponse;
     }
 
+    // TODO: testar algoritmo para apagar salas inactivas (1 hora ou mais de downtime, poderá ser alterado)
     private ServerResponse deleteRooms() {
 
         final long currentTimestamp = Instant.now().getEpochSecond() - 3600;
@@ -658,6 +664,8 @@ public class PrimaryServer extends Server {
         return ServerResponse.SuccessResponse;
     }
 
+    // TODO: testar algoritmo que envia comandos UpdateServer, DeleteRoom, UpdateRoom
+    // TODO: para um servidor que estava offline quando estes foram gerados
     private ServerResponse serverOnline(int serverId, long serverTimestamp) {
 
         final ServerInfo selectedServer = servers.get(serverId);
@@ -706,6 +714,9 @@ public class PrimaryServer extends Server {
         return !lhs.equals(rhs);
     }
 
+    // TODO: verificar se todos os servidores recebem a notificação updateServer
+    //       alterar porta HTTP de um servidor secundário, verificar se todos os restantes recebem a nova porta
+    //       os secundários que estavam offline devem receber a mensagem assim que se reconectarem (@serverOnline)
     @Override
     public ServerResponse updateServer(final ServerInfo serverInfo) {
 
@@ -813,14 +824,14 @@ public class PrimaryServer extends Server {
         return ServerResponse.SuccessResponse;
     }
 
+    // TODO: implementar autenticação via facebook
     public ServerResponse userLogin(final String userEmail, final String userToken) {
 
         if (users.containsKey(userToken)) {
             return ServerResponse.SessionExists;
         }
 
-
-            users.put(userToken, userEmail);
+        users.put(userToken, userEmail);
 
 
         return ServerResponse.SuccessResponse;

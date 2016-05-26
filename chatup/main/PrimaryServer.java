@@ -1,8 +1,5 @@
 package chatup.main;
 
-import chatup.model.Message;
-import chatup.model.MessageCache;
-
 class PrimaryServer {
 
     public static void main(final String[] args) {

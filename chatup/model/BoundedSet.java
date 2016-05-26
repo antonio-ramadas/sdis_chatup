@@ -11,17 +11,12 @@ class BoundedSet<E> extends TreeSet<E> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public boolean add(E e) {
 
         if (size() >= mSize) {
-
             final E smallest = first();
-
-            if (((Comparable<E>) e).compareTo(smallest) > 0) {
-                return remove(smallest) && super.add(e);
-            }
-
-            return false;
+            return ((Comparable<E>) e).compareTo(smallest) > 0 && remove(smallest) && super.add(e);
         }
 
         return super.add(e);

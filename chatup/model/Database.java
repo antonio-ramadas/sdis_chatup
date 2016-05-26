@@ -332,4 +332,34 @@ public class Database {
 
         return myServers;
     }
+
+    private static final String queryInsertUser = "INSERT INTO Users(token, email) VALUES(?, ?)";
+    private static final String queryDeleteUser = "DELETE FROM Users WHERE token = ?";
+
+    public boolean insertUser(final String userToken, final String userEmail) {
+
+        try (final PreparedStatement stmt = dbConnection.prepareStatement(queryInsertUser)) {
+            stmt.setString(1, userToken);
+            stmt.setString(2, userEmail);
+            stmt.executeUpdate();
+        }
+        catch (SQLException ex) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean deleteUser(final String userToken) {
+
+        try (final PreparedStatement stmt = dbConnection.prepareStatement(queryDeleteUser)) {
+            stmt.setString(1, userToken);
+            stmt.executeUpdate();
+        }
+        catch (SQLException ex) {
+            return false;
+        }
+
+        return true;
+    }
 }
