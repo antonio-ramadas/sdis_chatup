@@ -4,9 +4,6 @@ import chatup.server.Server;
 import chatup.server.ServerInfo;
 import chatup.server.ServerKeystore;
 import chatup.server.ServerType;
-import com.esotericsoftware.minlog.Log;
-
-import java.io.IOException;
 
 public class ChatupServer {
 

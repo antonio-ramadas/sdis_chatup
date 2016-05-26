@@ -2,7 +2,7 @@ package chatup.main;
 
 class PrimaryServer {
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
 
         if (args.length > 2) {
             ChatupGlobals.usage("(<tcpPort>) (<httpPort>)");
@@ -15,7 +15,7 @@ class PrimaryServer {
             try {
                 tcpPort = Short.parseShort(args[0]);
             }
-            catch (NumberFormatException ex) {
+            catch (final NumberFormatException ex) {
                 tcpPort = ChatupGlobals.DefaultTcpPort;
             }
         }
@@ -27,7 +27,7 @@ class PrimaryServer {
             try {
                 httpPort = Short.parseShort(args[1]);
             }
-            catch (NumberFormatException ex) {
+            catch (final NumberFormatException ex) {
                 httpPort = ChatupGlobals.DefaultHttpPort;
             }
         }

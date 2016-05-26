@@ -45,6 +45,22 @@ public class Database {
 
     private final Connection dbConnection;
 
+    public boolean insertRoom(int roomId, final Room paramRoom) {
+
+        try (final PreparedStatement stmt = dbConnection.prepareStatement(queryInsertRoom)) {
+            stmt.setInt(1, roomId);
+            stmt.setString(2, paramRoom.getName());
+            stmt.setString(3, paramRoom.getPassword());
+            stmt.setString(4, paramRoom.getOwner());
+            stmt.executeUpdate();
+        }
+        catch (SQLException ex) {
+            return false;
+        }
+
+        return true;
+    }
+
     public boolean insertRoom(int roomId, final RoomInfo paramRoom) {
 
         try (final PreparedStatement stmt = dbConnection.prepareStatement(queryInsertRoom)) {

@@ -35,7 +35,7 @@ public class MessageCache implements Serializable {
         return myQueue.pollFirst();
     }
 
-    public final Message getLast() {
+    final Message getLast() {
         return myQueue.peekFirst();
     }
 
@@ -43,7 +43,7 @@ public class MessageCache implements Serializable {
         return myQueue.peekLast();
     }
 
-    private final Message[] toArray() {
+    private Message[] toArray() {
 
         final ArrayList<Message> returnQueue = new ArrayList<>();
 

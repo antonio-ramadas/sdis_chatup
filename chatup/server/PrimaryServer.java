@@ -117,7 +117,7 @@ public class PrimaryServer extends Server {
 
     private int sequenceRoom;
 
-    public ServerLogger getLogger() {
+    final ServerLogger getLogger() {
         return serverLogger;
     }
 
@@ -688,7 +688,7 @@ public class PrimaryServer extends Server {
         return ServerResponse.SuccessResponse;
     }
 
-    public ServerResponse disconnectServer(int serverId) {
+    final ServerResponse disconnectServer(int serverId) {
 
         final ServerInfo selectedServer = servers.get(serverId);
 

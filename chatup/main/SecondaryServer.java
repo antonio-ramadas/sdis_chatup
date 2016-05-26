@@ -7,7 +7,7 @@ import java.time.Instant;
 
 public class SecondaryServer {
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
 
         if (args.length < 2 || args.length > 4) {
             ChatupGlobals.usage("<serverId> primaryIp:primaryPort (<tcpPort>) (<httpPort>)");
@@ -28,7 +28,7 @@ public class SecondaryServer {
             try {
                 tcpPort = Integer.parseInt(args[2]);
             }
-            catch (NumberFormatException ex) {
+            catch (final NumberFormatException ex) {
                 tcpPort = ChatupGlobals.DefaultTcpPort;
             }
         }

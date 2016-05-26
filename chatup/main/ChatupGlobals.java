@@ -1,6 +1,7 @@
 package chatup.main;
 
 import chatup.server.ServerType;
+
 import com.esotericsoftware.minlog.Log;
 
 public class ChatupGlobals {
