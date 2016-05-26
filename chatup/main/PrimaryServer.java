@@ -35,15 +35,6 @@ class PrimaryServer {
             }
         }
 
-        final MessageCache messageCache = new MessageCache();
-
-        messageCache.push(new Message(1, "marques999", 2414, "ABCD"));
-        messageCache.push(new Message(1, "marques999", 2214, "ABCD"));
-        messageCache.push(new Message(1, "marques999", 2714, "ABCD"));
-        messageCache.push(new Message(1, "marques999", 1414, "ABCD"));
-
-        System.out.println(messageCache.getLast().getTimestamp());
-
         ChatupServer.initializePrimary(httpPort, tcpPort);
     }
 }

@@ -7,38 +7,18 @@ import java.util.*;
 
 public class MessageCache implements Serializable {
 
-    private volatile TreeSet<Message> myQueue;
+    private volatile BoundedSet<Message> myQueue;
 
-    public MessageCache() {
-
-        myQueue = new TreeSet<>(new Comparator<Message>() {
-            @Override
-            public int compare(final Message lhsMessage, final Message rhsMessage) {
-                return Long.compare(lhsMessage.getTimestamp(), rhsMessage.getTimestamp());
-            }
-        });
+    MessageCache() {
+        myQueue = new BoundedSet<>(ChatupGlobals.DefaultCacheSize);
     }
 
-    public synchronized Message push(final Message paramMessage) {
-
-        final Message removedMessage;
-
-        System.out.println("queue size: " + myQueue.size());
-
-        if (myQueue.size() + 1 > ChatupGlobals.DefaultCacheSize) {
-            removedMessage = myQueue.pollFirst();
-        }
-        else {
-            removedMessage = null;
-        }
-
+    synchronized void push(final Message paramMessage) {
         myQueue.add(paramMessage);
-
-        return removedMessage;
     }
 
-    public synchronized Message getLast() {
-        return myQueue.last();
+    synchronized Message getLast() {
+        return myQueue.first();
     }
 
     synchronized ArrayList<Message> getMessages(long paramTimestamp) {
