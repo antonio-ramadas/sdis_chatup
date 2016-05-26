@@ -12,7 +12,7 @@ public class MessageCache implements Serializable {
 
     private MinMaxPriorityQueue<Message> myQueue;
 
-    public MessageCache() {
+    MessageCache() {
 
         myQueue = MinMaxPriorityQueue.orderedBy(new Comparator<Message>() {
             @Override
@@ -27,7 +27,7 @@ public class MessageCache implements Serializable {
         }).maximumSize(ChatupGlobals.DefaultCacheSize).create();
     }
 
-    public boolean push(final Message paramMessage) {
+    boolean push(final Message paramMessage) {
         return myQueue.offer(paramMessage);
     }
 
@@ -43,7 +43,7 @@ public class MessageCache implements Serializable {
         return myQueue.peekLast();
     }
 
-    public final Message[] toArray() {
+    private final Message[] toArray() {
 
         final ArrayList<Message> returnQueue = new ArrayList<>();
 
@@ -56,7 +56,7 @@ public class MessageCache implements Serializable {
         return returnQueue.toArray(new Message[returnQueue.size()]);
     }
 
-    public final Message[] getMessages(long paramTimestamp) {
+    final Message[] getMessages(long paramTimestamp) {
 
         if (myQueue.isEmpty()) {
             return new Message[]{};
@@ -87,7 +87,7 @@ public class MessageCache implements Serializable {
         return returnQueue.toArray(new Message[returnQueue.size()]);
     }
 
-    public int size() {
+    int size() {
         return myQueue.size();
     }
 }

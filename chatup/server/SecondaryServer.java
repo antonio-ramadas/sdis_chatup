@@ -278,15 +278,11 @@ public class SecondaryServer extends Server {
         return ServerResponse.SuccessResponse;
     }
 
+    // TODO: Verified!
     final ServerResponse joinRoom(final JoinRoom joinRoom) {
 
         final String userToken = joinRoom.userToken;
         final String userEmail = users.get(userToken);
-
-        System.out.println("------ JoinRoom ------");
-        System.out.println("userToken:" + userToken);
-        System.out.println("userEmail:" + userEmail);
-        System.out.println("--------------------------");
 
 		if (userEmail == null) {
 			users.put(userToken, joinRoom.userEmail);
@@ -307,13 +303,9 @@ public class SecondaryServer extends Server {
 		return ServerResponse.SuccessResponse;
 	}
 
+    // TODO: Verified!
     @Override
     public ServerResponse leaveRoom(int roomId, final String userToken) {
-
-        System.out.println("------ LeaveRoom ------");
-        System.out.println("roomId:" + roomId);
-        System.out.println("userToken:" + userToken);
-        System.out.println("--------------------------");
 
         final String userEmail = users.get(userToken);
 
@@ -416,7 +408,8 @@ public class SecondaryServer extends Server {
         return users.containsKey(userToken);
     }
 
-	public JsonValue getMessages(final String userToken, int roomId) {
+    @Override
+	public JsonValue getMessages(final String userToken, int roomId, long roomTimestamp) {
 
         final JsonValue messagesArray = Json.array();
         final String userRecord = users.get(userToken);
@@ -437,9 +430,12 @@ public class SecondaryServer extends Server {
 			return messagesArray;
 		}
 
-        final Message[] myMessages = selectedRoom.getMessages();
+        final Message[] myMessages = selectedRoom.getMessages(roomTimestamp);
 
-        for (final Message currentMessage : myMessages) {
+        for (int i = myMessages.length - 1; i >= 0; i--) {
+
+            final Message currentMessage = myMessages[i];
+
             messagesArray.asArray().add(Json.object()
                 .add(HttpFields.MessageSender, currentMessage.getAuthor())
                 .add(HttpFields.MessageTimestamp, currentMessage.getTimestamp())

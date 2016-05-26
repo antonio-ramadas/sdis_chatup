@@ -6,6 +6,7 @@ import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 
+import com.esotericsoftware.minlog.Log;
 import com.sun.net.httpserver.HttpExchange;
 
 import java.io.ByteArrayOutputStream;
@@ -28,7 +29,7 @@ abstract class HttpDispatcher {
 
         final String requestMethod = httpExchange.getRequestMethod();
 
-        System.out.println("[" + httpService + "] received " + requestMethod + " request from " + httpExchange.getRemoteAddress() + "...");
+        Log.info(httpService, requestMethod + " request from " + httpExchange.getRemoteAddress() + "...");
 
         switch (requestMethod) {
         case "GET":
@@ -99,7 +100,7 @@ abstract class HttpDispatcher {
                 HttpURLConnection.HTTP_OK
             );
         }
-        catch (IOException ex) {
+        catch (final IOException ex) {
             return false;
         }
 
@@ -108,7 +109,7 @@ abstract class HttpDispatcher {
 
     private void sendResponse(final String serverResponse, int statusCode) throws IOException {
 
-        System.out.println("[" + httpService +  "] sending response: " + serverResponse);
+        Log.info(httpService, "sending response: " + serverResponse);
         httpExchange.sendResponseHeaders(statusCode, serverResponse.length());
 
         try (final OutputStream os = httpExchange.getResponseBody()) {
@@ -127,7 +128,7 @@ abstract class HttpDispatcher {
                     HttpURLConnection.HTTP_OK
                 );
             }
-            catch (IOException ex) {
+            catch (final IOException ex) {
                 return false;
             }
         }
@@ -148,7 +149,7 @@ abstract class HttpDispatcher {
                     HttpURLConnection.HTTP_OK
                 );
             }
-            catch (IOException ex) {
+            catch (final IOException ex) {
                 return false;
             }
         }
@@ -175,9 +176,13 @@ abstract class HttpDispatcher {
         return null;
     }
 
-    final String parseString(final String parameterString, final String commandName) {
+    final String parseString(final String[] paramArray, int paramIndex, final String commandName) {
 
-        final String[] parameterValues  = parameterString.split("=");
+        if (paramIndex < 0 || paramIndex > paramArray.length - 1) {
+            return null;
+        }
+
+        final String[] parameterValues  = paramArray[paramIndex].split("=");
 
         if (parameterValues.length != 2) {
             return null;
@@ -190,19 +195,35 @@ abstract class HttpDispatcher {
         return null;
     }
 
-    int parseInteger(final String parameterString, final String commandName) {
+    int parseInteger(final String[] paramArray, int paramIndex, final String commandName) {
 
-        final String integerString = parseString(parameterString, commandName);
+        final String integerString = parseString(paramArray, paramIndex, commandName);
 
-        if (integerString == null) {
+        if (integerString == null || integerString.isEmpty()) {
             return -1;
         }
 
         try {
             return Integer.parseInt(integerString);
         }
-        catch (NumberFormatException ex) {
+        catch (final NumberFormatException ex) {
             return -1;
+        }
+    }
+
+    long parseLong(final String[] paramArray, int paramIndex, final String commandName) {
+
+        final String longString = parseString(paramArray, paramIndex, commandName);
+
+        if (longString == null || longString.isEmpty()) {
+            return 0L;
+        }
+
+        try {
+            return Long.parseLong(longString);
+        }
+        catch (final NumberFormatException ex) {
+            return 0L;
         }
     }
 
@@ -218,7 +239,7 @@ abstract class HttpDispatcher {
 
             return new String(out.toByteArray(), ChatupGlobals.DefaultEncoding);
         }
-        catch (IOException ex) {
+        catch (final IOException ex) {
             ex.printStackTrace();
         }
 

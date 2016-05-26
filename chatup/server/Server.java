@@ -138,7 +138,7 @@ public abstract class Server {
         throw new UnsupportedOperationException("SyncRoom");
     }
 
-    public JsonValue getMessages(final String userToken, int roomId) {
+    public JsonValue getMessages(final String userToken, int roomId, long roomTimestamp) {
         throw new UnsupportedOperationException("RetrieveMessages");
     }
 

@@ -25,7 +25,7 @@ class RoomServiceHandler extends HttpDispatcher {
 
         if (jsonValue.length > 0) {
 
-            final String userToken = parseString(jsonValue[0], HttpFields.UserToken);
+            final String userToken = parseString(jsonValue, 0, HttpFields.UserToken);
 
             if (userToken == null) {
                 sendError(ServerResponse.InvalidToken);

@@ -15,7 +15,7 @@ class HeartbeatServiceHandler extends HttpDispatcher {
     @Override
     public void parseGetRequest(final String[] jsonValue) {
 
-        final String userToken = parseString(jsonValue[0], HttpFields.UserToken);
+        final String userToken = parseString(jsonValue, 0, HttpFields.UserToken);
         final Server serverInstance = ChatupServer.getInstance();
 
         if (userToken != null) {
