@@ -2,89 +2,67 @@ package chatup.model;
 
 import chatup.main.ChatupGlobals;
 
-import google.collections.MinMaxPriorityQueue;
-
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.*;
 
 public class MessageCache implements Serializable {
 
-    private MinMaxPriorityQueue<Message> myQueue;
+    private volatile TreeSet<Message> myQueue;
 
-    MessageCache() {
+    public MessageCache() {
 
-        myQueue = MinMaxPriorityQueue.orderedBy(new Comparator<Message>() {
+        myQueue = new TreeSet<>(new Comparator<Message>() {
             @Override
             public int compare(final Message lhsMessage, final Message rhsMessage) {
-                return Long.compare(rhsMessage.getTimestamp(), lhsMessage.getTimestamp());
+                return Long.compare(lhsMessage.getTimestamp(), rhsMessage.getTimestamp());
             }
-
-            @Override
-            public Comparator<Message> reversed() {
-                return (lhsMessage, rhsMessage) -> Long.compare(lhsMessage.getTimestamp(), rhsMessage.getTimestamp());
-            }
-        }).maximumSize(ChatupGlobals.DefaultCacheSize).create();
+        });
     }
 
-    boolean push(final Message paramMessage) {
-        return myQueue.offer(paramMessage);
+    public synchronized Message push(final Message paramMessage) {
+
+        final Message removedMessage;
+
+        System.out.println("queue size: " + myQueue.size());
+
+        if (myQueue.size() + 1 > ChatupGlobals.DefaultCacheSize) {
+            removedMessage = myQueue.pollFirst();
+        }
+        else {
+            removedMessage = null;
+        }
+
+        myQueue.add(paramMessage);
+
+        return removedMessage;
     }
 
-    public final Message pop() {
-        return myQueue.pollFirst();
+    public synchronized Message getLast() {
+        return myQueue.last();
     }
 
-    final Message getLast() {
-        return myQueue.peekFirst();
-    }
-
-    public final Message getFirst() {
-        return myQueue.peekLast();
-    }
-
-    private Message[] toArray() {
+    synchronized ArrayList<Message> getMessages(long paramTimestamp) {
 
         final ArrayList<Message> returnQueue = new ArrayList<>();
 
-        for (Message mostRecent = pop(); mostRecent != null; mostRecent = pop()) {
-            returnQueue.add(mostRecent);
-        }
-
-        myQueue.addAll(returnQueue);
-
-        return returnQueue.toArray(new Message[returnQueue.size()]);
-    }
-
-    final Message[] getMessages(long paramTimestamp) {
-
         if (myQueue.isEmpty()) {
-            return new Message[]{};
+            return returnQueue;
         }
 
-        if (paramTimestamp <= 0 || getFirst().getTimestamp() >= paramTimestamp) {
-            return toArray();
-        }
+        final Iterator<Message> it = myQueue.descendingIterator();
 
-        final MinMaxPriorityQueue<Message> returnQueue = MinMaxPriorityQueue.orderedBy(new Comparator<Message>() {
-            @Override
-            public int compare(final Message lhsMessage, final Message rhsMessage) {
-                return Long.compare(rhsMessage.getTimestamp(), lhsMessage.getTimestamp());
+        while (it.hasNext()) {
+
+            final Message mostRecent = it.next();
+
+            if (mostRecent.getTimestamp() < paramTimestamp) {
+                break;
             }
 
-            @Override
-            public Comparator<Message> reversed() {
-                return (lhsMessage, rhsMessage) -> Long.compare(lhsMessage.getTimestamp(), rhsMessage.getTimestamp());
-            }
-        }).maximumSize(ChatupGlobals.DefaultCacheSize).create();
-
-        for (Message mostRecent = pop(); mostRecent != null && mostRecent.getTimestamp() >= paramTimestamp; mostRecent = pop()) {
             returnQueue.add(mostRecent);
         }
 
-        myQueue.addAll(returnQueue);
-
-        return returnQueue.toArray(new Message[returnQueue.size()]);
+        return returnQueue;
     }
 
     int size() {

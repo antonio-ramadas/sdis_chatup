@@ -20,6 +20,7 @@ import kryonet.KryoServer;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -430,11 +431,11 @@ public class SecondaryServer extends Server {
 			return messagesArray;
 		}
 
-        final Message[] myMessages = selectedRoom.getMessages(roomTimestamp);
+        final ArrayList<Message> myMessages = selectedRoom.getMessages(roomTimestamp);
 
-        for (int i = myMessages.length - 1; i >= 0; i--) {
+        for (int i = myMessages.size() - 1; i >= 0; i--) {
 
-            final Message currentMessage = myMessages[i];
+            final Message currentMessage = myMessages.get(i);
 
             messagesArray.asArray().add(Json.object()
                 .add(HttpFields.MessageSender, currentMessage.getAuthor())

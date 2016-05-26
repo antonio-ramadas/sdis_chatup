@@ -819,12 +819,9 @@ public class PrimaryServer extends Server {
             return ServerResponse.SessionExists;
         }
 
-        if (userEmail.equals("marques999@gmail.com") && userToken.equals("14191091")) {
+
             users.put(userToken, userEmail);
-        }
-        else {
-            return ServerResponse.AuthenticationFailed;
-        }
+
 
         return ServerResponse.SuccessResponse;
     }

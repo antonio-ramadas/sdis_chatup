@@ -1,5 +1,8 @@
 package chatup.main;
 
+import chatup.model.Message;
+import chatup.model.MessageCache;
+
 class PrimaryServer {
 
     public static void main(final String[] args) {
@@ -31,6 +34,15 @@ class PrimaryServer {
                 httpPort = ChatupGlobals.DefaultHttpPort;
             }
         }
+
+        final MessageCache messageCache = new MessageCache();
+
+        messageCache.push(new Message(1, "marques999", 2414, "ABCD"));
+        messageCache.push(new Message(1, "marques999", 2214, "ABCD"));
+        messageCache.push(new Message(1, "marques999", 2714, "ABCD"));
+        messageCache.push(new Message(1, "marques999", 1414, "ABCD"));
+
+        System.out.println(messageCache.getLast().getTimestamp());
 
         ChatupServer.initializePrimary(httpPort, tcpPort);
     }

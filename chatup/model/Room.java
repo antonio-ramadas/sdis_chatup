@@ -2,6 +2,7 @@ package chatup.model;
 
 import java.time.Instant;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -143,7 +144,7 @@ public class Room {
         return mUsers;
     }
 
-    public Message[] getMessages(long paramTimestamp) {
+    public ArrayList<Message> getMessages(long paramTimestamp) {
         return mMessages.getMessages(paramTimestamp);
     }
 
