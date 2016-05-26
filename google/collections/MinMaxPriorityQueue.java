@@ -219,7 +219,8 @@ public final class MinMaxPriorityQueue<E> extends AbstractQueue<E> {
 
             if (changes == null) {
                 return new MoveDesc<E>(actualLastElement, toTrickle);
-            } else {
+            }
+            else {
                 return new MoveDesc<E>(actualLastElement, changes.replaced);
             }
         }
@@ -236,7 +237,8 @@ public final class MinMaxPriorityQueue<E> extends AbstractQueue<E> {
 
         if (bubbledTo == vacated) {
             return heap.tryCrossOverAndBubbleUp(index, vacated, toTrickle);
-        } else {
+        }
+        else {
             return (bubbledTo < index) ? new MoveDesc<E>(toTrickle, elementData(index)) : null;
         }
     }
@@ -656,10 +658,6 @@ public final class MinMaxPriorityQueue<E> extends AbstractQueue<E> {
         return minHeap.ordering;
     }
 
-    int capacity() {
-        return queue.length;
-    }
-
     private static final int DEFAULT_CAPACITY = 11;
 
     static int initialQueueSize(int configuredExpectedSize, int maximumSize, Iterable<?> initialContents) {
@@ -676,8 +674,7 @@ public final class MinMaxPriorityQueue<E> extends AbstractQueue<E> {
     private void growIfNeeded() {
 
         if (size > queue.length) {
-            int newCapacity = calculateNewCapacity();
-            Object[] newQueue = new Object[newCapacity];
+            Object[] newQueue = new Object[calculateNewCapacity()];
             System.arraycopy(queue, 0, newQueue, 0, queue.length);
             queue = newQueue;
         }

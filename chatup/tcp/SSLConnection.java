@@ -1,6 +1,8 @@
-package chatup.server;
+package chatup.tcp;
 
 import chatup.model.Message;
+import chatup.server.ServerInfo;
+import chatup.server.ServerKeystore;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -39,7 +41,7 @@ abstract public class SSLConnection {
         return tcpSocket;
     }
 
-    public class ReceiveThread extends Thread {
+    private class ReceiveThread extends Thread {
 
         private final SSLServerSocket tcpSocket;
 

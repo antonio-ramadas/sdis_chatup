@@ -1,5 +1,8 @@
 package chatup.main;
 
+import chatup.server.ServerType;
+import com.esotericsoftware.minlog.Log;
+
 public class ChatupGlobals {
 
     public static final String DefaultEncoding = "utf-8";
@@ -7,8 +10,8 @@ public class ChatupGlobals {
     public static final String MessageServiceUrl = "MessageService";
     public static final String UserServiceUrl = "UserService";
     public static final String RoomServiceUrl = "RoomService";
-    private static final String fmtAbort = "Exception caught: %s on method %s@%s!";
-    private static final String fmtUsage = "Program usage: %s %s";
+    private static final String fmtAbort = "Caught exception %s on method %s@%s!";
+    private static final String fmtUsage = "Invalid arguments, usage: %s %s";
     
     public static final int DefaultTimeout = 5000;
     public static final int DefaultCacheSize = 100;
@@ -31,7 +34,7 @@ public class ChatupGlobals {
         System.exit(1);
     }
 
-    static void abort(final Exception paramException) {
+    static void abort(final ServerType serverType, final Exception paramException) {
 
         final StackTraceElement stackTrace = Thread.currentThread().getStackTrace()[2];
 
@@ -42,7 +45,7 @@ public class ChatupGlobals {
             stackTrace.getClassName()
         );
 
-        System.out.println(abortMessage);
+        Log.error(serverType.toString(), abortMessage);
         System.exit(1);
     }
 }

@@ -1,5 +1,7 @@
 package chatup.tcp;
 
+import chatup.server.ServerInfo;
+
 import java.io.Serializable;
 
 public class UpdateServer implements Serializable
@@ -12,17 +14,12 @@ public class UpdateServer implements Serializable
     {
     }
 
-    public UpdateServer(int paramId, long paramTimestamp)
+    public UpdateServer(final ServerInfo serverInfo)
     {
-        this(paramId, paramTimestamp, null, -1);
-    }
-
-    public UpdateServer(int paramId, long paramTimestamp, final String paramAddress, int paramPort)
-    {
-        serverAddress = paramAddress;
-        serverId = paramId;
-        serverTimestamp = paramTimestamp;
-        serverPort = paramPort;
+        serverAddress = serverInfo.getAddress();
+        serverTimestamp = serverInfo.getTimestamp();
+        serverId = serverInfo.getId();
+        serverPort = serverInfo.getPort();
     }
 
     public String serverAddress;

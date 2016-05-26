@@ -42,11 +42,11 @@ public class ServerKeystore {
         return tmf;
     }
 
-    final String getPassword() {
+    public final String getPassword() {
         return keystorePassword;
     }
 
-    final String getPath() {
+    public final String getPath() {
         return keystorePath;
     }
 }

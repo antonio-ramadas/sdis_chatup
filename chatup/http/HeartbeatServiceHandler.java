@@ -1,11 +1,8 @@
 package chatup.http;
 
 import chatup.main.ChatupGlobals;
-
 import chatup.main.ChatupServer;
 import chatup.server.Server;
-import com.eclipsesource.json.JsonObject;
-import com.eclipsesource.json.JsonValue;
 
 import com.sun.net.httpserver.HttpExchange;
 

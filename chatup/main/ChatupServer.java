@@ -3,6 +3,10 @@ package chatup.main;
 import chatup.server.Server;
 import chatup.server.ServerInfo;
 import chatup.server.ServerKeystore;
+import chatup.server.ServerType;
+import com.esotericsoftware.minlog.Log;
+
+import java.io.IOException;
 
 public class ChatupServer {
 
@@ -15,8 +19,8 @@ public class ChatupServer {
             serverKeystore = new ServerKeystore("server.jks", "123456");
             serverInstance = new chatup.server.PrimaryServer(tcpPort, httpPort);
         }
-        catch (Exception ex) {
-            ChatupGlobals.abort(ex);
+        catch (final Exception ex) {
+            ChatupGlobals.abort(ServerType.PRIMARY, ex);
         }
     }
 
@@ -26,8 +30,8 @@ public class ChatupServer {
             serverKeystore = new ServerKeystore("server.jks", "123456");
             serverInstance = new chatup.server.SecondaryServer(primaryServer, tcpPort, httpPort);
         }
-        catch (Exception ex) {
-            ChatupGlobals.abort(ex);
+        catch (final Exception ex) {
+            ChatupGlobals.abort(ServerType.SECONDARY, ex);
         }
     }
 

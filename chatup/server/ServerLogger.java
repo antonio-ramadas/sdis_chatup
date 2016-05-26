@@ -1,5 +1,7 @@
 package chatup.server;
 
+import com.esotericsoftware.minlog.Log;
+
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -7,13 +9,15 @@ import java.util.Date;
 public class ServerLogger {
 
     private BufferedWriter fileOutput;
-    private BufferedWriter consoleOutput;
+    private ServerType serverType;
 
     ServerLogger(final Server paramServer) {
 
         final String serverName;
 
-        if (paramServer.getType() == ServerType.PRIMARY) {
+        serverType = paramServer.getType();
+
+        if (serverType  == ServerType.PRIMARY) {
             serverName = "primary";
         }
         else {
@@ -31,8 +35,6 @@ public class ServerLogger {
                 ex.printStackTrace();
             }
         }
-
-        consoleOutput = new BufferedWriter(new OutputStreamWriter(System.out));
     }
 
     private boolean createDirectory(final String paramDirectory) {
@@ -40,22 +42,11 @@ public class ServerLogger {
         return !(!myFile.exists() || !myFile.isDirectory()) || myFile.mkdir();
     }
 
-    protected void flush() {
-
-        try {
-            consoleOutput.flush();
-            fileOutput.flush();
-        }
-        catch (final IOException ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    private final String generateFilename() {
+    private String generateFilename() {
         return new SimpleDateFormat("'/'yyyy-MM-dd-HH_mm_ss'.log'").format(new Date());
     }
 
-    private final String generateTimestamp() {
+    private String generateTimestamp() {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss' | '").format(new Date());
     }
 
@@ -71,11 +62,7 @@ public class ServerLogger {
         error("Room #" + roomId + " is not registered on this server!");
     }
 
-    public void roomNotFound(final String roomName) {
-        error("Room $" + roomName + "$ is not registered on this server!");
-    }
-
-    public void userConnected(final String userName) {
+    void userConnected(final String userName) {
         information(userName + " has connected.");
     }
 
@@ -95,24 +82,28 @@ public class ServerLogger {
         information("Received Room #" + roomId + " metadata from Server #" + serverId + "!");
     }
 
+    public void insertMessage(final int roomId, int serverId) {
+        information("Received Message #" + roomId + " metadata from Server #" + serverId + "!");
+    }
+
     public void sendMessage(int roomId) {
         information("Sending message from Room #" + roomId + " to server!");
     }
 
     public void serverOffline(int serverId) {
-        information("Server " + serverId + " disconnected.");
+        information("Server #" + serverId + " disconnected.");
     }
 
     public void serverNotFound(int serverId) {
-        error("Server " + serverId + " not found in database!");
-    }
-
-    public void insertServer(int serverId) {
-        information("Inserting server " + serverId + " into local database...");
+        error("Server #" + serverId + " not registered on this server!");
     }
 
     public void deleteServer(int serverId) {
         warning("Server #" + serverId + " has been delete due to inactivity!");
+    }
+
+    void updateServer(int serverId)  {
+        information("Server #" + serverId + " information has been updated!");
     }
 
     public void serverOnline(int serverId, final String hostName) {
@@ -140,31 +131,23 @@ public class ServerLogger {
     }
 
     private void warning(final String paramMessage) {
-        System.out.println("[WARNING] " + paramMessage);
-       // write(consoleOutput, "[WARNING] " + paramMessage);
-       // write(fileOutput, String.format("%s | WARNING | %s", generateTimestamp(), paramMessage));
-       // flush();
+        Log.warn(serverType.toString(), paramMessage);
+        write(fileOutput, String.format("%s | WARNING | %s", generateTimestamp(), paramMessage));
     }
 
     private void error(final String paramMessage) {
-        System.out.println("[ERROR] " + paramMessage);
-     //   write(consoleOutput, "[ERROR]" + paramMessage);
-     //   write(fileOutput, String.format("%s | ERROR | %s", generateTimestamp(), paramMessage));
-      //  flush();
+        Log.error(serverType.toString(), paramMessage);
+        write(fileOutput, String.format("%s | ERROR | %s", generateTimestamp(), paramMessage));
     }
 
     private void debug(final String paramMessage) {
-        System.out.println("[DEBUG] " + paramMessage);
-       // write(consoleOutput, "[DEBUG]" + paramMessage);
-      //  write(fileOutput, String.format("%s | DEBUG | %s", generateFilename(), paramMessage));
-       // flush();
+        Log.debug(serverType.toString(), paramMessage);
+        write(fileOutput, String.format("%s | DEBUG | %s", generateFilename(), paramMessage));
     }
 
     private void information(final String paramMessage) {
-        System.out.println("[INFORMATION] " + paramMessage);
-        //write(consoleOutput, "[INFORMATION]" + paramMessage);
-        //write(fileOutput, String.format("%s | INFORMATION | %s", generateFilename(), paramMessage));
-        //flush();
+        Log.info(serverType.toString(), paramMessage);
+        write(fileOutput, String.format("%s | INFORMATION | %s", generateFilename(), paramMessage));
     }
 
     private void write(final BufferedWriter buffer, final String message) {
@@ -178,19 +161,27 @@ public class ServerLogger {
         }
     }
 
-    public void removeUser(final String userToken) {
-        information("User #" + userToken + " is not connected to this server anymore!");
-    }
-
-    public boolean debugEnabled() {
-        return true;
-    }
-
     public void userNotFound(final String userToken) {
         warning("User #" + userToken + " not registed on this server!");
     }
 
     public void databaseError() {
         error("Database access error, could not save changes to disk!");
+    }
+
+    void removeUser(final String userToken) {
+        information("User #" + userToken + " is not connected to this server anymore!");
+    }
+
+    void insertMirror(int roomId, int serverId) {
+        information("Registering Server #" + serverId + " on Room #" + roomId);
+    }
+
+    void insertServer(int serverId) {
+        information("Inserting server " + serverId + " into local database...");
+    }
+
+    void mirrorExists(int roomId, int serverId) {
+        information("Server #" + serverId + " already registered on Room #" + roomId);
     }
 }

@@ -3,6 +3,7 @@ package chatup.tcp;
 import chatup.model.Room;
 
 import java.io.Serializable;
+import java.util.Set;
 
 public class CreateRoom implements Serializable
 {
@@ -10,6 +11,7 @@ public class CreateRoom implements Serializable
     public String userToken;
     public String roomName;
     public String roomPassword;
+    public Set<Integer> roomServers;
 
     public CreateRoom()
     {
@@ -22,6 +24,7 @@ public class CreateRoom implements Serializable
         roomId = paramId;
         roomName = paramRoom.getName();
         roomPassword = paramRoom.getPassword();
+        roomServers = paramRoom.getServers();
         userToken = paramRoom.getOwner();
         userEmail = paramEmail;
     }

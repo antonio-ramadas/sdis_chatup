@@ -27,8 +27,9 @@ public class SecondaryServer extends Server {
 
     private final Database serverDatabase;
     private final ServerLogger serverLogger;
-    private final SecondaryServerListener myServerListener;
-	private final SecondaryClientListener myClientListener;
+    private final KryoServer mServer;
+    private final HashMap<Integer, KryoClient> mClients;
+    private final SecondaryServerListener mServerListener;
     private final HashMap<Integer, ServerInfo> servers;
     private final HashMap<Integer, Room> rooms;
     private int serverPort;
@@ -45,8 +46,9 @@ public class SecondaryServer extends Server {
         // 2) Ler para memória informações dos servidores armazenadas em disco
         //--------------------------------------------------------------------
 
-        serverId = paramPrimary.getId();
-        serverTimestamp = 0L;
+        mServerId = paramPrimary.getId();
+        mClients = new HashMap<>();
+        mServerTimestamp = 0L;
         serverPort = httpPort;
         serverDatabase = new Database(this);
         serverLogger = new ServerLogger(this);
@@ -60,14 +62,8 @@ public class SecondaryServer extends Server {
             servers = myServers;
         }
 
-        if (getLogger().debugEnabled()) {
-
-            System.out.println("*=====     servers     =====*");
-
-            servers.forEach((serverId, serverInformation) -> {
-                System.out.println("[" + serverId + "] " + serverInformation);
-            });
-        }
+        System.out.println("*=====     servers     =====*");
+        servers.forEach((k, v) -> System.out.println("[" + k + "] " + v));
 
         //---------------------------------------------------------------
         // 3) Ler para memória informações das salas armazenadas em disco
@@ -86,9 +82,7 @@ public class SecondaryServer extends Server {
         // 4) Ler para memória associações servidor <-> sala armazenadas em disco
         //-----------------------------------------------------------------------
 
-        if (getLogger().debugEnabled()) {
-            System.out.println("*=====      rooms      =====*");
-        }
+        System.out.println("*=====      rooms      =====*");
 
         rooms.forEach((roomId, roomInformation) -> {
 
@@ -104,9 +98,7 @@ public class SecondaryServer extends Server {
                 roomInformation.insertMessages(roomMessages);
             }
 
-            if (getLogger().debugEnabled()) {
-                System.out.println("[" + roomId + "] " + roomInformation);
-            }
+            System.out.println("[" + roomId + "] " + roomInformation);
         });
 
         //--------------------------------------------------------------------------
@@ -114,8 +106,8 @@ public class SecondaryServer extends Server {
         //--------------------------------------------------------------------------
 
         final KryoClient myClient = new KryoClient();
+        final PrimaryClientListener myClientListener = new PrimaryClientListener(this, myClient);
 
-        myClientListener = new SecondaryClientListener(this, myClient);
         TcpNetwork.register(myClient);
         myClient.addListener(myClientListener);
         myClient.start();
@@ -125,7 +117,7 @@ public class SecondaryServer extends Server {
         // 6) Inicializar servidor TCP/SSL para receber pedidos dos servidores secundários
         //--------------------------------------------------------------------------------
 
-        final KryoServer myServer = new KryoServer() {
+         mServer = new KryoServer() {
 
             @Override
             protected Connection newConnection() {
@@ -133,69 +125,170 @@ public class SecondaryServer extends Server {
             }
         };
 
-        myServerListener = new SecondaryServerListener(this, myServer);
-        TcpNetwork.register(myServer);
-        myServer.addListener(myServerListener);
-        myServer.bind(tcpPort);
-        myServer.start();
+        mServerListener = new SecondaryServerListener(this, mServer);
+        TcpNetwork.register(mServer);
+        mServer.addListener(mServerListener);
+        mServer.bind(tcpPort);
+        mServer.start();
 	}
 
-	private int serverId;
-    private long serverTimestamp;
+	private int mServerId;
+    private long mServerTimestamp;
 
     @Override
     public int getId() {
-        return serverId;
+        return mServerId;
     }
 
-    public ServerLogger getLogger() {
+    final ServerLogger getLogger() {
         return serverLogger;
     }
 
-    public void registerUser(final String userToken, final String userEmail) {
+    private void registerUser(final String userToken, final String userEmail) {
 
         final String userRecord = users.get(userToken);
 
         if (userRecord == null) {
             users.put(userToken, userEmail);
+            serverLogger.userConnected(userEmail);
         }
     }
 
-    public ServerResponse createRoom(final CreateRoom createRoom) {
+    final ServerResponse createRoom(final CreateRoom createRoom) {
+
+        int roomId = createRoom.roomId;
 
         System.out.println("------ CreateRoom ------");
         System.out.println("roomId:" + createRoom.roomId);
         System.out.println("roomName:" + createRoom.roomName);
         System.out.println("roomPassword:" + createRoom.roomPassword);
         System.out.println("roomOwner:" + createRoom.userToken);
+        System.out.println("roomServers:" + createRoom.roomServers);
+        System.out.println("--------------------------");
 
-        if (rooms.containsKey(createRoom.roomId)) {
+        if (rooms.containsKey(roomId)) {
             return ServerResponse.RoomNotFound;
         }
 
-        final Room serializedRoom = new Room
-        (
+        final Room serializedRoom = new Room(
             createRoom.roomName,
             createRoom.roomPassword,
             createRoom.userToken
         );
 
-        if (serverDatabase.insertRoom(createRoom.roomId, serializedRoom)) {
-            rooms.put(createRoom.roomId, serializedRoom );
+        if (serverDatabase.insertRoom(roomId, serializedRoom)) {
+            serverLogger.createRoom(createRoom.userToken, createRoom.roomName);
+            rooms.put(roomId, serializedRoom);
         }
         else {
             return ServerResponse.DatabaseError;
         }
 
+        final Room insertedRoom = rooms.get(createRoom.roomId);
+
+        if (insertedRoom == null) {
+            return ServerResponse.RoomNotFound;
+        }
+
+        final Set<Integer> roomServers = createRoom.roomServers;
+
+        if (roomServers == null || roomServers.isEmpty()) {
+            return ServerResponse.OperationFailed;
+        }
+
+        for (final Integer serverId : roomServers) {
+
+            if (serverId == mServerId) {
+                continue;
+            }
+
+            final ServerInfo serverInformation = servers.get(serverId);
+
+            if (serverInformation == null) {
+                serverLogger.serverNotFound(serverId);
+            }
+            else {
+
+                if (insertedRoom.registerServer(serverId)) {
+
+                    serverLogger.insertMirror(roomId, serverId);
+
+                    if (!serverDatabase.insertServerRoom(serverId, createRoom.roomId)) {
+                        return ServerResponse.DatabaseError;
+                    }
+                }
+                else {
+                    serverLogger.mirrorExists(roomId, serverId);
+                }
+
+                if (serverInformation.isOnline()) {
+                    System.out.println("server is already online, not trying to reconnect...");
+                }
+                else {
+                    createConnection(serverId);
+                }
+            }
+        }
+
+        registerUser(createRoom.userToken, createRoom.userEmail);
+
         return ServerResponse.SuccessResponse;
 	}
 
-	public ServerResponse joinRoom(final JoinRoom joinRoom) {
+    private ServerResponse createConnection(int serverId) {
+
+        final KryoClient kryoClient = new KryoClient();
+        final ServerInfo selectedServer = servers.get(serverId);
+
+        TcpNetwork.register(kryoClient);
+        kryoClient.addListener(new SecondaryClientListener(this, kryoClient));
+
+        if (selectedServer == null) {
+           return ServerResponse.ServerNotFound;
+        }
+
+        mClients.put(serverId, kryoClient);
+
+        try {
+            kryoClient.start();
+            kryoClient.connect(ChatupGlobals.DefaultTimeout, selectedServer.getAddress(), selectedServer.getPort());
+        }
+        catch (IOException ex) {
+            return ServerResponse.ServiceOffline;
+        }
+
+        return ServerResponse.SuccessResponse;
+    }
+
+    final ServerResponse disconnectServer(int serverId) {
+
+        System.out.println("------ ServerOffline ------");
+        System.out.println("serverId:" + serverId);
+        System.out.println("--------------------------");
+
+        final ServerInfo selectedServer = servers.get(serverId);
+
+        if (selectedServer == null) {
+            return ServerResponse.ServerNotFound;
+        }
+
+        selectedServer.setStatus(false);
+        serverLogger.serverOffline(serverId);
+
+        return ServerResponse.SuccessResponse;
+    }
+
+    final ServerResponse joinRoom(final JoinRoom joinRoom) {
 
         final String userToken = joinRoom.userToken;
-		final String userRecord = users.get(joinRoom.userToken);
+        final String userEmail = users.get(userToken);
 
-		if (userRecord == null) {
+        System.out.println("------ JoinRoom ------");
+        System.out.println("userToken:" + userToken);
+        System.out.println("userEmail:" + userEmail);
+        System.out.println("--------------------------");
+
+		if (userEmail == null) {
 			users.put(userToken, joinRoom.userEmail);
 		}
 
@@ -217,9 +310,14 @@ public class SecondaryServer extends Server {
     @Override
     public ServerResponse leaveRoom(int roomId, final String userToken) {
 
-        final String userRecord = users.get(userToken);
+        System.out.println("------ LeaveRoom ------");
+        System.out.println("roomId:" + roomId);
+        System.out.println("userToken:" + userToken);
+        System.out.println("--------------------------");
 
-        if (userRecord == null) {
+        final String userEmail = users.get(userToken);
+
+        if (userEmail == null) {
             return ServerResponse.InvalidToken;
         }
 
@@ -229,16 +327,17 @@ public class SecondaryServer extends Server {
             return ServerResponse.RoomNotFound;
         }
 
-        selectedRoom.removeUser(userToken);
-
-        if (cascadeUser(userToken)) {
-            getLogger().removeUser(userToken);
+        if (selectedRoom.removeUser(userToken)) {
+            cascadeUser(userToken);
+        }
+        else {
+            return ServerResponse.OperationFailed;
         }
 
         return ServerResponse.SuccessResponse;
     }
 
-    private boolean cascadeUser(final String userToken) {
+    private void cascadeUser(final String userToken) {
 
         boolean userRemoved = true;
 
@@ -250,28 +349,13 @@ public class SecondaryServer extends Server {
         }
 
         if (userRemoved) {
+            serverLogger.removeUser(userToken);
             users.remove(userToken);
-        }
-
-        return userRemoved;
-    }
-
-    private void cascadeRoom(final Set<String> roomUsers) {
-
-        for (final String userToken : roomUsers) {
-
-            if (cascadeUser(userToken)) {
-                getLogger().removeUser(userToken);
-            }
         }
     }
 
     @Override
     public ServerResponse deleteRoom(int roomId) {
-
-        System.out.println("------ DeleteRoom ------");
-        System.out.println("roomId:" + roomId);
-        System.out.println("------------------------");
 
         final Room selectedRoom = rooms.get(roomId);
 
@@ -288,7 +372,7 @@ public class SecondaryServer extends Server {
             return ServerResponse.DatabaseError;
         }
 
-        cascadeRoom(roomUsers);
+        roomUsers.forEach(this::cascadeUser);
 
         return ServerResponse.SuccessResponse;
     }
@@ -315,7 +399,7 @@ public class SecondaryServer extends Server {
                 final Set<Integer> roomServers = selectedRoom.getServers();
 
                 for (final Integer serverId : roomServers) {
-                    myServerListener.sendServer(serverId, paramMessage);
+                    mServerListener.sendServer(serverId, paramMessage);
                 }
 
                 return ServerResponse.SuccessResponse;
@@ -338,14 +422,14 @@ public class SecondaryServer extends Server {
         final String userRecord = users.get(userToken);
 
         if (userRecord == null) {
-            getLogger().userNotFound(userToken);
+            serverLogger.userNotFound(userToken);
             return messagesArray;
         }
 
 		final Room selectedRoom = rooms.get(roomId);
 
         if (selectedRoom == null) {
-            getLogger().roomNotFound(roomId);
+            serverLogger.roomNotFound(roomId);
             return messagesArray;
         }
 
@@ -387,18 +471,21 @@ public class SecondaryServer extends Server {
         System.out.println("serverPort:" + serverInfo.getPort());
         System.out.println("--------------------------");
 
+        int serverId = serverInfo.getId();
+
 		if (servers.containsKey(serverId)) {
 			return updateServer(serverInfo);
 		}
 
 		if (serverDatabase.insertServer(serverInfo)) {
             servers.put(serverId, serverInfo);
+            serverLogger.insertServer(serverId);
         }
         else {
             return ServerResponse.DatabaseError;
         }
 
-        serverTimestamp = Instant.now().getEpochSecond();
+        mServerTimestamp = Instant.now().getEpochSecond();
 
 		return ServerResponse.SuccessResponse;
 	}
@@ -406,12 +493,7 @@ public class SecondaryServer extends Server {
 	@Override
 	public ServerResponse updateServer(final ServerInfo serverInfo) {
 
-        System.out.println("------ UpdateServer ------");
-        System.out.println("serverId:" + serverInfo.getId());
-        System.out.println("serverAddress:" + serverInfo.getAddress());
-        System.out.println("serverPort:" + serverInfo.getPort());
-        System.out.println("--------------------------");
-
+        int serverId = serverInfo.getId();
         final ServerInfo selectedServer = servers.get(serverId);
 
 		if (selectedServer == null) {
@@ -422,12 +504,13 @@ public class SecondaryServer extends Server {
             selectedServer.setAddress(serverInfo.getAddress());
             selectedServer.setPort(serverInfo.getPort());
             selectedServer.setTimestamp(serverInfo.getTimestamp());
+            serverLogger.updateServer(serverId);
         }
         else {
             return ServerResponse.DatabaseError;
         }
 
-        serverTimestamp = Instant.now().getEpochSecond();
+        mServerTimestamp = Instant.now().getEpochSecond();
 
 		return ServerResponse.SuccessResponse;
 	}
@@ -435,13 +518,16 @@ public class SecondaryServer extends Server {
 	@Override
 	public ServerResponse deleteServer(int serverId) {
 
-        System.out.println("------ DeleteServer ------");
-        System.out.println("serverId:" + serverId);
-        System.out.println("--------------------------");
-
         if (servers.get(serverId) == null) {
             return ServerResponse.ServerNotFound;
         }
+
+        rooms.forEach((roomId, room) -> {
+
+            if (room.removeServer(serverId)) {
+                serverDatabase.deleteServerRoom(serverId, roomId);
+            }
+        });
 
         if (serverDatabase.deleteServer(serverId)) {
             servers.remove(serverId);
@@ -450,11 +536,7 @@ public class SecondaryServer extends Server {
             return ServerResponse.DatabaseError;
         }
 
-        serverTimestamp = Instant.now().getEpochSecond();
-
-        rooms.forEach((roomId, room) -> {
-            room.removeServer(serverId);
-        });
+        mServerTimestamp = Instant.now().getEpochSecond();
 
         return ServerResponse.SuccessResponse;
 	}
@@ -462,22 +544,15 @@ public class SecondaryServer extends Server {
 	@Override
 	public ServerResponse userDisconnect(final String userEmail, final String userToken) {
 
-		final String userRecord = users.get(userToken);
+        final String userRecord = users.get(userToken);
 
-		if (userRecord == null) {
-            return ServerResponse.InvalidToken;
-		}
-
-        if (userRecord.equals(userEmail)) {
+        if (userRecord != null && userRecord.equals(userEmail)) {
+            rooms.forEach((roomId, room) -> room.removeUser(userToken));
             users.remove(userToken);
         }
         else {
             return ServerResponse.InvalidToken;
         }
-
-        rooms.forEach((roomId, room) -> {
-            room.removeUser(userToken);
-        });
 
 		return ServerResponse.SuccessResponse;
 	}
@@ -496,18 +571,23 @@ public class SecondaryServer extends Server {
             return ServerResponse.RoomNotFound;
         }
 
-        myServerListener.sendServer(serverId, selectedRoom);
+        if (serverId != mServerId) {
+
+            mServerListener.sendServer(serverId,
+                new SyncRoomResponse(roomId, selectedRoom)
+            );
+        }
 
         return ServerResponse.SuccessResponse;
     }
 
-    public ServerResponse updateRoom(final SyncRoomResponse updateRoom) {
+    final ServerResponse updateRoom(final SyncRoomResponse updateRoom) {
 
         System.out.println("------ UpdateRoom ------");
         System.out.println("roomId:" + updateRoom.roomId);
         System.out.println("roomTimestamp:" + updateRoom.roomTimestamp);
-        System.out.println("#roomServers:" + updateRoom.roomServers.size());
-        System.out.println("#roomUsers:" + updateRoom.roomUsers.size());
+        System.out.println("roomServers:" + updateRoom.roomServers);
+        System.out.println("roomUsers:" + updateRoom.roomUsers);
         System.out.println("--------------------------");
 
         final Room selectedRoom = rooms.get(updateRoom.roomId);
@@ -547,29 +627,7 @@ public class SecondaryServer extends Server {
         return ServerResponse.OperationFailed;
     }
 
-    public ServerResponse syncRoom(int roomId, final Message[] messageCache) {
-
-        System.out.println("------ SyncRoom ------");
-        System.out.println("roomId:" + roomId);
-        System.out.println("#messages:" + messageCache.length);
-        System.out.println("----------------------");
-
-        if (roomId < 0) {
-            return ServerResponse.MissingParameters;
-        }
-
-        final Room selectedRoom = rooms.get(roomId);
-
-        if (selectedRoom == null) {
-            return ServerResponse.RoomNotFound;
-        }
-
-        selectedRoom.syncMessages(messageCache);
-
-        return ServerResponse.SuccessResponse;
-    }
-
-    public ServerOnline getInformation() {
-        return new ServerOnline(serverId, serverTimestamp, serverPort);
+    final ServerOnline getInformation() {
+        return new ServerOnline(mServerId, mServerTimestamp, serverPort);
     }
 }

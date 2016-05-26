@@ -1,16 +1,15 @@
-package chatup.server;
+package chatup.tcp;
 
 import chatup.model.Message;
 import chatup.model.MessageCache;
-import chatup.tcp.*;
 
 import com.esotericsoftware.kryo.Kryo;
 
 import kryonet.EndPoint;
 
-class TcpNetwork {
+public class TcpNetwork {
 
-    static void register(final EndPoint endPoint) {
+    public static void register(final EndPoint endPoint) {
         Kryo kryo = endPoint.getKryo();
         kryo.register(CreateRoom.class);
         kryo.register(DeleteRoom.class);

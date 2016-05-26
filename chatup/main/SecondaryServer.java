@@ -1,6 +1,7 @@
 package chatup.main;
 
 import chatup.server.ServerInfo;
+import chatup.server.ServerType;
 
 import java.time.Instant;
 
@@ -19,7 +20,7 @@ public class SecondaryServer {
             serverId = Integer.parseInt(args[0]);
         }
         catch (NumberFormatException ex) {
-            ChatupGlobals.abort(ex);
+            ChatupGlobals.abort(ServerType.SECONDARY, ex);
         }
 
         if (args.length > 2) {
@@ -59,7 +60,7 @@ public class SecondaryServer {
            ChatupServer.initializeSecondary(primaryServer, httpPort, tcpPort);
         }
         catch (final NumberFormatException ex) {
-            ChatupGlobals.abort(ex);
+            ChatupGlobals.abort(ServerType.SECONDARY, ex);
         }
     }
 }
