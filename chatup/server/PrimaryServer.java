@@ -283,7 +283,6 @@ public class PrimaryServer extends Server {
         return ServerResponse.SuccessResponse;
     }
 
-    // TODO: Verified!
     private void insertQueue(int serverId, final Object paramObject) {
 
         final CommandQueue serverMessages = messageQueue.get(serverId);
@@ -348,6 +347,7 @@ public class PrimaryServer extends Server {
                 myServerListener.sendServer(serverId, deleteRoom);
             }
             else {
+                System.out.println("Server #" + serverId + " is offline, will be notified as soon as it connects!");
                 insertQueue(serverId, deleteRoom);
             }
         }
@@ -594,7 +594,8 @@ public class PrimaryServer extends Server {
                         myServerListener.sendServer(currentId, deleteServer);
                     }
                     else {
-                        insertQueue(serverId, deleteServer);
+                        System.out.println("Server #" + currentId + " is offline, will be notified as soon as it connects!");
+                        insertQueue(currentId, deleteServer);
                     }
 
                     currentServer.updateTimestamp();
@@ -651,7 +652,8 @@ public class PrimaryServer extends Server {
                     myServerListener.sendServer(currentId, deleteServer);
                 }
                 else {
-                    insertQueue(serverId, deleteServer);
+                    System.out.println("Server #" + currentId + " is offline, will be notified as soon as it connects!");
+                    insertQueue(currentId, deleteServer);
                 }
 
                 currentServer.updateTimestamp();
@@ -720,7 +722,8 @@ public class PrimaryServer extends Server {
                     myServerListener.sendServer(serverId, deleteRoom);
                 }
                 else {
-                    insertQueue(roomId, deleteRoom);
+                    System.out.println("Server #" + serverId + " is offline, will be notified as soon as it connects!");
+                    insertQueue(serverId, deleteRoom);
                 }
 
                 currentServer.updateTimestamp();
@@ -855,7 +858,8 @@ public class PrimaryServer extends Server {
                     myServerListener.sendServer(currentId, updateServer);
                 }
                 else {
-                    insertQueue(serverId, updateServer);
+                    System.out.println("Server #" + currentId + " is offline, will be notified as soon as it connects!");
+                    insertQueue(currentId, updateServer);
                 }
             }
         });

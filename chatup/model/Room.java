@@ -15,7 +15,7 @@ public class Room {
     private Set<String> mUsers;
     private Set<Integer> mServers;
 
-    public Room(final String paramName, final String paramPassword, final String paramOwner) {
+    Room(final String paramName, final String paramPassword, final String paramOwner) {
         this(paramName, paramPassword, Instant.now().getEpochSecond(), paramOwner);
 	}
 
@@ -30,10 +30,6 @@ public class Room {
     }
 
 	private long mTimestamp;
-
-    public boolean updateUsers(final Set<String> paramUsers) {
-        return mUsers.addAll(paramUsers);
-    }
 
     public Set<Integer> updateServers(final Set<Integer> paramServers) {
 
