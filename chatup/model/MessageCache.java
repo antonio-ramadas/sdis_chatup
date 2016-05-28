@@ -45,7 +45,7 @@ public class MessageCache implements Serializable {
         return returnQueue;
     }
 
-    int size() {
+    public int size() {
         return myQueue.size();
     }
 }

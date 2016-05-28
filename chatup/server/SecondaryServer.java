@@ -89,13 +89,13 @@ public class SecondaryServer extends Server {
 
             final Set<Integer> roomServers = serverDatabase.getServerByRoom(roomId);
 
-            if (roomServers != null) {
+            if (roomServers != null && roomServers.size() > 0) {
                 roomInformation.setServers(roomServers);
             }
 
             final MessageCache roomMessages = serverDatabase.getMessagesByRoom(roomId);
 
-            if (roomMessages != null) {
+            if (roomMessages != null && roomMessages.size() > 0) {
                 roomInformation.insertMessages(roomMessages);
             }
 

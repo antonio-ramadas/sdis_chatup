@@ -22,6 +22,7 @@ CREATE TABLE Messages (
   id                      INTEGER PRIMARY KEY AUTOINCREMENT,
   room                    INTEGER NOT NULL,
   author                  TEXT NOT NULL,
+  token                   TEXT NOT NULL,
   epoch                   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   contents                TEXT NOT NULL,
   FOREIGN KEY(room)       REFERENCES Rooms(id)
