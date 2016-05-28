@@ -1,15 +1,19 @@
 package chatup.server;
 
+import chatup.http.HttpDispatcher;
 import chatup.http.ServerResponse;
+import chatup.main.ChatupGlobals;
+import chatup.main.ChatupServer;
 import chatup.model.Message;
 
 import com.eclipsesource.json.JsonValue;
 
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.*;
 
 import javafx.util.Pair;
-import java.io.IOException;
+
+import javax.net.ssl.*;
+
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -18,56 +22,58 @@ import java.util.concurrent.Executors;
 public abstract class Server {
 
     final HashMap<String, String> users = new HashMap<>();
-    private ServerType serverType;
+    private final ServerType serverType;
 
     Server(final HttpHandler httpHandler, final ServerType paramType, int httpPort) throws SQLException {
-
-        final HttpServer httpServer;
 
         serverType = paramType;
 
         try {
-            //   final KeyStore serverKeystore = tcpConnection.getServerKeystore();
-            //   final KeyManagerFactory kmf = serverKeystore.getKeyManager();
-            //   final TrustManagerFactory tmf = serverKeystore.getTrustManager();
 
-          httpServer = HttpServer.create(new InetSocketAddress(httpPort), 0);
-
-        /*    final SSLContext sslContext = SSLContext.getInstance("TLSv1");
+            final HttpsServer httpServer = HttpsServer.create(new InetSocketAddress(httpPort), 0);
+            final ServerKeystore serverKeystore = ChatupServer.getKeystore();
+            final KeyManagerFactory kmf = serverKeystore.getKeyManager();
+            final TrustManagerFactory tmf = serverKeystore.getTrustManager();
+            final SSLContext sslContext = SSLContext.getInstance("TLS");
 
             sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 
-            httpServer.setHttpsConfigurator(new HttpsConfigurator(sslContext){
+            httpServer.setHttpsConfigurator(new HttpsConfigurator(sslContext) {
+
+                @Override
                 public void configure(HttpsParameters params) {
+
                     try {
-                        SSLContext c = SSLContext.getDefault();
-                        SSLEngine engine = c.createSSLEngine();
+
+                        final SSLContext c = SSLContext.getDefault();
+                        final SSLEngine engine = c.createSSLEngine();
+
                         params.setNeedClientAuth(false);
+                        params.setWantClientAuth(false);
                         params.setCipherSuites(engine.getEnabledCipherSuites());
                         params.setProtocols(engine.getEnabledProtocols());
-                        SSLParameters defaultSSLParameters = c.getDefaultSSLParameters();
+
+                        final SSLParameters defaultSSLParameters = c.getDefaultSSLParameters();
+
                         params.setSSLParameters(defaultSSLParameters);
                     }
-                    catch (NoSuchAlgorithmException e) {
-                        e.printStackTrace();
+                    catch (final Exception ex) {
+                        ChatupGlobals.abort(serverType, ex);
                     }
                 }
-            });*/
+            });
 
             httpServer.createContext("/", httpHandler);
             httpServer.setExecutor(Executors.newCachedThreadPool());
             httpServer.start();
         }
-        catch (IOException ex) {
-            System.out.println("Exception caught: " + ex.getMessage() + " in KryoServer.contructor");
+        catch (final Exception ex) {
+            ChatupGlobals.abort(serverType, ex);
         }
-      /*  catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        catch (KeyManagementException e) {
-            e.printStackTrace();
-        }
-        */
+    }
+
+    public HashMap<String, String> getUsers() {
+        return users;
     }
 
     public ServerType getType() {
@@ -77,10 +83,6 @@ public abstract class Server {
     public int getId() {
         return -1;
     }
-
-    //---------------------------------------------------------------
-    // SERVER: insertServer, updateServer, deleteServer
-    //---------------------------------------------------------------
 
     public ServerResponse insertServer(final ServerInfo serverInfo) {
         throw new UnsupportedOperationException("InsertServer");
@@ -94,10 +96,6 @@ public abstract class Server {
         throw new UnsupportedOperationException("DeleteServer");
     }
 
-    //--------------------------------
-    // USER: userLogin, userDisconnect
-    //---------------------------------
-
     public ServerResponse userLogin(final String userEmail, final String userToken) {
         throw new UnsupportedOperationException("UserLogin");
     }
@@ -105,10 +103,6 @@ public abstract class Server {
     public ServerResponse userDisconnect(final String userEmail, final String userToken) {
         throw new UnsupportedOperationException("UserLogin");
     }
-
-    //---------------------------------------------------------
-    // ROOM(PRIMARY): createRoom, getRooms, joinRoom, leaveRoom
-    //---------------------------------------------------------
 
     public ServerResponse createRoom(final String roomName, final String roomPassword, final String roomOwner) {
         throw new UnsupportedOperationException("CreateRoom");
@@ -126,25 +120,19 @@ public abstract class Server {
         throw new UnsupportedOperationException("LeaveRoom");
     }
 
-    //--------------------------------------------------
-    // ROOM(SECONDARY): deleteRoom, syncRoom, updateRoom
-    //--------------------------------------------------
-
     public ServerResponse deleteRoom(int roomId) {
         throw new UnsupportedOperationException("DeleteRoom");
     }
 
-    public ServerResponse syncRoom(int roomId, int serverId) {
-        throw new UnsupportedOperationException("SyncRoom");
-    }
-
-    public JsonValue getMessages(final String userToken, int roomId) {
+    public ServerResponse getMessages(final HttpDispatcher httpExchange, final String userToken, int roomId, long roomTimestamp) {
         throw new UnsupportedOperationException("RetrieveMessages");
     }
 
-    public ServerResponse insertMessage(Message userMessage) {
-        throw new UnsupportedOperationException("InsertMessage");
+    public ServerResponse sendMessage(final Message paramMessage) {
+        throw new UnsupportedOperationException("SendMessage");
     }
 
-    public abstract boolean validateToken(String getValue);
+    public boolean validateToken(final String userToken) {
+        throw new UnsupportedOperationException("ValdiateToken");
+    }
 }

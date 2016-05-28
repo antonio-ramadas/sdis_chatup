@@ -29,21 +29,19 @@ import kryonet.FrameworkMessage.RegisterTCP;
 
 import java.nio.ByteBuffer;
 
-class KryoSerialization implements Serialization
-{
+class KryoSerialization implements Serialization {
+
     private final Kryo kryo;
     private final ByteBufferInput input;
     private final ByteBufferOutput output;
 
-    KryoSerialization()
-    {
+    KryoSerialization() {
         this(new Kryo());
         kryo.setReferences(false);
         kryo.setRegistrationRequired(true);
     }
 
-    private KryoSerialization(final Kryo kryoInstance)
-    {
+    private KryoSerialization(final Kryo kryoInstance) {
         kryo = kryoInstance;
         kryoInstance.register(RegisterTCP.class);
         kryoInstance.register(KeepAlive.class);
@@ -52,38 +50,32 @@ class KryoSerialization implements Serialization
         output = new ByteBufferOutput();
     }
 
-    final Kryo getKryo()
-    {
+    final Kryo getKryo() {
         return kryo;
     }
 
-    public synchronized void write(final Connection connection, final ByteBuffer buffer, final Object object)
-    {
+    public synchronized void write(final Connection connection, final ByteBuffer buffer, final Object object) {
         output.setBuffer(buffer);
         kryo.getContext().put("connection", connection);
         kryo.writeClassAndObject(output, object);
         output.flush();
     }
 
-    public synchronized Object read(final Connection connection, final ByteBuffer buffer)
-    {
+    public synchronized Object read(final Connection connection, final ByteBuffer buffer) {
         input.setBuffer(buffer);
         kryo.getContext().put("connection", connection);
         return kryo.readClassAndObject(input);
     }
 
-    public void writeLength(final ByteBuffer buffer, int length)
-    {
+    public void writeLength(final ByteBuffer buffer, int length) {
         buffer.putInt(length);
     }
 
-    public int readLength(final ByteBuffer buffer)
-    {
+    public int readLength(final ByteBuffer buffer) {
         return buffer.getInt();
     }
 
-    public int getLengthLength()
-    {
+    public int getLengthLength() {
         return 4;
     }
 }

@@ -1,12 +1,13 @@
 package chatup.main;
 
 import chatup.server.ServerInfo;
+import chatup.server.ServerType;
 
 import java.time.Instant;
 
 public class SecondaryServer {
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
 
         if (args.length < 2 || args.length > 4) {
             ChatupGlobals.usage("<serverId> primaryIp:primaryPort (<tcpPort>) (<httpPort>)");
@@ -19,7 +20,7 @@ public class SecondaryServer {
             serverId = Integer.parseInt(args[0]);
         }
         catch (NumberFormatException ex) {
-            ChatupGlobals.abort(ex);
+            ChatupGlobals.abort(ServerType.SECONDARY, ex);
         }
 
         if (args.length > 2) {
@@ -27,7 +28,7 @@ public class SecondaryServer {
             try {
                 tcpPort = Integer.parseInt(args[2]);
             }
-            catch (NumberFormatException ex) {
+            catch (final NumberFormatException ex) {
                 tcpPort = ChatupGlobals.DefaultTcpPort;
             }
         }
@@ -39,7 +40,7 @@ public class SecondaryServer {
             try {
                 httpPort = Short.parseShort(args[3]);
             }
-            catch (NumberFormatException ex) {
+            catch (final NumberFormatException ex) {
                 httpPort = ChatupGlobals.DefaultHttpPort;
             }
         }
@@ -59,7 +60,7 @@ public class SecondaryServer {
            ChatupServer.initializeSecondary(primaryServer, httpPort, tcpPort);
         }
         catch (final NumberFormatException ex) {
-            ChatupGlobals.abort(ex);
+            ChatupGlobals.abort(ServerType.SECONDARY, ex);
         }
     }
 }

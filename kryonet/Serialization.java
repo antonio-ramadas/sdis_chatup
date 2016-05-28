@@ -21,12 +21,10 @@ package kryonet;
 
 import java.nio.ByteBuffer;
 
-interface Serialization
-{
+interface Serialization {
     void write(Connection connection, ByteBuffer buffer, Object object);
     void writeLength(ByteBuffer buffer, int length);
     int readLength(ByteBuffer buffer);
     int getLengthLength();
-
     Object read(Connection connection, ByteBuffer buffer);
 }

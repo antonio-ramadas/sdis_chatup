@@ -19,15 +19,13 @@
 
 package kryonet;
 
-public class KryoNetException extends RuntimeException
-{
-    public KryoNetException(final String message, final Throwable cause)
-    {
+class KryoNetException extends RuntimeException {
+
+    KryoNetException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
-    public KryoNetException(final String message)
-    {
+    KryoNetException(final String message) {
         super(message);
     }
 }

@@ -2,25 +2,37 @@ package chatup.model;
 
 import java.time.Instant;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Room extends RoomInfo {
+public class Room {
 
-	private MessageCache roomMessages;
+    private String mName;
+    private String mPassword;
+    private String mOwner;
+    private MessageCache mMessages;
+    private Set<String> mUsers;
+    private Set<Integer> mServers;
 
-	public Room(final String paramName, final String paramPassword, final String paramOwner) {
-
-        super(paramName, paramPassword, paramOwner);
-
-		roomMessages = new MessageCache();
-		lastSync = 0L;
+    public Room(final String paramName, final String paramPassword, final String paramOwner) {
+        this(paramName, paramPassword, Instant.now().getEpochSecond(), paramOwner);
 	}
 
-	private long lastSync;
+    public Room(final String paramName, final String paramPassword, long paramTimestamp, final String paramOwner) {
+        mName = paramName;
+        mOwner = paramOwner;
+        mPassword = paramPassword;
+        mMessages = new MessageCache();
+        mUsers = new HashSet<>();
+        mServers = new HashSet<>();
+        mTimestamp = paramTimestamp;
+    }
+
+	private long mTimestamp;
 
     public boolean updateUsers(final Set<String> paramUsers) {
-        return roomUsers.addAll(paramUsers);
+        return mUsers.addAll(paramUsers);
     }
 
     public Set<Integer> updateServers(final Set<Integer> paramServers) {
@@ -29,7 +41,7 @@ public class Room extends RoomInfo {
 
         for (final Integer serverId : paramServers) {
 
-            if (roomServers.add(serverId)) {
+            if (mServers.add(serverId)) {
                 newServers.add(serverId);
             }
         }
@@ -41,64 +53,60 @@ public class Room extends RoomInfo {
 
 		final String userToken = paramMessage.getAuthor();
 
-		if (roomUsers.contains(userToken)) {
-			roomMessages.push(paramMessage);
+		if (mUsers.contains(userToken)) {
+			mMessages.push(paramMessage);
 		}
 		else {
-			roomUsers.add(userToken);
-			roomMessages.push(paramMessage);
+			mUsers.add(userToken);
+			mMessages.push(paramMessage);
 		}
 
-        lastSync = roomMessages.getLast().getTimestamp();
+        mTimestamp = mMessages.getLast().getTimestamp();
 
 		return true;
 	}
 
-    @Override
     public boolean registerServer(int serverId) {
 
-        if (roomServers.contains(serverId)) {
+        if (mServers.contains(serverId)) {
             return false;
         }
 
-        roomServers.add(serverId);
-        lastSync = Instant.now().getEpochSecond();
+        mServers.add(serverId);
+        mTimestamp = Instant.now().getEpochSecond();
 
         return true;
     }
 
-    @Override
 	public boolean removeServer(int serverId) {
 
-		if (!roomServers.contains(serverId)) {
+		if (!mServers.contains(serverId)) {
 			return false;
 		}
 
-		roomServers.remove(serverId);
-        lastSync = Instant.now().getEpochSecond();
+		mServers.remove(serverId);
+        mTimestamp = Instant.now().getEpochSecond();
 
 		return true;
 	}
 
-    @Override
 	public boolean registerUser(final String userToken) {
 
-		if (roomUsers.contains(userToken)) {
+		if (mUsers.contains(userToken)) {
 			return false;
 		}
 
-		roomUsers.add(userToken);
-        lastSync = Instant.now().getEpochSecond();
+		mUsers.add(userToken);
+        mTimestamp = Instant.now().getEpochSecond();
 
 		return true;
 	}
 
-    @Override
     public boolean removeUser(final String userToken)  {
 
-        if (roomUsers.contains(userToken)) {
-            lastSync = Instant.now().getEpochSecond();
-            roomUsers.remove(userToken);
+        if (mUsers.contains(userToken)) {
+            mTimestamp = Instant.now().getEpochSecond();
+            mUsers.remove(userToken);
         }
         else {
             return false;
@@ -107,34 +115,57 @@ public class Room extends RoomInfo {
         return true;
     }
 
-    public long getLastUpdate() {
-        return lastSync;
+    public long getTimestamp() {
+        return mTimestamp;
     }
 
-    public void syncMessages(final Message[] messageCache) {
-
-        for (final Message currentMessage : messageCache) {
-            roomMessages.push(currentMessage);
-        }
-
-        lastSync = roomMessages.getLast().getTimestamp();
+    public void setServers(final Set<Integer> paramServers) {
+        mServers = paramServers;
     }
 
     @Override
     public String toString() {
-        return super.toString() + " #numberMessages=" + roomMessages.size();
+        return mName + " " + mServers + " #numberMessages=" + mMessages.size();
     }
 
-    public Message[] getMessages() {
-        return roomMessages.getMessages(0);
+    public final String getName() {
+        return mName;
     }
 
-    public Message[] getMessages(long paramTimestamp) {
-        return roomMessages.getMessages(paramTimestamp);
+    public final String getOwner() {
+        return mOwner;
+    }
+
+    public final String getPassword() {
+        return mPassword;
+    }
+
+    public final Set<Integer> getServers() {
+        return mServers;
+    }
+
+    public final Set<String> getUsers() {
+        return mUsers;
+    }
+
+    public ArrayList<Message> getMessages(long paramTimestamp) {
+        return mMessages.getMessages(paramTimestamp);
+    }
+
+    public boolean hasUser(final String userToken) {
+        return mUsers.contains(userToken);
+    }
+
+    public boolean isEmpty() {
+        return mUsers.isEmpty();
+    }
+
+    public boolean isPrivate() {
+        return mPassword != null;
     }
 
     public void insertMessages(final MessageCache paramMessages) {
-        roomMessages = paramMessages;
-        lastSync = roomMessages.getLast().getTimestamp();
+        mMessages = paramMessages;
+        mTimestamp = mMessages.getLast().getTimestamp();
     }
 }

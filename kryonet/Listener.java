@@ -81,18 +81,18 @@ public class Listener
         abstract protected void queue(final Runnable runnable);
     }
 
-    static public class ThreadedListener extends QueuedListener{
+    static public class ThreadedListener extends QueuedListener {
 
         protected final ExecutorService threadPool;
 
-        public ThreadedListener(Listener listener)
+        public ThreadedListener(final Listener paramListener)
         {
-            this(listener, Executors.newFixedThreadPool(1));
+            this(paramListener, Executors.newFixedThreadPool(1));
         }
 
-        public ThreadedListener(Listener listener, ExecutorService threadPool)
+        public ThreadedListener(final Listener paramListener, final ExecutorService threadPool)
         {
-            super(listener);
+            super(paramListener);
 
             if (threadPool == null)
             {

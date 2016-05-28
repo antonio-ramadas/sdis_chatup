@@ -35,7 +35,7 @@ public class Connection
     EndPoint endPoint;
     TcpConnection tcp;
     UdpConnection udp;
-    InetSocketAddress udpRemoteAddress;
+    private InetSocketAddress udpRemoteAddress;
     private Listener[] listeners = {};
     private final Object listenerLock = new Object();
     volatile boolean isConnected;
@@ -60,52 +60,21 @@ public class Connection
         return isConnected;
     }
 
-    public KryoNetException getLastProtocolError()
-    {
-        return lastProtocolError;
-    }
-
     public int sendTCP(Object object)
     {
         try
         {
-            int length = tcp.send(this, object);
-
-            if (length == 0)
-            {
-            }
-            else if (Log.DEBUG)
-            {
-                String objectString = object == null ? "null" : object.getClass().getSimpleName();
-
-                if (!(object instanceof FrameworkMessage))
-                {
-                    Log.debug("kryonet", this + " sent TCP: " + objectString + " (" + length + ")");
-                }
-            }
-
-            return length;
+            return tcp.send(this, object);
         }
         catch (IOException ex)
         {
-            if (Log.DEBUG)
-            {
-                Log.debug("kryonet", "Unable to send TCP with connection: " + this, ex);
-            }
-
             close();
-
             return 0;
         }
         catch (KryoNetException ex)
         {
-            if (Log.ERROR)
-            {
-                Log.error("kryonet", "Unable to send TCP with connection: " + this, ex);
-            }
-
+            Log.error("kryonet", "Unable to send TCP with connection: " + this, ex);
             close();
-
             return 0;
         }
     }
@@ -131,47 +100,18 @@ public class Connection
                 throw new SocketException("Connection is closed.");
             }
 
-            int length = udp.send(this, object, address);
-
-            if (Log.DEBUG)
-            {
-                if (length != -1)
-                {
-                    final String objectString = object == null ? "null" : object.getClass().getSimpleName();
-
-                    if (!(object instanceof FrameworkMessage))
-                    {
-                        Log.debug("kryonet", this + " sent UDP: " + objectString + " (" + length + ")");
-                    }
-                }
-                else
-                {
-                    Log.debug("kryonet", this + " was unable to send, UDP socket buffer full.");
-                }
-            }
-
-            return length;
+            return udp.send(this, object, address);
         }
         catch (IOException ex)
         {
-            if (Log.DEBUG)
-            {
-                Log.debug("kryonet", "Unable to send UDP with connection: " + this, ex);
-            }
-
+            Log.debug("kryonet", "Unable to send UDP with connection: " + this, ex);
             close();
-
             return 0;
         }
         catch (KryoNetException ex)
         {
-            if (Log.ERROR)
-            {
-                Log.error("kryonet", "Unable to send UDP with connection: " + this, ex);
-            }
-
+            Log.error("kryonet", "Unable to send UDP with connection: " + this, ex);
             close();
-
             return 0;
         }
     }
@@ -220,32 +160,38 @@ public class Connection
         }
     }
 
-    public void removeListener(Listener listener)
+    public void removeListener(final Listener paramListener)
     {
         synchronized (listenerLock)
         {
-            final Listener[] listeners = this.listeners;
-            int n = listeners.length;
+            final Listener[] myListeners = this.listeners;
+            int n = myListeners.length;
 
             if (n == 0)
             {
                 return;
             }
 
-            Listener[] newListeners = new Listener[n - 1];
+            final Listener[] newListeners = new Listener[n - 1];
 
             for (int i = 0, ii = 0; i < n; i++)
             {
-                Listener copyListener = listeners[i];
+                final Listener copyListener = myListeners[i];
 
-                if (listener == copyListener)
+                if (paramListener == copyListener)
+                {
                     continue;
+                }
+
                 if (ii == n - 1)
+                {
                     return;
+                }
+
                 newListeners[ii++] = copyListener;
             }
 
-            this.listeners = newListeners;
+            listeners = newListeners;
         }
     }
 
@@ -259,7 +205,7 @@ public class Connection
         }
     }
 
-    void notifyDisconnected()
+    private void notifyDisconnected()
     {
         final Listener[] myListeners = listeners;
 
@@ -316,43 +262,17 @@ public class Connection
         return null;
     }
 
-    public InetSocketAddress getRemoteAddressUDP()
-    {
-        final InetSocketAddress connectedAddress = udp.connectedAddress;
-
-        if (connectedAddress != null)
-        {
-            return connectedAddress;
-        }
-
-        return udpRemoteAddress;
-    }
-
-    public void setBufferPositionFix(boolean bufferPositionFix)
-    {
-        tcp.bufferPositionFix = bufferPositionFix;
-    }
-
     public void setName(String name)
     {
         this.name = name;
     }
 
-    public int getTcpWriteBufferSize()
-    {
-        return tcp.writeBuffer.position();
-    }
-
-    public boolean isIdle()
+    boolean isIdle()
     {
         return tcp.writeBuffer.position() / (float) tcp.writeBuffer.capacity() < tcp.idleThreshold;
     }
 
-    public void setIdleThreshold(float idleThreshold)
-    {
-        tcp.idleThreshold = idleThreshold;
-    }
-
+    @Override
     public String toString()
     {
         if (name != null)

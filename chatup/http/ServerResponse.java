@@ -15,6 +15,7 @@ public enum ServerResponse {
     RoomNotFound("roomNotFound"),
     ServerNotFound("serverNotFound"),
     ServiceOffline("serviceOffline"),
+    SessionExists("sessionExists"),
     SuccessResponse("success"),
     WrongPassword("wrongPassword");
 

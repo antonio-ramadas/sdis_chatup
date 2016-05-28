@@ -22,20 +22,18 @@ class MessageServiceHandler extends HttpDispatcher {
     public void parseGetRequest(final String[] getValues) {
 
         final Server serverInstance = ChatupServer.getInstance();
-        final String userToken = parseString(getValues[1], HttpFields.MessageSender);
-        int roomId = parseInteger(getValues[0], HttpFields.MessageRoomId);
+        final String userToken = parseString(getValues, 1, HttpFields.MessageSender);
+        int roomId = parseInteger(getValues, 0, HttpFields.MessageRoomId);
+        long roomTimestamp = parseLong(getValues, 2, HttpFields.MessageTimestamp);
 
         if (userToken == null || roomId < 0) {
             sendError(ServerResponse.MissingParameters);
         }
         else {
 
-            final JsonValue jsonObject = serverInstance.getMessages(userToken, roomId);
+            final ServerResponse serverResponse = serverInstance.getMessages(this, userToken,roomId,roomTimestamp);
 
-            if (jsonObject != null) {
-                sendJsonResponse(ServerResponse.SuccessResponse, jsonObject);
-            }
-            else {
+            if (serverResponse != ServerResponse.SuccessResponse) {
                 sendError(ServerResponse.OperationFailed);
             }
         }
@@ -61,7 +59,7 @@ class MessageServiceHandler extends HttpDispatcher {
             }
             else {
                 sendJsonResponse(
-                    serverInstance.insertMessage(
+                    serverInstance.sendMessage(
                         new Message(roomId, userToken, Instant.now().toEpochMilli(), messageBody)
                     ),
                     jsonObject.add(HttpFields.MessageTimestamp, Instant.now().toEpochMilli())

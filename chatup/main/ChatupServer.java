@@ -3,6 +3,7 @@ package chatup.main;
 import chatup.server.Server;
 import chatup.server.ServerInfo;
 import chatup.server.ServerKeystore;
+import chatup.server.ServerType;
 
 public class ChatupServer {
 
@@ -12,26 +13,30 @@ public class ChatupServer {
     static void initializePrimary(int httpPort, int tcpPort) {
 
         try {
-            serverKeystore = new ServerKeystore("server.jks", "123456");
+            serverKeystore = new ServerKeystore(ChatupGlobals.keystoreFilename, ChatupGlobals.keystorePassword);
             serverInstance = new chatup.server.PrimaryServer(tcpPort, httpPort);
         }
-        catch (Exception ex) {
-            ChatupGlobals.abort(ex);
+        catch (final Exception ex) {
+            ChatupGlobals.abort(ServerType.PRIMARY, ex);
         }
     }
 
     static void initializeSecondary(final ServerInfo primaryServer, int httpPort, int tcpPort) {
 
         try {
-            serverKeystore = new ServerKeystore("server.jks", "123456");
+            serverKeystore = new ServerKeystore(ChatupGlobals.keystoreFilename, ChatupGlobals.keystorePassword);
             serverInstance = new chatup.server.SecondaryServer(primaryServer, tcpPort, httpPort);
         }
-        catch (Exception ex) {
-            ChatupGlobals.abort(ex);
+        catch (final Exception ex) {
+            ChatupGlobals.abort(ServerType.SECONDARY, ex);
         }
     }
 
     public static Server getInstance() {
         return serverInstance;
+    }
+
+    public static ServerKeystore getKeystore() {
+        return serverKeystore;
     }
 }

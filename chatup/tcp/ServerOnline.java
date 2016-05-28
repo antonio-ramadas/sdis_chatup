@@ -12,14 +12,12 @@ public class ServerOnline implements Serializable
     {
     }
 
-    public ServerOnline(int paramId, long paramTimestamp)
-    {
-        this(paramId, paramTimestamp, -1);
-    }
+    public String serverAddress;
 
-    public ServerOnline(int paramId, long paramTimestamp, int paramPort)
+    public ServerOnline(int paramId, long paramTimestamp, final String paramAddress, int paramPort)
     {
         serverId = paramId;
+        serverAddress = paramAddress;
         serverTimestamp = paramTimestamp;
         serverPort = paramPort;
     }

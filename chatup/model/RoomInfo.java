@@ -10,24 +10,19 @@ public class RoomInfo implements Serializable {
     private String roomName;
     private String roomPassword;
     private String roomOwner;
+    private Set<String> roomUsers;
+    private Set<Integer> roomServers;
 
     public RoomInfo(final String paramName, final String paramPassword, final String paramOwner) {
-        this(paramName, paramPassword, Instant.now().getEpochSecond(), paramOwner);
-    }
-
-    RoomInfo(final String paramName, final String paramPassword, long paramTimestamp, final String paramOwner) {
         roomName = paramName;
         roomOwner = paramOwner;
         roomPassword = paramPassword;
-        roomTimestamp = paramTimestamp;
+        roomTimestamp = Instant.now().getEpochSecond();
         roomUsers = new HashSet<>();
         roomServers = new HashSet<>();
     }
 
     private long roomTimestamp;
-
-    Set<String> roomUsers;
-    Set<Integer> roomServers;
 
     public boolean registerServer(int serverId) {
 
@@ -95,16 +90,16 @@ public class RoomInfo implements Serializable {
         return roomOwner;
     }
 
-    public final String getPassword() {
-        return roomPassword;
-    }
-
     public final Set<Integer> getServers() {
         return roomServers;
     }
 
-    public final Set<String> getUsers() {
-        return roomUsers;
+    public long getTimestamp() {
+        return roomTimestamp;
+    }
+
+    final String getPassword() {
+        return roomPassword;
     }
 
     @Override
@@ -118,9 +113,5 @@ public class RoomInfo implements Serializable {
 
     public boolean validatePassword(String userPassword) {
         return roomPassword.equals(userPassword);
-    }
-
-    public long getTimestamp() {
-        return roomTimestamp;
     }
 }
