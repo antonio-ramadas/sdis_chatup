@@ -1,21 +1,22 @@
 package chatup.server;
 
+import chatup.main.ChatupGlobals;
 import com.esotericsoftware.minlog.Log;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class ServerLogger {
+class ServerLogger {
 
     private BufferedWriter fileOutput;
     private ServerType serverType;
 
     ServerLogger(final Server paramServer) {
 
-        final String serverName;
-
         serverType = paramServer.getType();
+
+        final String serverName;
 
         if (serverType  == ServerType.PRIMARY) {
             serverName = "primary";
@@ -32,7 +33,7 @@ public class ServerLogger {
                 fileOutput = new BufferedWriter(new FileWriter(fileObject));
             }
             catch (final IOException ex) {
-                ex.printStackTrace();
+                ChatupGlobals.abort(serverType, ex);
             }
         }
     }
@@ -50,55 +51,59 @@ public class ServerLogger {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss' | '").format(new Date());
     }
 
-    public void invalidOperation(final Object paramObject) {
+    void invalidOperation(final Object paramObject) {
         error(paramObject.getClass().getSimpleName() + " received empty or invalid command!");
     }
 
-    public void roomExists(final String roomName) {
+    void roomExists(final String roomName) {
         warning("Room #" + roomName + " already exists!");
     }
 
-    public void roomNotFound(int roomId) {
+    void roomInvalidToken(int roomId, final String userToken) {
+        error("Received message from User #" + userToken + ", but user is currently not inside Room #" + roomId + "!");
+    }
+
+    void roomNotFound(int roomId) {
         error("Room #" + roomId + " is not registered on this server!");
+    }
+
+    void syncRoom(int roomId, int serverId) {
+        information("Sending Room #" + roomId + " metadata to Server #" + serverId + "...");
+    }
+
+    void updateRoom(final int roomId, int serverId) {
+        information("Received Room #" + roomId + " metadata from Server #" + serverId + "!");
     }
 
     void userConnected(final String userName) {
         information(userName + " has connected.");
     }
 
-    public void alreadyJoined(int roomId, final String userToken) {
+    void alreadyJoined(int roomId, final String userToken) {
         warning("User #" + userToken + " has already joined Room #" + roomId + "!");
     }
 
-    public void roomInvalidToken(int roomId, final String userToken) {
-        error("Received message from User #" + userToken + ", but user is currently not inside Room #" + roomId + "!");
-    }
-
-    public void syncRoom(int roomId, int serverId) {
-        information("Sending Room #" + roomId + " metadata to Server #" + serverId + "...");
-    }
-
-    public void updateRoom(final int roomId, int serverId) {
-        information("Received Room #" + roomId + " metadata from Server #" + serverId + "!");
-    }
-
-    public void insertMessage(final int roomId, int serverId) {
+    void insertMessage(final int roomId, int serverId) {
         information("Received Message #" + roomId + " metadata from Server #" + serverId + "!");
     }
 
-    public void sendMessage(int roomId) {
+    void sendMessage(int roomId) {
         information("Sending message from Room #" + roomId + " to server!");
     }
 
-    public void serverOffline(int serverId) {
+    void serverOffline(int serverId) {
         information("Server #" + serverId + " disconnected.");
     }
 
-    public void serverNotFound(int serverId) {
+    void serverOnline(int serverId, final String hostName) {
+        information("Server #" + serverId + " connected from " + hostName + ".");
+    }
+
+    void serverNotFound(int serverId) {
         error("Server #" + serverId + " not registered on this server!");
     }
 
-    public void deleteServer(int serverId) {
+    void deleteServer(int serverId) {
         warning("Server #" + serverId + " has been delete due to inactivity!");
     }
 
@@ -106,27 +111,23 @@ public class ServerLogger {
         information("Server #" + serverId + " information has been updated!");
     }
 
-    public void serverOnline(int serverId, final String hostName) {
-        information("Server #" + serverId + " connected from " + hostName + ".");
-    }
-
-    public void userDisconnected(final String userToken) {
+    void userDisconnected(final String userToken) {
         information("User #" + userToken + " has logged out");
     }
 
-    public void createRoom(final String userToken, final String roomName) {
+    void createRoom(final String userToken, final String roomName) {
         information("User #" + userToken + " has created Room " + roomName + ".");
     }
 
-    public void joinRoom(final String userToken, int roomId) {
+    void joinRoom(final String userToken, int roomId) {
         information("User #" + userToken + " has joined Room #" + roomId + ".");
     }
 
-    public void deleteRoom(int roomId) {
+    void deleteRoom(int roomId) {
         warning("Room #" + roomId + " has been deleted due to inactivity!");
     }
 
-    public void leaveRoom(final String userToken, int roomId) {
+    void leaveRoom(final String userToken, int roomId) {
         information("User #" + userToken + " has left Room #" + roomId + ".");
     }
 
@@ -138,11 +139,6 @@ public class ServerLogger {
     private void error(final String paramMessage) {
         Log.error(serverType.toString(), paramMessage);
         write(fileOutput, String.format("%s | ERROR | %s", generateTimestamp(), paramMessage));
-    }
-
-    private void debug(final String paramMessage) {
-        Log.debug(serverType.toString(), paramMessage);
-        write(fileOutput, String.format("%s | DEBUG | %s", generateFilename(), paramMessage));
     }
 
     private void information(final String paramMessage) {
@@ -161,11 +157,11 @@ public class ServerLogger {
         }
     }
 
-    public void userNotFound(final String userToken) {
+    void userNotFound(final String userToken) {
         warning("User #" + userToken + " not registed on this server!");
     }
 
-    public void databaseError() {
+    void databaseError() {
         error("Database access error, could not save changes to disk!");
     }
 

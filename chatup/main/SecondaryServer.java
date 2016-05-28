@@ -40,7 +40,7 @@ public class SecondaryServer {
             try {
                 httpPort = Short.parseShort(args[3]);
             }
-            catch (NumberFormatException ex) {
+            catch (final NumberFormatException ex) {
                 httpPort = ChatupGlobals.DefaultHttpPort;
             }
         }

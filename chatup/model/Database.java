@@ -4,6 +4,11 @@ import chatup.server.Server;
 import chatup.server.ServerInfo;
 import chatup.server.ServerType;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.sql.*;
 import java.util.*;
 
@@ -25,25 +30,72 @@ public class Database {
     private static final String queryDeleteRoom = "DELETE FROM Rooms WHERE id = ?";
     private static final String querySelectRooms = "SELECT * FROM Rooms";
 
-    public Database(final Server paramServer) throws SQLException {
+    public Database(final Server paramServer) throws IOException, SQLException {
 
         final ServerType serverType = paramServer.getType();
+        final String serverDirectory;
 
         if (serverType == ServerType.PRIMARY) {
-            dbConnection = DriverManager.getConnection("jdbc:sqlite:primary.db");
+            serverDirectory = paramServer.getType().toString();
         }
         else {
-            dbConnection = DriverManager.getConnection(
-                "jdbc:sqlite:" +
-                paramServer.getType() + "-" +
-                paramServer.getId() + ".db"
-            );
+            serverDirectory = paramServer.getType() + "-" + paramServer.getId();
         }
 
+        final String databaseFilename = serverDirectory + ".db";
+        final String databasePath = serverDirectory + "/" + databaseFilename;
+        final File databaseFile = new File(databasePath);
+
+        if (!databaseFile.exists()) {
+
+            final File defaultDatabase = new File("default/" + serverType + ".db");
+
+            if (defaultDatabase.exists()) {
+                copyFile(defaultDatabase, databaseFile);
+            }
+            else {
+                throw new IOException();
+            }
+        }
+
+        dbConnection = DriverManager.getConnection("jdbc:sqlite:" + databasePath);
         dbConnection.setAutoCommit(true);
     }
 
     private final Connection dbConnection;
+
+    private static boolean copyFile(File sourceFile, File destFile) throws IOException {
+
+        if (!sourceFile.exists()) {
+            return false;
+        }
+
+        if (!destFile.exists()) {
+
+            if (!destFile.mkdirs()) {
+                return false;
+            }
+
+            if (!destFile.createNewFile()) {
+                return false;
+            }
+        }
+
+        final FileChannel source = new FileInputStream(sourceFile).getChannel();
+        final FileChannel destination = new FileOutputStream(destFile).getChannel();
+
+        if (source != null) {
+            destination.transferFrom(source, 0, source.size());
+        }
+
+        if (source != null) {
+            source.close();
+        }
+
+        destination.close();
+
+        return true;
+    }
 
     public boolean insertRoom(int roomId, final Room paramRoom) {
 
@@ -280,10 +332,11 @@ public class Database {
     }
 
     private static final String queryInsertRoomServer = "INSERT INTO ServerRooms(server, room) VALUES(?, ?)";
-    private static final String queryDeleteRoomServer = "DELETE FROM ServerRooms WHERE server = ? AND room = ?";
+    private static final String queryDeleteRoomServers = "DELETE FROM ServerRooms WHERE room = ?";
+    private static final String queryDeleteServerRooms = "DELETE FROM ServerRooms WHERE server = ?";
     private static final String querySelectServersByRoom = "SELECT * FROM ServerRooms WHERE room = ?";
 
-    public boolean insertServerRoom(int serverId, int roomId) {
+    public boolean associateServer(int serverId, int roomId) {
 
         try (final PreparedStatement stmt = dbConnection.prepareStatement(queryInsertRoomServer)) {
             stmt.setInt(1, serverId);
@@ -297,11 +350,23 @@ public class Database {
         return true;
     }
 
-    public boolean deleteServerRoom(int serverId, int roomId) {
+    public boolean deleteServerRooms(int serverId) {
 
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(queryDeleteRoomServer)) {
+        try (final PreparedStatement stmt = dbConnection.prepareStatement(queryDeleteServerRooms)) {
             stmt.setInt(1, serverId);
-            stmt.setInt(2, roomId);
+            stmt.executeUpdate();
+        }
+        catch (SQLException ex) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean deleteRoomServers(int roomId) {
+
+        try (final PreparedStatement stmt = dbConnection.prepareStatement(queryDeleteRoomServers)) {
+            stmt.setInt(1, roomId);
             stmt.executeUpdate();
         }
         catch (SQLException ex) {

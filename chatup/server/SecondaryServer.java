@@ -12,7 +12,10 @@ import kryonet.Connection;
 import kryonet.KryoClient;
 import kryonet.KryoServer;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.*;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -23,8 +26,6 @@ public class SecondaryServer extends Server {
 
     private final Database serverDatabase;
     private final ServerLogger serverLogger;
-    private final KryoServer mServer;
-    private final HashMap<Integer, KryoClient> mClients;
     private final SecondaryServerListener mServerListener;
     private final HashMap<Integer, ServerInfo> servers;
     private final HashMap<Integer, Room> rooms;
@@ -39,16 +40,19 @@ public class SecondaryServer extends Server {
 
 		super(new SecondaryDispatcher(), ServerType.SECONDARY, httpPort);
 
-        //--------------------------------------------------------------------
-        // 2) Ler para memória informações dos servidores armazenadas em disco
-        //--------------------------------------------------------------------
+        //---------------------------------------------------------------
+        // 2) Inicialização do servidor; obter data da última atualização
+        //---------------------------------------------------------------
 
         mServerId = paramPrimary.getId();
-        mClients = new HashMap<>();
         mServerTimestamp = 0L;
         serverPort = httpPort;
         serverDatabase = new Database(this);
         serverLogger = new ServerLogger(this);
+
+        //--------------------------------------------------------------------
+        // 3) Ler para memória informações dos servidores armazenadas em disco
+        //--------------------------------------------------------------------
 
         final HashMap<Integer, ServerInfo> myServers = serverDatabase.getServers();
 
@@ -63,7 +67,7 @@ public class SecondaryServer extends Server {
         servers.forEach((k, v) -> System.out.println("[" + k + "] " + v));
 
         //---------------------------------------------------------------
-        // 3) Ler para memória informações das salas armazenadas em disco
+        // 4) Ler para memória informações das salas armazenadas em disco
         //---------------------------------------------------------------
 
         final HashMap<Integer, Room> myRooms = serverDatabase.getRooms();
@@ -76,7 +80,7 @@ public class SecondaryServer extends Server {
         }
 
         //-----------------------------------------------------------------------
-        // 4) Ler para memória associações servidor <-> sala armazenadas em disco
+        // 5) Ler para memória associações servidor <-> sala armazenadas em disco
         //-----------------------------------------------------------------------
 
         System.out.println("*=====      rooms      =====*");
@@ -98,23 +102,23 @@ public class SecondaryServer extends Server {
             System.out.println("[" + roomId + "] " + roomInformation);
         });
 
-        //--------------------------------------------------------------------------
-        // 5) Inicializar cliente TCP/SSL para receber comandos do servidor primário
-        //--------------------------------------------------------------------------
+        //----------------------------------------------------------------------
+        // 6) Inicializar cliente TCP para receber comandos do servidor primário
+        //----------------------------------------------------------------------
 
         final KryoClient myClient = new KryoClient();
         final PrimaryClientListener myClientListener = new PrimaryClientListener(this, myClient);
 
-        TcpNetwork.register(myClient);
+        TcpNetwork.registerPrimary(myClient);
         myClient.addListener(myClientListener);
         myClient.start();
         myClient.connect(ChatupGlobals.DefaultTimeout, paramPrimary.getAddress(), paramPrimary.getPort());
 
-        //--------------------------------------------------------------------------------
-        // 6) Inicializar servidor TCP/SSL para receber pedidos dos servidores secundários
-        //--------------------------------------------------------------------------------
+        //----------------------------------------------------------------------------
+        // 7) Inicializar servidor TCP para receber pedidos dos servidores secundários
+        //----------------------------------------------------------------------------
 
-         mServer = new KryoServer() {
+        final KryoServer mServer = new KryoServer() {
 
             @Override
             protected Connection newConnection() {
@@ -123,7 +127,7 @@ public class SecondaryServer extends Server {
         };
 
         mServerListener = new SecondaryServerListener(this, mServer);
-        TcpNetwork.register(mServer);
+        TcpNetwork.registerSecondary(mServer);
         mServer.addListener(mServerListener);
         mServer.bind(tcpPort);
         mServer.start();
@@ -141,16 +145,6 @@ public class SecondaryServer extends Server {
         return serverLogger;
     }
 
-    private void registerUser(final String userToken, final String userEmail) {
-
-        final String userRecord = users.get(userToken);
-
-        if (userRecord == null) {
-            users.put(userToken, userEmail);
-            serverLogger.userConnected(userEmail);
-        }
-    }
-
     final ServerResponse createRoom(final CreateRoom createRoom) {
 
         int roomId = createRoom.roomId;
@@ -163,13 +157,22 @@ public class SecondaryServer extends Server {
         System.out.println("roomServers:" + createRoom.roomServers);
         System.out.println("--------------------------");
 
+        //----------------------------------------------------------
+        // 1) Verificar se sala escolhida já existe na base de dados
+        //----------------------------------------------------------
+
         if (rooms.containsKey(roomId)) {
             return ServerResponse.RoomNotFound;
         }
 
+        //-----------------------------------------------------------
+        // 2) Inserir informações da sala escolhida no servidor local
+        //-----------------------------------------------------------
+
         final Room serializedRoom = new Room(
             createRoom.roomName,
             createRoom.roomPassword,
+            createRoom.roomTimestamp,
             createRoom.userToken
         );
 
@@ -181,17 +184,25 @@ public class SecondaryServer extends Server {
             return ServerResponse.DatabaseError;
         }
 
+        //------------------------------------------------------
+        // 2) Obter lista de servidores mirror da sala escolhida
+        //------------------------------------------------------
+
+        final Set<Integer> roomServers = createRoom.roomServers;
+
+        if (roomServers == null) {
+            return ServerResponse.OperationFailed;
+        }
+
         final Room insertedRoom = rooms.get(createRoom.roomId);
 
         if (insertedRoom == null) {
             return ServerResponse.RoomNotFound;
         }
 
-        final Set<Integer> roomServers = createRoom.roomServers;
-
-        if (roomServers == null || roomServers.isEmpty()) {
-            return ServerResponse.OperationFailed;
-        }
+        //--------------------------------------------------------
+        // 3) Registar servidores mirror da sala no servidor local
+        //--------------------------------------------------------
 
         for (final Integer serverId : roomServers) {
 
@@ -210,7 +221,7 @@ public class SecondaryServer extends Server {
 
                     serverLogger.insertMirror(roomId, serverId);
 
-                    if (!serverDatabase.insertServerRoom(serverId, createRoom.roomId)) {
+                    if (!serverDatabase.associateServer(serverId, createRoom.roomId)) {
                         return ServerResponse.DatabaseError;
                     }
                 }
@@ -222,17 +233,116 @@ public class SecondaryServer extends Server {
                     System.out.println("server is already online, not trying to reconnect...");
                 }
                 else {
-                    createConnection(serverId);
+
+                    System.out.println("connecting to server #" + serverId + "...");
+
+                    final ServerResponse serverResponse = createConnection(serverId);
+
+                    if (serverResponse == ServerResponse.SuccessResponse) {
+                        System.out.println("connection successful");
+                    }
+                    else {
+                        return serverResponse;
+                    }
                 }
             }
         }
 
-        registerUser(createRoom.userToken, createRoom.userEmail);
+        //--------------------------------------------------------------
+        // 4) Registar entrada do proprietário da sala no servidor local
+        //--------------------------------------------------------------
+
+        final String userRecord = users.get(createRoom.userToken);
+
+        if (userRecord == null) {
+            users.put(createRoom.userToken, createRoom.userEmail);
+            serverLogger.userConnected(createRoom.userEmail);
+        }
 
         return ServerResponse.SuccessResponse;
 	}
 
-    private void notifyComet() {
+    private ServerResponse createConnection(int serverId) {
+
+        final KryoClient kryoClient = new KryoClient();
+        final ServerInfo selectedServer = servers.get(serverId);
+
+        TcpNetwork.registerSecondary(kryoClient);
+        kryoClient.addListener(new SecondaryClientListener(this, kryoClient));
+
+        if (selectedServer == null) {
+            return ServerResponse.ServerNotFound;
+        }
+
+        try {
+            kryoClient.start();
+            kryoClient.connect(ChatupGlobals.DefaultTimeout, selectedServer.getAddress(), selectedServer.getPort());
+        }
+        catch (final IOException ex) {
+            return ServerResponse.ServiceOffline;
+        }
+
+        return ServerResponse.SuccessResponse;
+    }
+
+    final ServerResponse disconnectServer(int serverId) {
+
+        //-----------------------------------------------------------
+        // 1) Verificar se servidor escolhido existe na base de dados
+        //-----------------------------------------------------------
+
+        final ServerInfo selectedServer = servers.get(serverId);
+
+        if (selectedServer == null) {
+            return ServerResponse.ServerNotFound;
+        }
+
+        //---------------------------------------------------------------------
+        // 2) Alterar estado da ligação ao servidor escolhido no servidor local
+        //---------------------------------------------------------------------
+
+        selectedServer.setStatus(false);
+        serverLogger.serverOffline(serverId);
+
+        return ServerResponse.SuccessResponse;
+    }
+
+    final ServerResponse joinRoom(final JoinRoom joinRoom) {
+
+        //-----------------------------------------------------------
+        // 1) Verificar se utilizador tem sessão iniciada no servidor
+        //-----------------------------------------------------------
+
+        final String userToken = joinRoom.userToken;
+        final String userEmail = users.get(userToken);
+
+		if (userEmail == null) {
+			users.put(userToken, joinRoom.userEmail);
+		}
+
+        //--------------------------------------------------------
+        // 2) Verificar se sala escolhida existe no servidor local
+        //--------------------------------------------------------
+
+        final Room selectedRoom = rooms.get(joinRoom.roomId);
+
+		if (selectedRoom == null) {
+			return ServerResponse.RoomNotFound;
+		}
+
+        //----------------------------------------------------
+        // 3) Registar entrada do utilizador na sala escolhida
+        //----------------------------------------------------
+
+        if (selectedRoom.hasUser(userToken)) {
+            return ServerResponse.AlreadyJoined;
+        }
+
+		selectedRoom.registerUser(userToken);
+
+        //-----------------------------------------------------------------------
+        // 4) Responder aos pedidos pendentes de todos os utilizadores desta sala
+        //-----------------------------------------------------------------------
 
         for (final CometRequest cometRequest : pendingRequests) {
 
@@ -242,73 +352,6 @@ public class SecondaryServer extends Server {
         }
 
         pendingRequests.clear();
-    }
-
-    private ServerResponse createConnection(int serverId) {
-
-        final KryoClient kryoClient = new KryoClient();
-        final ServerInfo selectedServer = servers.get(serverId);
-
-        TcpNetwork.register(kryoClient);
-        kryoClient.addListener(new SecondaryClientListener(this, kryoClient));
-
-        if (selectedServer == null) {
-           return ServerResponse.ServerNotFound;
-        }
-
-        mClients.put(serverId, kryoClient);
-
-        try {
-            kryoClient.start();
-            kryoClient.connect(ChatupGlobals.DefaultTimeout, selectedServer.getAddress(), selectedServer.getPort());
-        }
-        catch (IOException ex) {
-            return ServerResponse.ServiceOffline;
-        }
-
-        return ServerResponse.SuccessResponse;
-    }
-
-    final ServerResponse disconnectServer(int serverId) {
-
-        System.out.println("------ ServerOffline ------");
-        System.out.println("serverId:" + serverId);
-        System.out.println("--------------------------");
-
-        final ServerInfo selectedServer = servers.get(serverId);
-
-        if (selectedServer == null) {
-            return ServerResponse.ServerNotFound;
-        }
-
-        selectedServer.setStatus(false);
-        serverLogger.serverOffline(serverId);
-
-        return ServerResponse.SuccessResponse;
-    }
-
-    // TODO: Verified!
-    final ServerResponse joinRoom(final JoinRoom joinRoom) {
-
-        final String userToken = joinRoom.userToken;
-        final String userEmail = users.get(userToken);
-
-		if (userEmail == null) {
-			users.put(userToken, joinRoom.userEmail);
-		}
-
-		final Room selectedRoom = rooms.get(joinRoom.roomId);
-
-		if (selectedRoom == null) {
-			return ServerResponse.RoomNotFound;
-		}
-
-		if (selectedRoom.hasUser(userToken)) {
-            return ServerResponse.AlreadyJoined;
-        }
-
-		selectedRoom.registerUser(userToken);
-        notifyComet();
 
 		return ServerResponse.SuccessResponse;
 	}
@@ -317,17 +360,29 @@ public class SecondaryServer extends Server {
     @Override
     public ServerResponse leaveRoom(int roomId, final String userToken) {
 
+        //-----------------------------------------------------------
+        // 1) Verificar se utilizador tem sessão iniciada no servidor
+        //-----------------------------------------------------------
+
         final String userEmail = users.get(userToken);
 
         if (userEmail == null) {
             return ServerResponse.InvalidToken;
         }
 
+        //--------------------------------------------------------
+        // 2) Verificar se sala escolhida existe no servidor local
+        //--------------------------------------------------------
+
         final Room selectedRoom = rooms.get(roomId);
 
         if (selectedRoom == null) {
             return ServerResponse.RoomNotFound;
         }
+
+        //-----------------------------------------------
+        // 3) Remover utiizador da sala no servidor local
+        //-----------------------------------------------
 
         if (selectedRoom.removeUser(userToken)) {
             cascadeUser(userToken);
@@ -336,7 +391,18 @@ public class SecondaryServer extends Server {
             return ServerResponse.OperationFailed;
         }
 
-        notifyComet();
+        //-----------------------------------------------------------------------
+        // 4) Responder aos pedidos pendentes de todos os utilizadores desta sala
+        //-----------------------------------------------------------------------
+
+        for (final CometRequest cometRequest : pendingRequests) {
+
+            if (users.containsKey(cometRequest.getToken())) {
+                cometRequest.send();
+            }
+        }
+
+        pendingRequests.clear();
 
         return ServerResponse.SuccessResponse;
     }
@@ -361,13 +427,19 @@ public class SecondaryServer extends Server {
     @Override
     public ServerResponse deleteRoom(int roomId) {
 
+        //--------------------------------------------------------
+        // 1) Verificar se sala escolhida existe no servidor local
+        //--------------------------------------------------------
+
         final Room selectedRoom = rooms.get(roomId);
 
         if (selectedRoom == null) {
             return ServerResponse.RoomNotFound;
         }
 
-        final Set<String> roomUsers = selectedRoom.getUsers();
+        //-----------------------------------------------------------------------
+        // 2) Apagar sala do servidor local, registar alterações na base de dados
+        //-----------------------------------------------------------------------
 
         if (serverDatabase.deleteRoom(roomId)) {
             rooms.remove(roomId);
@@ -376,12 +448,73 @@ public class SecondaryServer extends Server {
             return ServerResponse.DatabaseError;
         }
 
-        roomUsers.forEach(this::cascadeUser);
+        //--------------------------------------------------------------------------
+        // 3) Apagar todos os utilizadores que estavam conectados apenas a esta sala
+        //--------------------------------------------------------------------------
+
+        selectedRoom.getUsers().forEach(this::cascadeUser);
 
         return ServerResponse.SuccessResponse;
     }
 
-    public ServerResponse insertMessage(final Message paramMessage) {
+    @Override
+    public ServerResponse sendMessage(final Message paramMessage) {
+
+        //---------------------------------------------------------
+        // 1) Verificar se sala de destino existe no servidor local
+        //---------------------------------------------------------
+
+        final Room selectedRoom = rooms.get(paramMessage.getId());
+
+        if (selectedRoom == null) {
+            return ServerResponse.RoomNotFound;
+        }
+
+        //------------------------------------------------
+        // 2) Registar mensagem recebida no servidor local
+        //------------------------------------------------
+
+        if (selectedRoom.insertMessage(paramMessage)) {
+
+            if (serverDatabase.insertMessage(paramMessage)) {
+                return ServerResponse.SuccessResponse;
+            }
+
+            return ServerResponse.DatabaseError;
+        }
+
+        //--------------------------------------------------------------------
+        // 3) Enviar mensagem para os outros servidores secundários conectados
+        //--------------------------------------------------------------------
+
+        final Set<Integer> roomServers = selectedRoom.getServers();
+
+        for (final Integer serverId : roomServers) {
+            mServerListener.sendServer(serverId, paramMessage);
+        }
+
+        //-----------------------------------------------------------------------
+        // 4) Responder aos pedidos pendentes de todos os utilizadores desta sala
+        //-----------------------------------------------------------------------
+
+        for (final CometRequest cometRequest : pendingRequests) {
+
+            if (users.containsKey(cometRequest.getToken())) {
+                cometRequest.send();
+            }
+        }
+
+        pendingRequests.clear();
+        serverLogger.sendMessage(paramMessage.getId());
+
+        return ServerResponse.SuccessResponse;
+    }
+
+    final ServerResponse insertMessage(final Message paramMessage) {
+
+        //-----------------------------------------------------------
+        // 1) Verificar se utilizador tem sessão iniciada no servidor
+        //-----------------------------------------------------------
 
         final String userToken = paramMessage.getAuthor();
         final String userRecord = users.get(userToken);
@@ -390,31 +523,30 @@ public class SecondaryServer extends Server {
             return ServerResponse.InvalidToken;
         }
 
+        //------------------------------------------------------
+        // 2) Verificar se sala recebida existe na base de dados
+        //------------------------------------------------------
+
         final Room selectedRoom = rooms.get(paramMessage.getId());
 
         if (selectedRoom == null) {
             return ServerResponse.RoomNotFound;
         }
 
-        if (serverDatabase.insertMessage(paramMessage)) {
+        //----------------------------------------------------
+        // 3) Registar alterações na base de dados do servidor
+        //----------------------------------------------------
 
-            if (selectedRoom.insertMessage(paramMessage)) {
+        if (selectedRoom.insertMessage(paramMessage)) {
 
-                final Set<Integer> roomServers = selectedRoom.getServers();
-
-                for (final Integer serverId : roomServers) {
-                    mServerListener.sendServer(serverId, paramMessage);
-                }
-
-                notifyComet();
-
+            if (serverDatabase.insertMessage(paramMessage)) {
                 return ServerResponse.SuccessResponse;
             }
 
-            return ServerResponse.OperationFailed;
+            return ServerResponse.DatabaseError;
         }
 
-        return ServerResponse.DatabaseError;
+        return ServerResponse.OperationFailed;
     }
 
     @Override
@@ -425,7 +557,7 @@ public class SecondaryServer extends Server {
     private ArrayList<CometRequest> pendingRequests = new ArrayList<>();
 
     @Override
-	public ServerResponse getMessages(final HttpDispatcher httpExchange, final String userToken, int roomId, long roomTimestamp) {
+	public ServerResponse getMessages(final HttpDispatcher httpExchange, final String userToken, int roomId, long lastUpdate) {
 
         final String userRecord = users.get(userToken);
 
@@ -443,9 +575,9 @@ public class SecondaryServer extends Server {
 			return ServerResponse.InvalidToken;
 		}
 
-        final CometRequest cometRequest = new CometRequest(selectedRoom, userToken, roomTimestamp, httpExchange);
+        final CometRequest cometRequest = new CometRequest(selectedRoom, userToken, lastUpdate, httpExchange);
 
-        if (roomTimestamp <= 0L) {
+        if (lastUpdate <= selectedRoom.getTimestamp()) {
             cometRequest.send();
         }
         else {
@@ -515,12 +647,12 @@ public class SecondaryServer extends Server {
             return ServerResponse.ServerNotFound;
         }
 
-        rooms.forEach((roomId, room) -> {
-
-            if (room.removeServer(serverId)) {
-                serverDatabase.deleteServerRoom(serverId, roomId);
-            }
-        });
+        if (serverDatabase.deleteServerRooms(serverId)) {
+            rooms.forEach((roomId, room) -> room.removeServer(serverId));
+        }
+        else {
+            return ServerResponse.DatabaseError;
+        }
 
         if (serverDatabase.deleteServer(serverId)) {
             servers.remove(serverId);
@@ -550,77 +682,114 @@ public class SecondaryServer extends Server {
 		return ServerResponse.SuccessResponse;
 	}
 
-    @Override
-    public ServerResponse syncRoom(int roomId, int serverId) {
+    final ServerResponse syncRoom(final SyncRoom syncRoom, int serverId) {
 
         System.out.println("------ SyncRoom ------");
-        System.out.println("roomId:" + roomId);
+        System.out.println("roomId:" + syncRoom.roomId);
+        System.out.println("roomTimestamp:" + syncRoom.roomTimestamp);
         System.out.println("serverId:" + serverId);
         System.out.println("--------------------------");
 
-        final Room selectedRoom = rooms.get(roomId);
+        final Room selectedRoom = rooms.get(syncRoom.roomId);
 
         if (selectedRoom == null) {
             return ServerResponse.RoomNotFound;
         }
 
-        if (serverId != mServerId) {
+        final UpdateRoom updateRoom = new UpdateRoom(syncRoom.roomId, selectedRoom);
 
-            mServerListener.sendServer(serverId,
-                new SyncRoomResponse(roomId, selectedRoom)
-            );
+        if (serverId == mServerId) {
+            return ServerResponse.SuccessResponse;
+        }
+
+        if (syncRoom.roomTimestamp < selectedRoom.getTimestamp()) {
+            mServerListener.sendServer(serverId, updateRoom);
+        }
+        else {
+            mServerListener.sendServer(serverId, null);
         }
 
         return ServerResponse.SuccessResponse;
     }
 
-    final ServerResponse updateRoom(final SyncRoomResponse updateRoom) {
+    final ServerResponse updateRoom(final UpdateRoom updateRoom) {
 
         System.out.println("------ UpdateRoom ------");
         System.out.println("roomId:" + updateRoom.roomId);
-        System.out.println("roomTimestamp:" + updateRoom.roomTimestamp);
-        System.out.println("roomServers:" + updateRoom.roomServers);
-        System.out.println("roomUsers:" + updateRoom.roomUsers);
+        System.out.println("roomTimestamp:" + updateRoom.roomObject.getTimestamp());
+        System.out.println("roomServers:" + updateRoom.roomObject.getServers());
+        System.out.println("roomUsers:" + updateRoom.roomObject.getUsers());
         System.out.println("--------------------------");
 
-        final Room selectedRoom = rooms.get(updateRoom.roomId);
+        if (updateRoom.roomObject == null || updateRoom.roomId < 0) {
+            return ServerResponse.MissingParameters;
+        }
 
-        if (selectedRoom == null) {
+        if (rooms.containsKey(updateRoom.roomId)) {
+            rooms.put(updateRoom.roomId, updateRoom.roomObject);
+        }
+        else {
             return ServerResponse.RoomNotFound;
         }
 
-        boolean roomUpdated = false;
-        final Set<Integer> newServers = selectedRoom.updateServers(updateRoom.roomServers);
+        if (serverDatabase.deleteRoomServers(updateRoom.roomId)) {
 
-        if (newServers.size() > 0) {
+            final Set<Integer> roomServers = updateRoom.roomObject.getServers();
 
-            roomUpdated = true;
-
-            for (final Integer serverId : newServers) {
-                serverDatabase.insertServerRoom(serverId, updateRoom.roomId);
-            }
-
-            final Set<Integer> deletedServers = selectedRoom.getServers();
-
-            deletedServers.removeAll(updateRoom.roomServers);
-
-            for (final Integer serverId : deletedServers) {
-                serverDatabase.deleteServerRoom(serverId, updateRoom.roomId);
+            for (final Integer serverId : roomServers) {
+                serverDatabase.associateServer(serverId, updateRoom.roomId);
             }
         }
-
-        if (selectedRoom.updateUsers(updateRoom.roomUsers)) {
-            roomUpdated = true;
+        else {
+            return ServerResponse.DatabaseError;
         }
 
-        if (roomUpdated) {
-            return ServerResponse.SuccessResponse;
+        return ServerResponse.SuccessResponse;
+    }
+
+    private String getAddress() {
+
+        final StringBuilder response = new StringBuilder();
+        final HttpURLConnection httpConnection;
+
+        try {
+            httpConnection = (HttpURLConnection) new URL("http://checkip.amazonaws.com").openConnection();
+        }
+        catch (final IOException ex) {
+
+            try {
+                return InetAddress.getLocalHost().getHostAddress();
+            }
+            catch (UnknownHostException e1) {
+                return null;
+            }
         }
 
-        return ServerResponse.OperationFailed;
+        httpConnection.addRequestProperty("Protocol", "Http/1.1");
+        httpConnection.addRequestProperty("Connection", "keep-alive");
+        httpConnection.addRequestProperty("Keep-Alive", "1000");
+        httpConnection.setDoInput(true);
+
+        try (final BufferedReader br = new BufferedReader(new InputStreamReader(httpConnection.getInputStream()))) {
+            
+            for (String inputLine = br.readLine(); inputLine != null; inputLine = br.readLine()) {
+                response.append(inputLine);
+            }
+        }
+        catch (final IOException ex) {
+
+            try {
+                return InetAddress.getLocalHost().getHostAddress();
+            }
+            catch (UnknownHostException e1) {
+                return null;
+            }
+        }
+
+        return response.toString();
     }
 
     final ServerOnline getInformation() {
-        return new ServerOnline(mServerId, mServerTimestamp, serverPort);
+        return new ServerOnline(mServerId, mServerTimestamp, getAddress(), serverPort);
     }
 }

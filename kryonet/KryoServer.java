@@ -36,72 +36,80 @@ import com.esotericsoftware.kryo.util.IntMap;
 
 import static com.esotericsoftware.minlog.Log.*;
 
-public class KryoServer implements EndPoint{
-
+public class KryoServer implements EndPoint
+{
+    private final Object listenerLock = new Object();
+    private final Object updateLock = new Object();
     private final Serialization serialization;
-    private final int writeBufferSize, objectBufferSize;
     private final Selector selector;
-    private int emptySelects;
+
     private ServerSocketChannel serverChannel;
     private Connection[] connections = {};
     private IntMap<Connection> pendingConnections = new IntMap();
-    Listener[] listeners = {};
-    private Object listenerLock = new Object();
-    private int nextConnectionID = 1;
-    private volatile boolean shutdown;
-    private Object updateLock = new Object();
+    private Listener[] listeners = {};
     private Thread updateThread;
 
-    private Listener dispatchListener = new Listener(){
+    private int emptySelects;
+    private int nextConnectionID = 1;
 
-        public void connected(final Connection connection) {
+    private volatile boolean shutdown;
+    private final int writeBufferSize;
+    private final int objectBufferSize;
 
+    private Listener dispatchListener = new Listener()
+    {
+        public void connected(final Connection connection)
+        {
             final Listener[] myListeners = KryoServer.this.listeners;
 
-            for (int i = 0, n = myListeners.length; i < n; i++) {
-                myListeners[i].connected(connection);
+            for (final Listener myListener : myListeners)
+            {
+                myListener.connected(connection);
             }
         }
 
-        public void disconnected(final Connection connection) {
-
+        public void disconnected(final Connection connection)
+        {
             removeConnection(connection);
 
             final Listener[] myListeners = KryoServer.this.listeners;
 
-            for (final Listener myListener : myListeners) {
+            for (final Listener myListener : myListeners)
+            {
                 myListener.disconnected(connection);
             }
         }
 
-        public void received(Connection connection, Object object) {
-
+        public void received(Connection connection, Object object)
+        {
             final Listener[] myListeners = KryoServer.this.listeners;
 
-            for (final Listener myListener : myListeners) {
+            for (final Listener myListener : myListeners)
+            {
                 myListener.received(connection, object);
             }
         }
 
-        public void idle(Connection connection) {
-
+        public void idle(Connection connection)
+        {
             final Listener[] listeners = KryoServer.this.listeners;
 
-            for (final Listener listener : listeners) {
-                listener.idle(connection);
+            for (final Listener myListener : listeners)
+            {
+                myListener.idle(connection);
             }
         }
     };
 
-    public KryoServer() {
+    protected KryoServer() {
         this(16384, 2048);
     }
 
-    public KryoServer(int writeBufferSize, int objectBufferSize) {
+    private KryoServer(int writeBufferSize, int objectBufferSize) {
         this(writeBufferSize, objectBufferSize, new KryoSerialization());
     }
 
-    public KryoServer(int writeBufferSize, int objectBufferSize, Serialization serialization) {
+    private KryoServer(int writeBufferSize, int objectBufferSize, Serialization serialization) {
 
         this.writeBufferSize = writeBufferSize;
         this.objectBufferSize = objectBufferSize;
@@ -143,18 +151,11 @@ public class KryoServer implements EndPoint{
                 serverChannel.socket().bind(tcpPort);
                 serverChannel.configureBlocking(false);
                 serverChannel.register(selector, SelectionKey.OP_ACCEPT);
-
-                if (DEBUG) {
-                    debug("kryonet", "Accepting connections on port: " + tcpPort + "/TCP");
-                }
             }
             catch (IOException ex) {
                 close();
                 throw ex;
             }
-        }
-        if (INFO) {
-            info("kryonet", "KryoServer opened.");
         }
     }
 
@@ -191,7 +192,7 @@ public class KryoServer implements EndPoint{
                         Thread.sleep(25 - elapsedTime);
                     }
                 }
-                catch (InterruptedException ex) {}
+                catch (final InterruptedException ignored) {}
             }
         }
         else {
@@ -227,31 +228,14 @@ public class KryoServer implements EndPoint{
                                             break;
                                         }
 
-                                        if (DEBUG) {
-                                            String objectString = object == null ? "null" : object.getClass()
-                                                                                                  .getSimpleName();
-                                            if (!(object instanceof FrameworkMessage)) {
-                                                debug("kryonet", fromConnection + " received TCP: " + objectString);
-                                            }
-                                        }
-
                                         fromConnection.notifyReceived(object);
                                     }
                                 }
                                 catch (IOException ex) {
-
-                                    if (DEBUG) {
-                                        debug("kryonet", fromConnection + " update: " + ex.getMessage());
-                                    }
-
                                     fromConnection.close();
                                 }
                                 catch (KryoNetException ex) {
-
-                                    if (ERROR) {
-                                        error("kryonet", "Error reading TCP from connection: " + fromConnection, ex);
-                                    }
-
+                                    error("kryonet", "Error reading TCP from connection: " + fromConnection, ex);
                                     fromConnection.close();
                                 }
                             }
@@ -261,11 +245,6 @@ public class KryoServer implements EndPoint{
                                     fromConnection.tcp.writeOperation();
                                 }
                                 catch (IOException ex) {
-
-                                    if (DEBUG) {
-                                        debug("kryonet", fromConnection + " update: " + ex.getMessage());
-                                    }
-
                                     fromConnection.close();
                                 }
                             }
@@ -287,17 +266,15 @@ public class KryoServer implements EndPoint{
                                     acceptOperation(socketChannel);
                                 }
                             }
-                            catch (IOException ex) {
-                                if (DEBUG) {
-                                    debug("kryonet", "Unable to accept new connection.", ex);
-                                }
-                            }
+                            catch (IOException ignored) {}
+
                             continue;
                         }
 
                         selectionKey.channel().close();
                     }
-                    catch (CancelledKeyException ex) {
+                    catch (final CancelledKeyException ex) {
+
                         if (fromConnection != null) {
                             fromConnection.close();
                         }
@@ -315,7 +292,6 @@ public class KryoServer implements EndPoint{
         for (final Connection connection : connections) {
 
             if (connection.tcp.isTimedOut(time)) {
-
                 connection.close();
             }
             else {
@@ -356,26 +332,23 @@ public class KryoServer implements EndPoint{
             {
                 update(250);
             }
-            catch (IOException ex)
+            catch (final IOException ex)
             {
-                if (ERROR)
-                {
-                    error("kryonet", "Error updating server connections.", ex);
-                }
-
                 close();
             }
         }
     }
 
     @Override
-    public void start() {
+    public void start()
+    {
         new Thread(this, "KryoServer").start();
     }
 
-    public void stop() {
-
-        if (!shutdown) {
+    public void stop()
+    {
+        if (!shutdown)
+        {
             close();
             shutdown = true;
         }
@@ -412,32 +385,28 @@ public class KryoServer implements EndPoint{
             connection.sendTCP(registerConnection);
             connection.notifyConnected();
         }
-        catch (IOException ex)
+        catch (final IOException ex)
         {
             connection.close();
-
-            if (DEBUG)
-            {
-                debug("kryonet", "Unable to accept TCP connection.", ex);
-            }
         }
     }
 
-    protected Connection newConnection() {
+    protected Connection newConnection()
+    {
         return new Connection();
     }
 
-    private void addConnection(Connection connection) {
-
+    private void addConnection(final Connection paramConnection)
+    {
         final Connection[] newConnections = new Connection[connections.length + 1];
 
-        newConnections[0] = connection;
+        newConnections[0] = paramConnection;
         System.arraycopy(connections, 0, newConnections, 1, connections.length);
         connections = newConnections;
     }
 
-    void removeConnection(Connection connection) {
-
+    private void removeConnection(Connection connection)
+    {
         final ArrayList<Connection> temp = new ArrayList(Arrays.asList(connections));
 
         temp.remove(connection);
@@ -445,11 +414,11 @@ public class KryoServer implements EndPoint{
         pendingConnections.remove(connection.id);
     }
 
-    public void sendToAllTCP(final Object object)
+    public void sendToAllTCP(final Object paramObject)
     {
         for (final Connection connection : connections)
         {
-            connection.sendTCP(object);
+            connection.sendTCP(paramObject);
         }
     }
 
@@ -464,11 +433,12 @@ public class KryoServer implements EndPoint{
         }
     }
 
-    public void sendToTCP(int connectionId, final Object myObject) {
-
-        for (final Connection connection : connections) {
-
-            if (connection.id == connectionId) {
+    public void sendToTCP(int connectionId, final Object myObject)
+    {
+        for (final Connection connection : connections)
+        {
+            if (connection.id == connectionId)
+            {
                 connection.sendTCP(myObject);
                 break;
             }
@@ -483,10 +453,9 @@ public class KryoServer implements EndPoint{
             final Listener[] myListeners = listeners;
             int n = myListeners.length;
 
-            for (final Listener myListener : myListeners)
-            {
-                if (paramListener == myListener)
-                {
+            for (final Listener myListener : myListeners) {
+
+                if (paramListener == myListener) {
                     return;
                 }
             }
@@ -508,17 +477,15 @@ public class KryoServer implements EndPoint{
             int n = myListeners.length;
             final Listener[] newListeners = new Listener[n - 1];
 
-            for (int i = 0, ii = 0; i < n; i++)
-            {
+            for (int i = 0, ii = 0; i < n; i++) {
+
                 final Listener copyListener = myListeners[i];
 
-                if (paramListener == copyListener)
-                {
+                if (paramListener == copyListener) {
                     continue;
                 }
 
-                if (ii == n - 1)
-                {
+                if (ii == n - 1) {
                     return;
                 }
 
@@ -534,55 +501,55 @@ public class KryoServer implements EndPoint{
     {
         Connection[] connections = this.connections;
 
-        if (INFO && connections.length > 0)
-        {
+        if (connections.length > 0) {
             info("kryonet", "Closing server connections...");
         }
 
-        for (int i = 0, n = connections.length; i < n; i++) {
-            connections[i].close();
+        for (final Connection myConnection : connections) {
+            myConnection.close();
         }
+
         connections = new Connection[0];
 
         final ServerSocketChannel serverChannel = this.serverChannel;
 
-        if (serverChannel != null) {
-            try {
+        if (serverChannel != null)
+        {
+            try
+            {
                 serverChannel.close();
-                if (INFO) {
-                    info("kryonet", "KryoServer closed.");
-                }
             }
-            catch (IOException ex) {
-                if (DEBUG) {
-                    debug("kryonet", "Unable to close server.", ex);
-                }
+            catch (IOException ignored)
+            {
             }
+
             this.serverChannel = null;
         }
 
-        synchronized (updateLock) { // Blocks to avoid a select while the selector is used to bind the server connection.
+        synchronized (updateLock)
+        {
         }
 
         selector.wakeup();
 
-        try {
+        try
+        {
             selector.selectNow();
         }
-        catch (IOException ignored) {}
+        catch (IOException ignored)
+        {
+        }
     }
 
-    public void dispose() throws IOException {
+    public void dispose() throws IOException
+    {
         close();
         selector.close();
     }
 
     @Override
-    public Thread getUpdateThread() {
+    public Thread getUpdateThread()
+    {
         return updateThread;
-    }
-
-    public Connection[] getConnections() {
-        return connections;
     }
 }

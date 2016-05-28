@@ -13,7 +13,7 @@ public class ChatupServer {
     static void initializePrimary(int httpPort, int tcpPort) {
 
         try {
-            serverKeystore = new ServerKeystore("server.jks", "123456");
+            serverKeystore = new ServerKeystore(ChatupGlobals.keystoreFilename, ChatupGlobals.keystorePassword);
             serverInstance = new chatup.server.PrimaryServer(tcpPort, httpPort);
         }
         catch (final Exception ex) {
@@ -24,7 +24,7 @@ public class ChatupServer {
     static void initializeSecondary(final ServerInfo primaryServer, int httpPort, int tcpPort) {
 
         try {
-            serverKeystore = new ServerKeystore("server.jks", "123456");
+            serverKeystore = new ServerKeystore(ChatupGlobals.keystoreFilename, ChatupGlobals.keystorePassword);
             serverInstance = new chatup.server.SecondaryServer(primaryServer, tcpPort, httpPort);
         }
         catch (final Exception ex) {
@@ -34,5 +34,9 @@ public class ChatupServer {
 
     public static Server getInstance() {
         return serverInstance;
+    }
+
+    public static ServerKeystore getKeystore() {
+        return serverKeystore;
     }
 }

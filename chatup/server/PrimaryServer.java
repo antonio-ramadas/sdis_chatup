@@ -102,17 +102,23 @@ public class PrimaryServer extends Server {
             }
         };
 
-        TcpNetwork.register(myServer);
+        TcpNetwork.registerPrimary(myServer);
         myServerListener = new PrimaryServerListener(this, myServer);
         myServer.addListener(myServerListener);
         myServer.bind(tcpPort);
         myServer.start();
 
         //------------------------------------------------------------
-        // 6) Apaga todas as salas inactivas registadas neste servidor
+        // 6) Apaga todas os servidores inactivos nas últimas 24 horas
         //------------------------------------------------------------
 
-        deleteRooms();
+        purgeServers();
+
+        //-------------------------------------------------------
+        // 7) Apaga todas as salas inactivas nas últimas 24 horas
+        //-------------------------------------------------------
+
+        purgeRooms();
     }
 
     private int sequenceRoom;
@@ -200,10 +206,10 @@ public class PrimaryServer extends Server {
         final ServerInfo selectedServer = serversList.get(0);
         int serverId = selectedServer.getId();
 
-        myServerListener.send(serverId, selectedRoom);
+        myServerListener.sendServer(serverId, selectedRoom);
         selectedRoom.registerServer(serverId);
 
-        if (serverDatabase.insertServerRoom(serverId, roomId)) {
+        if (serverDatabase.associateServer(serverId, roomId)) {
             selectedRoom.registerServer(serverId);
         }
         else {
@@ -262,7 +268,7 @@ public class PrimaryServer extends Server {
 
             newRoom.registerServer(serverId);
 
-            if (serverDatabase.insertServerRoom(serverId, roomId)) {
+            if (serverDatabase.associateServer(serverId, roomId)) {
                 newRoom.registerServer(serverId);
             }
             else {
@@ -271,7 +277,7 @@ public class PrimaryServer extends Server {
         }
 
         for (final ServerInfo serverInformation : mostEmpty) {
-            myServerListener.send(serverInformation.getId(), newRoom);
+            myServerListener.sendServer(serverInformation.getId(), newRoom);
         }
 
         return ServerResponse.SuccessResponse;
@@ -339,7 +345,7 @@ public class PrimaryServer extends Server {
             serverDatabase.updateServer(currentServer);
 
             if (currentServer.isOnline()) {
-                myServerListener.send(serverId, deleteRoom);
+                myServerListener.sendServer(serverId, deleteRoom);
             }
             else {
                 insertQueue(serverId, deleteRoom);
@@ -393,7 +399,7 @@ public class PrimaryServer extends Server {
         final LeaveRoom leaveRoom = new LeaveRoom(roomId, userToken);
 
         for (final Integer serverId : roomServers) {
-            myServerListener.send(serverId, leaveRoom);
+            myServerListener.sendServer(serverId, leaveRoom);
         }
 
         return ServerResponse.SuccessResponse;
@@ -521,7 +527,7 @@ public class PrimaryServer extends Server {
         final JoinRoom joinRoom = new JoinRoom(roomId, userEmail, userToken);
 
         for (final Integer serverId : roomServers) {
-            myServerListener.send(serverId, joinRoom);
+            myServerListener.sendServer(serverId, joinRoom);
         }
 
         return new Pair<>(ServerResponse.SuccessResponse, currentServer);
@@ -547,7 +553,73 @@ public class PrimaryServer extends Server {
         return serverOnline(serverId, serverInfo.getTimestamp());
     }
 
-    // TODO: desenvolver algoritmo para apagar servidores inactivos (24 horas ou mais de downtime)
+    // TODO: testar algoritmo para apagar servidores inactivos (24 horas ou mais de inactividade)
+    private ServerResponse purgeServers() {
+
+        final long currentTimestamp = Instant.now().getEpochSecond() - (3600 * 24);
+        final Iterator<Map.Entry<Integer, ServerInfo>> serverIterator = servers.entrySet().iterator();
+
+        while (serverIterator.hasNext()) {
+
+            //---------------------------------------------------------------------------------
+            // 1) Escolher um servidor vazio que não tenha sido atualizado nas últimas 24 horas
+            //---------------------------------------------------------------------------------
+
+            final Map.Entry<Integer, ServerInfo> currentEntry = serverIterator.next();
+            final ServerInfo selectedServer = currentEntry.getValue();
+
+            if (selectedServer.getLoad() > 0 || selectedServer.getTimestamp() > currentTimestamp) {
+                continue;
+            }
+
+            int serverId = currentEntry.getKey();
+
+            //---------------------------------------------------------------
+            // 2) Notificar os restantes servidores da remoção desse servidor
+            //---------------------------------------------------------------
+
+            final DeleteServer deleteServer = new DeleteServer(serverId);
+
+            servers.forEach((currentId, currentServer) -> {
+
+                if (currentId != serverId) {
+
+                    if (currentServer.isOnline()) {
+                        myServerListener.sendServer(currentId, deleteServer);
+                    }
+                    else {
+                        insertQueue(serverId, deleteServer);
+                    }
+
+                    currentServer.updateTimestamp();
+                    serverDatabase.updateServer(currentServer);
+                }
+            });
+
+            //---------------------------------------------
+            // 2) Registar alterações efectuadas localmente
+            //---------------------------------------------
+
+            if (serverDatabase.deleteServerRooms(serverId)) {
+                rooms.forEach((roomId, room) -> room.removeServer(serverId));
+            }
+            else {
+                return ServerResponse.DatabaseError;
+            }
+
+            if (serverDatabase.deleteServer(serverId)) {
+                servers.remove(serverId);
+            }
+            else {
+                return ServerResponse.DatabaseError;
+            }
+
+            serverIterator.remove();
+        }
+
+        return ServerResponse.SuccessResponse;
+    }
+
     @Override
     public ServerResponse deleteServer(int serverId) {
 
@@ -572,7 +644,7 @@ public class PrimaryServer extends Server {
             if (currentId != serverId) {
 
                 if (currentServer.isOnline()) {
-                    myServerListener.send(currentId, deleteServer);
+                    myServerListener.sendServer(currentId, deleteServer);
                 }
                 else {
                     insertQueue(serverId, deleteServer);
@@ -587,12 +659,12 @@ public class PrimaryServer extends Server {
         // 3) Registar alterações efectuadas na base de dados
         //---------------------------------------------------
 
-        rooms.forEach((roomId, room) -> {
-
-            if (room.removeServer(serverId)) {
-                serverDatabase.deleteServerRoom(serverId, roomId);
-            }
-        });
+        if (serverDatabase.deleteServerRooms(serverId)) {
+            rooms.forEach((roomId, room) -> room.removeServer(serverId));
+        }
+        else {
+            return ServerResponse.DatabaseError;
+        }
 
         if (serverDatabase.deleteServer(serverId)) {
             servers.remove(serverId);
@@ -604,13 +676,17 @@ public class PrimaryServer extends Server {
         return ServerResponse.SuccessResponse;
     }
 
-    // TODO: testar algoritmo para apagar salas inactivas (1 hora ou mais de downtime, poderá ser alterado)
-    private ServerResponse deleteRooms() {
+    // TODO: testar algoritmo para apagar salas inactivas (24 horas ou mais de inactividade)
+    private ServerResponse purgeRooms() {
 
-        final long currentTimestamp = Instant.now().getEpochSecond() - 3600;
+        final long currentTimestamp = Instant.now().getEpochSecond() - (3600 * 24);
         final Iterator<Map.Entry<Integer, RoomInfo>> roomsIterator = rooms.entrySet().iterator();
 
         while (roomsIterator.hasNext()) {
+
+            //------------------------------------------------------------------------------
+            // 1) Escolher uma sala vazia que não tenha sido atualizada nas últimas 24 horas
+            //------------------------------------------------------------------------------
 
             final Map.Entry<Integer, RoomInfo> currentEntry = roomsIterator.next();
             final RoomInfo selectedRoom = currentEntry.getValue();
@@ -637,7 +713,7 @@ public class PrimaryServer extends Server {
                 }
 
                 if (currentServer.isOnline()) {
-                    myServerListener.send(serverId, deleteRoom);
+                    myServerListener.sendServer(serverId, deleteRoom);
                 }
                 else {
                     insertQueue(roomId, deleteRoom);
@@ -651,8 +727,8 @@ public class PrimaryServer extends Server {
             // 3) Registar remoção desse servidor na base de dados
             //----------------------------------------------------
 
-            if (serverDatabase.deleteServer(roomId)) {
-                servers.remove(roomId);
+            if (serverDatabase.deleteRoom(roomId)) {
+                rooms.remove(roomId);
             }
             else {
                 return ServerResponse.DatabaseError;
@@ -684,7 +760,7 @@ public class PrimaryServer extends Server {
                 return ServerResponse.OperationFailed;
             }
 
-            myServerListener.send(serverId, serverQueue);
+            myServerListener.sendServer(serverId, serverQueue);
             messageQueue.remove(serverId);
         }
         else {
@@ -772,7 +848,7 @@ public class PrimaryServer extends Server {
                 serverDatabase.updateServer(currentServer);
 
                 if (currentServer.isOnline()) {
-                    myServerListener.send(currentId, updateServer);
+                    myServerListener.sendServer(currentId, updateServer);
                 }
                 else {
                     insertQueue(serverId, updateServer);
@@ -805,7 +881,7 @@ public class PrimaryServer extends Server {
         servers.forEach((severId, server) -> {
 
             if (server.removeUser(userToken)) {
-                myServerListener.send(severId, userDisconnect);
+                myServerListener.sendServer(severId, userDisconnect);
             }
         });
 

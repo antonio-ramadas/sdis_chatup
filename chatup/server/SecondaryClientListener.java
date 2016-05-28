@@ -2,7 +2,7 @@ package chatup.server;
 
 import chatup.model.Message;
 
-import chatup.tcp.SyncRoomResponse;
+import chatup.tcp.UpdateRoom;
 
 import kryonet.Connection;
 import kryonet.KryoClient;
@@ -25,8 +25,8 @@ class SecondaryClientListener extends Listener {
 
         final ServerConnection serverConnection = (ServerConnection) paramConnection;
 
-        if (paramObject instanceof SyncRoomResponse) {
-            updateRoom(serverConnection, (SyncRoomResponse)paramObject);
+        if (paramObject instanceof UpdateRoom) {
+            updateRoom(serverConnection, (UpdateRoom)paramObject);
         }
         else if (paramObject instanceof Message){
             receiveMessage(serverConnection, (Message)paramObject);
@@ -54,7 +54,7 @@ class SecondaryClientListener extends Listener {
         }
     }
 
-    private void updateRoom(final ServerConnection paramConnection, final SyncRoomResponse updateRoom) {
+    private void updateRoom(final ServerConnection paramConnection, final UpdateRoom updateRoom) {
 
         switch (mSecondary.updateRoom(updateRoom)) {
         case SuccessResponse:

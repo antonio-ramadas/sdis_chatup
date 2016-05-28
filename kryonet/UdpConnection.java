@@ -42,15 +42,13 @@ class UdpConnection
     private DatagramChannel datagramChannel;
     private SelectionKey selectionKey;
 
-
-    UdpConnection(final Serialization serialization, int bufferSize)
+    UdpConnection(final Serialization paramSerialization, int bufferSize)
     {
-        this.serialization = serialization;
+        serialization = paramSerialization;
         readBuffer = ByteBuffer.allocate(bufferSize);
         writeBuffer = ByteBuffer.allocateDirect(bufferSize);
     }
 
-    private int keepAliveMillis = 19000;
     private long lastCommunicationTime;
 
     void connect(Selector selector, InetSocketAddress remoteAddress) throws IOException
@@ -69,7 +67,7 @@ class UdpConnection
             lastCommunicationTime = System.currentTimeMillis();
             connectedAddress = remoteAddress;
         }
-        catch (IOException ex)
+        catch (final IOException ex)
         {
             close();
             throw new IOException("Unable to connect to: " + remoteAddress);
@@ -107,7 +105,7 @@ class UdpConnection
 
                 return object;
             }
-            catch (Exception ex)
+            catch (final Exception ex)
             {
                 throw new KryoNetException("Error during deserialization.", ex);
             }
@@ -135,7 +133,7 @@ class UdpConnection
                 {
                     serialization.write(connection, writeBuffer, object);
                 }
-                catch (Exception ex)
+                catch (final Exception ex)
                 {
                     throw new KryoNetException("Error serializing object of type: " + object.getClass().getName(), ex);
                 }
@@ -173,13 +171,13 @@ class UdpConnection
                 }
             }
         }
-        catch (IOException ex)
+        catch (final IOException ignored)
         {
         }
     }
 
     boolean needsKeepAlive(long time)
     {
-        return connectedAddress != null && keepAliveMillis > 0 && time - lastCommunicationTime > keepAliveMillis;
+        return connectedAddress != null && (time - lastCommunicationTime) > 19000;
     }
 }

@@ -16,14 +16,18 @@ public class Room {
     private Set<Integer> mServers;
 
     public Room(final String paramName, final String paramPassword, final String paramOwner) {
+        this(paramName, paramPassword, Instant.now().getEpochSecond(), paramOwner);
+	}
+
+    public Room(final String paramName, final String paramPassword, long paramTimestamp, final String paramOwner) {
         mName = paramName;
         mOwner = paramOwner;
         mPassword = paramPassword;
-		mMessages = new MessageCache();
+        mMessages = new MessageCache();
         mUsers = new HashSet<>();
         mServers = new HashSet<>();
-		mTimestamp = Instant.now().getEpochSecond();
-	}
+        mTimestamp = paramTimestamp;
+    }
 
 	private long mTimestamp;
 

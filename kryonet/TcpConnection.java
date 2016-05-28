@@ -36,18 +36,17 @@ class TcpConnection
 
     final ByteBuffer readBuffer;
     final ByteBuffer writeBuffer;
-
-    boolean bufferPositionFix;
-    float idleThreshold = 0.1f;
-
     private SelectionKey selectionKey;
+
+    float idleThreshold = 0.1f;
 
     private volatile long lastWriteTime;
     private volatile long lastReadTime;
 
+    private boolean bufferPositionFix;
+    private int currentObjectLength;
     private int keepAliveMillis = 8000;
     private int timeoutMillis = 12000;
-    private int currentObjectLength;
 
     private final Serialization serialization;
     private final Object writeLock = new Object();
@@ -78,7 +77,7 @@ class TcpConnection
 
             return selectionKey;
         }
-        catch (IOException ex)
+        catch (final IOException ex)
         {
             close();
             throw ex;
@@ -107,17 +106,14 @@ class TcpConnection
             selectionKey.attach(this);
             lastReadTime = lastWriteTime = System.currentTimeMillis();
         }
-        catch (IOException ex)
+        catch (final IOException ex)
         {
             close();
-            IOException ioEx = new IOException("Unable to connect to: " + remoteAddress);
-            ioEx.initCause(ex);
-
-            throw ioEx;
+            throw new IOException("Unable to connect to: " + remoteAddress);
         }
     }
 
-    public Object readObject(Connection connection) throws IOException
+    final Object readObject(Connection connection) throws IOException
     {
         SocketChannel socketChannel = this.socketChannel;
 
@@ -279,7 +275,7 @@ class TcpConnection
             {
                 serialization.write(paramConnection, writeBuffer, object);
             }
-            catch (KryoNetException ex)
+            catch (final KryoNetException ex)
             {
                 throw new KryoNetException("Error serializing object of type: " + object.getClass().getName(), ex);
             }
@@ -320,7 +316,7 @@ class TcpConnection
                 }
             }
         }
-        catch (IOException ex)
+        catch (final IOException ignored)
         {
         }
     }

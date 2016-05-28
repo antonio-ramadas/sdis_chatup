@@ -18,6 +18,7 @@ public class CreateRoom implements Serializable
     }
 
     public int roomId;
+    public long roomTimestamp;
 
     public CreateRoom(int paramId, final Room paramRoom, final String paramEmail)
     {
@@ -25,6 +26,7 @@ public class CreateRoom implements Serializable
         roomName = paramRoom.getName();
         roomPassword = paramRoom.getPassword();
         roomServers = paramRoom.getServers();
+        roomTimestamp = paramRoom.getTimestamp();
         userToken = paramRoom.getOwner();
         userEmail = paramEmail;
     }

@@ -5,8 +5,8 @@ import chatup.main.ChatupGlobals;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
-
 import com.esotericsoftware.minlog.Log;
+
 import com.sun.net.httpserver.HttpExchange;
 
 import java.io.ByteArrayOutputStream;

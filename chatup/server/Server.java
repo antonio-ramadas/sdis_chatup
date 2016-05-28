@@ -3,16 +3,17 @@ package chatup.server;
 import chatup.http.HttpDispatcher;
 import chatup.http.ServerResponse;
 import chatup.main.ChatupGlobals;
+import chatup.main.ChatupServer;
 import chatup.model.Message;
 
 import com.eclipsesource.json.JsonValue;
 
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.*;
 
 import javafx.util.Pair;
 
-import java.io.IOException;
+import javax.net.ssl.*;
+
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -21,43 +22,52 @@ import java.util.concurrent.Executors;
 public abstract class Server {
 
     final HashMap<String, String> users = new HashMap<>();
-    final ServerType serverType;
+    private final ServerType serverType;
 
     Server(final HttpHandler httpHandler, final ServerType paramType, int httpPort) throws SQLException {
 
         serverType = paramType;
 
         try {
-            /*
-            final KeyStore serverKeystore = tcpConnection.getServerKeystore();
+
+            final HttpsServer httpServer = HttpsServer.create(new InetSocketAddress(httpPort), 0);
+            final ServerKeystore serverKeystore = ChatupServer.getKeystore();
             final KeyManagerFactory kmf = serverKeystore.getKeyManager();
             final TrustManagerFactory tmf = serverKeystore.getTrustManager();
-            final SSLContext sslContext = SSLContext.getInstance("TLSv1");
+            final SSLContext sslContext = SSLContext.getInstance("TLS");
 
             sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 
             httpServer.setHttpsConfigurator(new HttpsConfigurator(sslContext) {
+
+                @Override
                 public void configure(HttpsParameters params) {
+
                     try {
-                        SSLContext c = SSLContext.getDefault();
-                        SSLEngine engine = c.createSSLEngine();
+
+                        final SSLContext c = SSLContext.getDefault();
+                        final SSLEngine engine = c.createSSLEngine();
+
                         params.setNeedClientAuth(false);
+                        params.setWantClientAuth(false);
                         params.setCipherSuites(engine.getEnabledCipherSuites());
                         params.setProtocols(engine.getEnabledProtocols());
-                        SSLParameters defaultSSLParameters = c.getDefaultSSLParameters();
+
+                        final SSLParameters defaultSSLParameters = c.getDefaultSSLParameters();
+
                         params.setSSLParameters(defaultSSLParameters);
-                    } catch (NoSuchAlgorithmException e) {
-                        e.printStackTrace();
+                    }
+                    catch (final Exception ex) {
+                        ChatupGlobals.abort(serverType, ex);
                     }
                 }
             });
-            */
-            HttpServer httpServer = HttpServer.create(new InetSocketAddress(httpPort), 0);
+
             httpServer.createContext("/", httpHandler);
             httpServer.setExecutor(Executors.newCachedThreadPool());
             httpServer.start();
         }
-        catch (final IOException ex) {
+        catch (final Exception ex) {
             ChatupGlobals.abort(serverType, ex);
         }
     }
@@ -114,17 +124,15 @@ public abstract class Server {
         throw new UnsupportedOperationException("DeleteRoom");
     }
 
-    public ServerResponse syncRoom(int roomId, int serverId) {
-        throw new UnsupportedOperationException("SyncRoom");
-    }
-
     public ServerResponse getMessages(final HttpDispatcher httpExchange, final String userToken, int roomId, long roomTimestamp) {
         throw new UnsupportedOperationException("RetrieveMessages");
     }
 
-    public ServerResponse insertMessage(Message userMessage) {
-        throw new UnsupportedOperationException("InsertMessage");
+    public ServerResponse sendMessage(final Message paramMessage) {
+        throw new UnsupportedOperationException("SendMessage");
     }
 
-    public abstract boolean validateToken(String getValue);
+    public boolean validateToken(final String userToken) {
+        throw new UnsupportedOperationException("ValdiateToken");
+    }
 }
