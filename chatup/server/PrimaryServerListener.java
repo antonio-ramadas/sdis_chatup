@@ -9,6 +9,7 @@ import kryonet.Connection;
 import kryonet.KryoServer;
 import kryonet.Listener;
 
+import java.net.ServerSocket;
 import java.util.HashMap;
 
 class PrimaryServerListener extends Listener {
@@ -38,7 +39,7 @@ class PrimaryServerListener extends Listener {
             final ServerInfo serverInfo = new ServerInfo(
                 serverOnline.serverId,
                 serverOnline.serverTimestamp,
-                serverOnline.serverAddress,
+                paramConnection.getRemoteAddressTCP().getAddress().getHostAddress(),
                 serverOnline.serverPort
             );
 
