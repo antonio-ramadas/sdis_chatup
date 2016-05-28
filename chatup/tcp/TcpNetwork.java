@@ -1,5 +1,6 @@
 package chatup.tcp;
 
+import chatup.model.CommandQueue;
 import chatup.model.Message;
 
 import com.esotericsoftware.kryo.Kryo;
@@ -10,6 +11,7 @@ public class TcpNetwork {
 
     public static void registerPrimary(final EndPoint endPoint) {
         Kryo kryo = endPoint.getKryo();
+        kryo.register(CommandQueue.class);
         kryo.register(CreateRoom.class);
         kryo.register(DeleteRoom.class);
         kryo.register(DeleteServer.class);

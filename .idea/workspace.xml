@@ -5,9 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="12837c42-8525-4718-b44a-390330e984d3" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/primary/primary.db" afterPath="$PROJECT_DIR$/primary/primary.db" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/model/Room.java" afterPath="$PROJECT_DIR$/chatup/model/Room.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/PrimaryServer.java" afterPath="$PROJECT_DIR$/chatup/server/PrimaryServer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/tcp/TcpNetwork.java" afterPath="$PROJECT_DIR$/chatup/tcp/TcpNetwork.java" />
     </list>
     <ignored path="sdis_chatup.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -33,30 +34,18 @@
       <file leaf-file-name="PrimaryServer.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/chatup/server/PrimaryServer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="250">
-              <caret line="861" column="31" selection-start-line="861" selection-start-column="20" selection-end-line="861" selection-end-column="31" />
+            <state relative-caret-position="418">
+              <caret line="768" column="13" selection-start-line="768" selection-start-column="13" selection-end-line="768" selection-end-column="13" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ChatupGlobals.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/chatup/main/ChatupGlobals.java">
+      <file leaf-file-name="PrimaryServerListener.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/chatup/server/PrimaryServerListener.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-276">
-              <caret line="26" column="21" selection-start-line="26" selection-start-column="21" selection-end-line="26" selection-end-column="21" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="BoundedSet.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/chatup/model/BoundedSet.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="68">
-              <caret line="4" column="6" selection-start-line="4" selection-start-column="6" selection-end-line="4" selection-end-column="6" />
+            <state relative-caret-position="306">
+              <caret line="48" column="64" selection-start-line="48" selection-start-column="64" selection-end-line="48" selection-end-column="64" />
               <folding />
             </state>
           </provider>
@@ -189,7 +178,6 @@
         <option value="$PROJECT_DIR$/chatup/server/SecondaryClientListener.java" />
         <option value="$PROJECT_DIR$/chatup/server/PrimaryServerListener.java" />
         <option value="$PROJECT_DIR$/chatup/tcp/UpdateRoom.java" />
-        <option value="$PROJECT_DIR$/chatup/tcp/TcpNetwork.java" />
         <option value="$PROJECT_DIR$/chatup/server/ServerInfo.java" />
         <option value="$PROJECT_DIR$/chatup/server/PrimaryClientListener.java" />
         <option value="$PROJECT_DIR$/chatup/tcp/CreateRoom.java" />
@@ -216,6 +204,7 @@
         <option value="$PROJECT_DIR$/chatup/server/SecondaryServer.java" />
         <option value="$PROJECT_DIR$/chatup/main/PrimaryServer.java" />
         <option value="$PROJECT_DIR$/chatup/model/Room.java" />
+        <option value="$PROJECT_DIR$/chatup/tcp/TcpNetwork.java" />
         <option value="$PROJECT_DIR$/chatup/server/PrimaryServer.java" />
       </list>
     </option>
@@ -691,8 +680,8 @@
     </list>
     <recent_temporary>
       <list size="3">
-        <item index="0" class="java.lang.String" itemvalue="Application.PrimaryServer" />
-        <item index="1" class="java.lang.String" itemvalue="Application.SecondaryServer" />
+        <item index="0" class="java.lang.String" itemvalue="Application.SecondaryServer" />
+        <item index="1" class="java.lang.String" itemvalue="Application.PrimaryServer" />
         <item index="2" class="java.lang.String" itemvalue="Application.PublicTest" />
       </list>
     </recent_temporary>
@@ -867,7 +856,14 @@
       <option name="project" value="LOCAL" />
       <updated>1464455222474</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="what was that roomId???">
+      <created>1464456938590</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1464456938590</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
@@ -966,7 +962,8 @@
     <MESSAGE value="even more notes about server communication" />
     <MESSAGE value="purge servers was throwing exception" />
     <MESSAGE value="missing server databases" />
-    <option name="LAST_COMMIT_MESSAGE" value="missing server databases" />
+    <MESSAGE value="what was that roomId???" />
+    <option name="LAST_COMMIT_MESSAGE" value="what was that roomId???" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -986,14 +983,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/kryonet/EndPoint.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="25" column="17" selection-start-line="25" selection-start-column="17" selection-end-line="25" selection-end-column="17" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/kryonet/Listener.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="228">
@@ -1038,11 +1027,11 @@
         <state relative-caret-position="510">
           <caret line="30" column="1" selection-start-line="30" selection-start-column="1" selection-end-line="30" selection-end-column="1" />
           <folding>
-            <element signature="e#0#1784#0" expanded="true" />
-            <element signature="e#1668#1669#0" expanded="true" />
-            <element signature="e#1705#1706#0" expanded="true" />
-            <element signature="e#1751#1752#0" expanded="true" />
-            <element signature="e#1781#1782#0" expanded="true" />
+            <element signature="e#0#1784#0" expanded="false" />
+            <element signature="e#1668#1669#0" expanded="false" />
+            <element signature="e#1705#1706#0" expanded="false" />
+            <element signature="e#1751#1752#0" expanded="false" />
+            <element signature="e#1781#1782#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1150,14 +1139,6 @@
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/chatup/server/PrimaryServerListener.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-493">
-          <caret line="13" column="6" selection-start-line="13" selection-start-column="6" selection-end-line="13" selection-end-column="6" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1444,10 +1425,28 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/chatup/server/PrimaryServerListener.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="306">
+          <caret line="48" column="64" selection-start-line="48" selection-start-column="64" selection-end-line="48" selection-end-column="64" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/chatup/tcp/TcpNetwork.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="306">
+          <caret line="18" column="39" selection-start-line="18" selection-start-column="39" selection-end-line="18" selection-end-column="39" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/chatup/server/PrimaryServer.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="250">
-          <caret line="861" column="31" selection-start-line="861" selection-start-column="20" selection-end-line="861" selection-end-column="31" />
+        <state relative-caret-position="418">
+          <caret line="768" column="13" selection-start-line="768" selection-start-column="13" selection-end-line="768" selection-end-column="13" />
           <folding />
         </state>
       </provider>

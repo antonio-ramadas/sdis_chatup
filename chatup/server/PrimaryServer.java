@@ -763,12 +763,10 @@ public class PrimaryServer extends Server {
 
             final CommandQueue serverQueue = messageQueue.get(serverId);
 
-            if (serverQueue == null || serverQueue.empty()) {
-                return ServerResponse.OperationFailed;
+            if (serverQueue != null) {
+                myServerListener.sendServer(serverId, serverQueue);
+                messageQueue.remove(serverId);
             }
-
-            myServerListener.sendServer(serverId, serverQueue);
-            messageQueue.remove(serverId);
         }
         else {
             selectedServer.setTimestamp(serverTimestamp);
