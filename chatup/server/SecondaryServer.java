@@ -297,9 +297,9 @@ public class SecondaryServer extends Server {
             return ServerResponse.ServerNotFound;
         }
 
-        //---------------------------------------------------------------------
-        // 2) Alterar estado da ligação ao servidor escolhido no servidor local
-        //---------------------------------------------------------------------
+        //------------------------------------------------------
+        // 2) Actualizar estado da ligação ao servidor escolhido
+        //------------------------------------------------------
 
         selectedServer.setStatus(false);
         serverLogger.serverOffline(serverId);
@@ -344,7 +344,7 @@ public class SecondaryServer extends Server {
         // 4) Responder aos pedidos pendentes de todos os utilizadores desta sala
         //-----------------------------------------------------------------------
 
-        for (final CometRequest cometRequest : pendingRequests) {
+        for (final PushRequest cometRequest : pendingRequests) {
 
             if (users.containsKey(cometRequest.getToken())) {
                 cometRequest.send();
@@ -356,7 +356,6 @@ public class SecondaryServer extends Server {
 		return ServerResponse.SuccessResponse;
 	}
 
-    // TODO: Verified!
     @Override
     public ServerResponse leaveRoom(int roomId, final String userToken) {
 
@@ -395,10 +394,10 @@ public class SecondaryServer extends Server {
         // 4) Responder aos pedidos pendentes de todos os utilizadores desta sala
         //-----------------------------------------------------------------------
 
-        for (final CometRequest cometRequest : pendingRequests) {
+        for (final PushRequest pushRequest : pendingRequests) {
 
-            if (users.containsKey(cometRequest.getToken())) {
-                cometRequest.send();
+            if (users.containsKey(pushRequest.getToken())) {
+                pushRequest.send();
             }
         }
 
@@ -497,10 +496,10 @@ public class SecondaryServer extends Server {
         // 4) Responder aos pedidos pendentes de todos os utilizadores desta sala
         //-----------------------------------------------------------------------
 
-        for (final CometRequest cometRequest : pendingRequests) {
+        for (final PushRequest pushRequest : pendingRequests) {
 
-            if (users.containsKey(cometRequest.getToken())) {
-                cometRequest.send();
+            if (users.containsKey(pushRequest.getToken())) {
+                pushRequest.send();
             }
         }
 
@@ -554,10 +553,14 @@ public class SecondaryServer extends Server {
         return users.containsKey(userToken);
     }
 
-    private ArrayList<CometRequest> pendingRequests = new ArrayList<>();
+    private ArrayList<PushRequest> pendingRequests = new ArrayList<>();
 
     @Override
 	public ServerResponse getMessages(final HttpDispatcher httpExchange, final String userToken, int roomId, long lastUpdate) {
+
+        //-----------------------------------------------------------
+        // 1) Verificar se utilizador tem sessão iniciada no servidor
+        //-----------------------------------------------------------
 
         final String userRecord = users.get(userToken);
 
@@ -565,23 +568,35 @@ public class SecondaryServer extends Server {
             return ServerResponse.InvalidToken;
         }
 
+        //-------------------------------------------------------
+        // 2) Verificar se sala escolhida existe na base de dados
+        //-------------------------------------------------------
+
 		final Room selectedRoom = rooms.get(roomId);
 
         if (selectedRoom == null) {
             return ServerResponse.RoomNotFound;
         }
 
+        //---------------------------------------------------------
+        // 1) Verificar se utilizador se encontra registado na sala
+        //---------------------------------------------------------
+
 		if (!selectedRoom.hasUser(userToken)) {
 			return ServerResponse.InvalidToken;
 		}
 
-        final CometRequest cometRequest = new CometRequest(selectedRoom, userToken, lastUpdate, httpExchange);
+        //----------------------------------------------------------------------------------
+        // 4) Atrasar pedido do utilizador, adicionando aos pedidos pendentes neste servidor
+        //----------------------------------------------------------------------------------
+
+        final PushRequest pushRequest = new PushRequest(selectedRoom, userToken, lastUpdate, httpExchange);
 
         if (lastUpdate <= selectedRoom.getTimestamp()) {
-            cometRequest.send();
+            pushRequest.send();
         }
         else {
-            pendingRequests.add(cometRequest);
+            pendingRequests.add(pushRequest);
         }
 
         return ServerResponse.SuccessResponse;
@@ -596,11 +611,19 @@ public class SecondaryServer extends Server {
         System.out.println("serverPort:" + serverInfo.getPort());
         System.out.println("--------------------------");
 
+        //--------------------------------------------------------------
+        // 1) Verificar se servidor escolhido já existe na base de dados
+        //--------------------------------------------------------------
+
         int serverId = serverInfo.getId();
 
 		if (servers.containsKey(serverId)) {
 			return updateServer(serverInfo);
 		}
+
+        //------------------------------------------------
+        // 2) Registar entrada de novo servidor secundário
+        //------------------------------------------------
 
 		if (serverDatabase.insertServer(serverInfo)) {
             servers.put(serverId, serverInfo);
@@ -610,6 +633,10 @@ public class SecondaryServer extends Server {
             return ServerResponse.DatabaseError;
         }
 
+        //----------------------------------------------------------
+        // 3) Atualizar data da última atualização do servidor local
+        //----------------------------------------------------------
+
         mServerTimestamp = Instant.now().getEpochSecond();
 
 		return ServerResponse.SuccessResponse;
@@ -618,12 +645,20 @@ public class SecondaryServer extends Server {
 	@Override
 	public ServerResponse updateServer(final ServerInfo serverInfo) {
 
+        //-----------------------------------------------------------
+        // 1) Verificar se servidor escolhido existe na base de dados
+        //-----------------------------------------------------------
+
         int serverId = serverInfo.getId();
         final ServerInfo selectedServer = servers.get(serverId);
 
 		if (selectedServer == null) {
 			return ServerResponse.ServerNotFound;
 		}
+
+        //------------------------------------------------
+        // 2) Actualizar informações relativas ao servidor
+        //------------------------------------------------
 
         if (serverDatabase.updateServer(serverInfo)) {
             selectedServer.setAddress(serverInfo.getAddress());
@@ -635,6 +670,10 @@ public class SecondaryServer extends Server {
             return ServerResponse.DatabaseError;
         }
 
+        //---------------------------------------------------------
+        // 3) Alterar data da última actualização do servidor local
+        //---------------------------------------------------------
+
         mServerTimestamp = Instant.now().getEpochSecond();
 
 		return ServerResponse.SuccessResponse;
@@ -642,6 +681,10 @@ public class SecondaryServer extends Server {
 
 	@Override
 	public ServerResponse deleteServer(int serverId) {
+
+        //-----------------------------------------------------------
+        // 1) Verificar se servidor escolhido existe na base de dados
+        //-----------------------------------------------------------
 
         if (servers.get(serverId) == null) {
             return ServerResponse.ServerNotFound;

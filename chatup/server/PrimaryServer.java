@@ -536,6 +536,10 @@ public class PrimaryServer extends Server {
     @Override
     public ServerResponse insertServer(final ServerInfo serverInfo) {
 
+        //--------------------------------------------------------------
+        // 1) Verificar se servidor escolhido já existe na base de dados
+        //--------------------------------------------------------------
+
         int serverId = serverInfo.getId();
 
         if (servers.containsKey(serverId)) {
@@ -596,9 +600,9 @@ public class PrimaryServer extends Server {
                 }
             });
 
-            //---------------------------------------------
-            // 2) Registar alterações efectuadas localmente
-            //---------------------------------------------
+            //----------------------------------------------------
+            // 2) Registar alterações efectuadas no servidor local
+            //----------------------------------------------------
 
             if (serverDatabase.deleteServerRooms(serverId)) {
                 rooms.forEach((roomId, room) -> room.removeServer(serverId));

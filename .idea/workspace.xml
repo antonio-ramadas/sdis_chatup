@@ -4,41 +4,11 @@
     <bookmark url="file://$PROJECT_DIR$/chatup/server/SecondaryServer.java" line="51" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="12837c42-8525-4718-b44a-390330e984d3" name="Default" comment="added comments on pending tasks">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/chatup/tcp/SSLConnection.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/client.jks" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/server.jks" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/truststore.jts" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/chatup/tcp/SyncRoomResponse.java" afterPath="$PROJECT_DIR$/chatup/tcp/UpdateRoom.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/primary.db" afterPath="$PROJECT_DIR$/primary.db" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/secondary-1.db" afterPath="$PROJECT_DIR$/secondary-1.db" />
+    <list default="true" id="12837c42-8525-4718-b44a-390330e984d3" name="Default" comment="">
+      <change type="MOVED" beforePath="$PROJECT_DIR$/chatup/http/CometRequest.java" afterPath="$PROJECT_DIR$/chatup/http/PushRequest.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/http/HttpDispatcher.java" afterPath="$PROJECT_DIR$/chatup/http/HttpDispatcher.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/http/MessageServiceHandler.java" afterPath="$PROJECT_DIR$/chatup/http/MessageServiceHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/main/ChatupGlobals.java" afterPath="$PROJECT_DIR$/chatup/main/ChatupGlobals.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/main/ChatupServer.java" afterPath="$PROJECT_DIR$/chatup/main/ChatupServer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/main/SecondaryServer.java" afterPath="$PROJECT_DIR$/chatup/main/SecondaryServer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/model/Database.java" afterPath="$PROJECT_DIR$/chatup/model/Database.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/model/Room.java" afterPath="$PROJECT_DIR$/chatup/model/Room.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/PrimaryClientListener.java" afterPath="$PROJECT_DIR$/chatup/server/PrimaryClientListener.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/PrimaryServer.java" afterPath="$PROJECT_DIR$/chatup/server/PrimaryServer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/PrimaryServerListener.java" afterPath="$PROJECT_DIR$/chatup/server/PrimaryServerListener.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/SecondaryClientListener.java" afterPath="$PROJECT_DIR$/chatup/server/SecondaryClientListener.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/SecondaryServer.java" afterPath="$PROJECT_DIR$/chatup/server/SecondaryServer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/SecondaryServerListener.java" afterPath="$PROJECT_DIR$/chatup/server/SecondaryServerListener.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/Server.java" afterPath="$PROJECT_DIR$/chatup/server/Server.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/ServerKeystore.java" afterPath="$PROJECT_DIR$/chatup/server/ServerKeystore.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/ServerLogger.java" afterPath="$PROJECT_DIR$/chatup/server/ServerLogger.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/tcp/CreateRoom.java" afterPath="$PROJECT_DIR$/chatup/tcp/CreateRoom.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/tcp/ServerOnline.java" afterPath="$PROJECT_DIR$/chatup/tcp/ServerOnline.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/tcp/TcpNetwork.java" afterPath="$PROJECT_DIR$/chatup/tcp/TcpNetwork.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/kryonet/Connection.java" afterPath="$PROJECT_DIR$/kryonet/Connection.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/kryonet/KryoClient.java" afterPath="$PROJECT_DIR$/kryonet/KryoClient.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/kryonet/KryoNetException.java" afterPath="$PROJECT_DIR$/kryonet/KryoNetException.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/kryonet/KryoSerialization.java" afterPath="$PROJECT_DIR$/kryonet/KryoSerialization.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/kryonet/KryoServer.java" afterPath="$PROJECT_DIR$/kryonet/KryoServer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/kryonet/Listener.java" afterPath="$PROJECT_DIR$/kryonet/Listener.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/kryonet/Serialization.java" afterPath="$PROJECT_DIR$/kryonet/Serialization.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/kryonet/TcpConnection.java" afterPath="$PROJECT_DIR$/kryonet/TcpConnection.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/kryonet/UdpConnection.java" afterPath="$PROJECT_DIR$/kryonet/UdpConnection.java" />
     </list>
@@ -65,8 +35,8 @@
             <file leaf-file-name="PrimaryServer.java" pinned="false" current-in-tab="true">
               <entry file="file://$PROJECT_DIR$/chatup/server/PrimaryServer.java">
                 <provider selected="true" editor-type-id="text-editor">
-                  <state relative-caret-position="295">
-                    <caret line="607" column="13" selection-start-line="607" selection-start-column="13" selection-end-line="607" selection-end-column="13" />
+                  <state relative-caret-position="516">
+                    <caret line="661" column="0" selection-start-line="661" selection-start-column="0" selection-end-line="663" selection-end-column="61" />
                     <folding />
                   </state>
                 </provider>
@@ -86,7 +56,7 @@
       <file leaf-file-name="Connection.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/kryonet/Connection.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-3243">
+            <state relative-caret-position="-1768">
               <caret line="37" column="0" selection-start-line="37" selection-start-column="0" selection-end-line="37" selection-end-column="47" />
               <folding>
                 <element signature="e#2466#2467#0" expanded="true" />
@@ -102,6 +72,28 @@
           </provider>
         </entry>
       </file>
+      <file leaf-file-name="ServerOnline.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/chatup/tcp/ServerOnline.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="68">
+              <caret line="4" column="13" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="13" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SecondaryServer.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/chatup/server/SecondaryServer.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="793">
+              <caret line="837" column="1" selection-start-line="837" selection-start-column="1" selection-end-line="837" selection-end-column="1" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="EndPoint.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/kryonet/EndPoint.java">
           <provider selected="true" editor-type-id="text-editor">
@@ -112,7 +104,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="FrameworkMessage.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="FrameworkMessage.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/kryonet/FrameworkMessage.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="425">
@@ -148,7 +140,7 @@
       <file leaf-file-name="KryoServer.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/kryonet/KryoServer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="584">
+            <state relative-caret-position="807">
               <caret line="554" column="1" selection-start-line="554" selection-start-column="1" selection-end-line="554" selection-end-column="1" />
               <folding>
                 <element signature="imports" expanded="true" />
@@ -160,20 +152,6 @@
                 <element signature="e#12328#12329#0" expanded="true" />
                 <element signature="e#16109#16110#0" expanded="true" />
                 <element signature="e#16144#16145#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="UdpConnection.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/kryonet/UdpConnection.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1742">
-              <caret line="46" column="8" selection-start-line="46" selection-start-column="8" selection-end-line="46" selection-end-column="8" />
-              <folding>
-                <element signature="imports" expanded="true" />
-                <element signature="e#5985#5986#0" expanded="true" />
-                <element signature="e#6074#6075#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -192,8 +170,8 @@
       <file leaf-file-name="TcpConnection.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/kryonet/TcpConnection.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="20">
-              <caret line="108" column="21" selection-start-line="108" selection-start-column="21" selection-end-line="108" selection-end-column="21" />
+            <state relative-caret-position="-605">
+              <caret line="116" column="43" selection-start-line="116" selection-start-column="43" selection-end-line="116" selection-end-column="43" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -259,8 +237,6 @@
         <option value="$PROJECT_DIR$/chatup/server/Server.java" />
         <option value="$PROJECT_DIR$/chatup/model/Room.java" />
         <option value="$PROJECT_DIR$/chatup/tcp/CreateRoom.java" />
-        <option value="$PROJECT_DIR$/chatup/server/PrimaryServer.java" />
-        <option value="$PROJECT_DIR$/chatup/server/SecondaryServer.java" />
         <option value="$PROJECT_DIR$/chatup/main/ChatupGlobals.java" />
         <option value="$PROJECT_DIR$/kryonet/Listener.java" />
         <option value="$PROJECT_DIR$/chatup/server/SecondaryServerListener.java" />
@@ -268,10 +244,12 @@
         <option value="$PROJECT_DIR$/kryonet/Connection.java" />
         <option value="$PROJECT_DIR$/kryonet/KryoServer.java" />
         <option value="$PROJECT_DIR$/kryonet/Serialization.java" />
-        <option value="$PROJECT_DIR$/kryonet/UdpConnection.java" />
-        <option value="$PROJECT_DIR$/kryonet/TcpConnection.java" />
         <option value="$PROJECT_DIR$/kryonet/KryoSerialization.java" />
         <option value="$PROJECT_DIR$/kryonet/KryoNetException.java" />
+        <option value="$PROJECT_DIR$/kryonet/UdpConnection.java" />
+        <option value="$PROJECT_DIR$/kryonet/TcpConnection.java" />
+        <option value="$PROJECT_DIR$/chatup/server/PrimaryServer.java" />
+        <option value="$PROJECT_DIR$/chatup/server/SecondaryServer.java" />
       </list>
     </option>
   </component>
@@ -837,7 +815,14 @@
       <option name="project" value="LOCAL" />
       <updated>1464289124890</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="https enabled again, commented server communication">
+      <created>1464448031426</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1464448031426</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
@@ -854,8 +839,8 @@
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32875264" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2379936" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32870865" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2379936" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -932,7 +917,8 @@
     <MESSAGE value="now it removes older messages" />
     <MESSAGE value="delayed &quot;comet&quot; http requests" />
     <MESSAGE value="added comments on pending tasks" />
-    <option name="LAST_COMMIT_MESSAGE" value="added comments on pending tasks" />
+    <MESSAGE value="https enabled again, commented server communication" />
+    <option name="LAST_COMMIT_MESSAGE" value="https enabled again, commented server communication" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1000,14 +986,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="221">
           <caret line="16" column="1" selection-start-line="16" selection-start-column="1" selection-end-line="16" selection-end-column="1" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/chatup/tcp/ServerOnline.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="68">
-          <caret line="4" column="13" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="13" />
           <folding />
         </state>
       </provider>
@@ -1273,24 +1251,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/chatup/server/PrimaryServer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="295">
-          <caret line="607" column="13" selection-start-line="607" selection-start-column="13" selection-end-line="607" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/chatup/server/SecondaryServer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="459">
-          <caret line="120" column="42" selection-start-line="120" selection-start-column="42" selection-end-line="120" selection-end-column="42" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/chatup/main/ChatupGlobals.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="533">
@@ -1319,23 +1279,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/kryonet/Connection.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-3243">
-          <caret line="37" column="0" selection-start-line="37" selection-start-column="0" selection-end-line="37" selection-end-column="47" />
-          <folding>
-            <element signature="e#2466#2467#0" expanded="true" />
-            <element signature="e#2500#2501#0" expanded="true" />
-            <element signature="e#6579#6580#0" expanded="true" />
-            <element signature="e#6610#6611#0" expanded="true" />
-            <element signature="e#7058#7059#0" expanded="true" />
-            <element signature="e#7090#7091#0" expanded="true" />
-            <element signature="e#7118#7119#0" expanded="true" />
-            <element signature="e#7224#7225#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/kryonet/EndPoint.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="102">
@@ -1357,46 +1300,6 @@
         <state relative-caret-position="204">
           <caret line="29" column="1" selection-start-line="29" selection-start-column="1" selection-end-line="29" selection-end-column="1" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/kryonet/KryoServer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="584">
-          <caret line="554" column="1" selection-start-line="554" selection-start-column="1" selection-end-line="554" selection-end-column="1" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#4002#4003#0" expanded="true" />
-            <element signature="e#4035#4036#0" expanded="true" />
-            <element signature="e#10980#10981#0" expanded="true" />
-            <element signature="e#11034#11035#0" expanded="true" />
-            <element signature="e#12289#12290#0" expanded="true" />
-            <element signature="e#12328#12329#0" expanded="true" />
-            <element signature="e#16109#16110#0" expanded="true" />
-            <element signature="e#16144#16145#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/kryonet/UdpConnection.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1742">
-          <caret line="46" column="8" selection-start-line="46" selection-start-column="8" selection-end-line="46" selection-end-column="8" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#5985#5986#0" expanded="true" />
-            <element signature="e#6074#6075#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/kryonet/TcpConnection.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="20">
-          <caret line="108" column="21" selection-start-line="108" selection-start-column="21" selection-end-line="108" selection-end-column="21" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1456,6 +1359,89 @@
         <state relative-caret-position="425">
           <caret line="42" column="1" selection-start-line="42" selection-start-column="1" selection-end-line="42" selection-end-column="1" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/kryonet/UdpConnection.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2805">
+          <caret line="182" column="1" selection-start-line="182" selection-start-column="1" selection-end-line="182" selection-end-column="1" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#6022#6023#0" expanded="true" />
+            <element signature="e#6111#6112#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/kryonet/KryoServer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="807">
+          <caret line="554" column="1" selection-start-line="554" selection-start-column="1" selection-end-line="554" selection-end-column="1" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#4002#4003#0" expanded="true" />
+            <element signature="e#4035#4036#0" expanded="true" />
+            <element signature="e#10980#10981#0" expanded="true" />
+            <element signature="e#11034#11035#0" expanded="true" />
+            <element signature="e#12289#12290#0" expanded="true" />
+            <element signature="e#12328#12329#0" expanded="true" />
+            <element signature="e#16109#16110#0" expanded="true" />
+            <element signature="e#16144#16145#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/kryonet/TcpConnection.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-605">
+          <caret line="116" column="43" selection-start-line="116" selection-start-column="43" selection-end-line="116" selection-end-column="43" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/kryonet/Connection.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1768">
+          <caret line="37" column="0" selection-start-line="37" selection-start-column="0" selection-end-line="37" selection-end-column="47" />
+          <folding>
+            <element signature="e#2466#2467#0" expanded="true" />
+            <element signature="e#2500#2501#0" expanded="true" />
+            <element signature="e#6579#6580#0" expanded="true" />
+            <element signature="e#6610#6611#0" expanded="true" />
+            <element signature="e#7058#7059#0" expanded="true" />
+            <element signature="e#7090#7091#0" expanded="true" />
+            <element signature="e#7118#7119#0" expanded="true" />
+            <element signature="e#7224#7225#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/chatup/tcp/ServerOnline.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="68">
+          <caret line="4" column="13" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/chatup/server/PrimaryServer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="516">
+          <caret line="661" column="0" selection-start-line="661" selection-start-column="0" selection-end-line="663" selection-end-column="61" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/chatup/server/SecondaryServer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="793">
+          <caret line="837" column="1" selection-start-line="837" selection-start-column="1" selection-end-line="837" selection-end-column="1" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

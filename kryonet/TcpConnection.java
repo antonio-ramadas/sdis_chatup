@@ -59,7 +59,7 @@ class TcpConnection
         readBuffer.flip();
     }
 
-    final SelectionKey accept(Selector selector, SocketChannel socketChannel) throws IOException
+    final SelectionKey accept(final Selector paramSelector, final SocketChannel paramSocketChannel) throws IOException
     {
         writeBuffer.clear();
         readBuffer.clear();
@@ -68,11 +68,11 @@ class TcpConnection
 
         try
         {
-            this.socketChannel = socketChannel;
-            socketChannel.configureBlocking(false);
-            Socket socket = socketChannel.socket();
+            socketChannel = paramSocketChannel;
+            paramSocketChannel.configureBlocking(false);
+            Socket socket = paramSocketChannel.socket();
             socket.setTcpNoDelay(true);
-            selectionKey = socketChannel.register(selector, SelectionKey.OP_READ);
+            selectionKey = paramSocketChannel.register(paramSelector, SelectionKey.OP_READ);
             lastReadTime = lastWriteTime = System.currentTimeMillis();
 
             return selectionKey;
@@ -84,7 +84,7 @@ class TcpConnection
         }
     }
 
-    void connect(Selector selector, SocketAddress remoteAddress, int timeout) throws IOException
+    void connect(final Selector paramSelector, final SocketAddress remoteAddress, int timeout) throws IOException
     {
         close();
         writeBuffer.clear();
@@ -94,15 +94,14 @@ class TcpConnection
 
         try
         {
-            final SocketChannel socketChannel = selector.provider().openSocketChannel();
-            final Socket socket = socketChannel.socket();
+            final SocketChannel paramSocketChannel = paramSelector.provider().openSocketChannel();
+            final Socket socket = paramSocketChannel.socket();
 
             socket.setTcpNoDelay(true);
             socket.connect(remoteAddress, timeout);
-            socketChannel.configureBlocking(false);
-
-            this.socketChannel = socketChannel;
-            selectionKey = socketChannel.register(selector, SelectionKey.OP_READ);
+            paramSocketChannel.configureBlocking(false);
+            socketChannel = paramSocketChannel;
+            selectionKey = paramSocketChannel.register(paramSelector, SelectionKey.OP_READ);
             selectionKey.attach(this);
             lastReadTime = lastWriteTime = System.currentTimeMillis();
         }
@@ -113,11 +112,11 @@ class TcpConnection
         }
     }
 
-    final Object readObject(Connection connection) throws IOException
+    final Object readObject(final Connection paramConnection) throws IOException
     {
-        SocketChannel socketChannel = this.socketChannel;
+        SocketChannel paramSocketChannel = socketChannel;
 
-        if (socketChannel == null)
+        if (paramSocketChannel == null)
         {
             throw new SocketException("Connection is closed.");
         }
@@ -130,7 +129,7 @@ class TcpConnection
             {
                 readBuffer.compact();
 
-                int bytesRead = socketChannel.read(readBuffer);
+                int bytesRead = paramSocketChannel.read(readBuffer);
 
                 readBuffer.flip();
 
@@ -166,7 +165,7 @@ class TcpConnection
         {
             readBuffer.compact();
 
-            int bytesRead = socketChannel.read(readBuffer);
+            int bytesRead = paramSocketChannel.read(readBuffer);
 
             readBuffer.flip();
 
@@ -193,7 +192,7 @@ class TcpConnection
 
         try
         {
-            object = serialization.read(connection, readBuffer);
+            object = serialization.read(paramConnection, readBuffer);
         }
         catch (Exception ex)
         {

@@ -51,7 +51,7 @@ class UdpConnection
 
     private long lastCommunicationTime;
 
-    void connect(Selector selector, InetSocketAddress remoteAddress) throws IOException
+    void connect(final Selector paramSelector, final InetSocketAddress remoteAddress) throws IOException
     {
         close();
         readBuffer.clear();
@@ -59,11 +59,11 @@ class UdpConnection
 
         try
         {
-            datagramChannel = selector.provider().openDatagramChannel();
+            datagramChannel = paramSelector.provider().openDatagramChannel();
             datagramChannel.socket().bind(null);
             datagramChannel.socket().connect(remoteAddress);
             datagramChannel.configureBlocking(false);
-            selectionKey = datagramChannel.register(selector, SelectionKey.OP_READ);
+            selectionKey = datagramChannel.register(paramSelector, SelectionKey.OP_READ);
             lastCommunicationTime = System.currentTimeMillis();
             connectedAddress = remoteAddress;
         }
@@ -76,16 +76,16 @@ class UdpConnection
 
     final InetSocketAddress readFromAddress() throws IOException
     {
-        final DatagramChannel datagramChannel = this.datagramChannel;
+        final DatagramChannel paramDatagramChannel = datagramChannel;
 
-        if (datagramChannel == null)
+        if (paramDatagramChannel == null)
         {
             throw new SocketException("Connection is closed.");
         }
 
         lastCommunicationTime = System.currentTimeMillis();
 
-        return (InetSocketAddress) datagramChannel.receive(readBuffer);
+        return (InetSocketAddress) paramDatagramChannel.receive(readBuffer);
     }
 
     final Object readObject(final Connection connection)

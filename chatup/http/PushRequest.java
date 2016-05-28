@@ -12,13 +12,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
-public class CometRequest {
+public class PushRequest {
 
     private HttpDispatcher httpDispatcher;
     private String userToken;
     private Room myRoom;
 
-    public CometRequest(final Room paramRoom, final String paramToken, long paramTimestamp, final HttpDispatcher paramDispatcher) {
+    public PushRequest(final Room paramRoom, final String paramToken, long paramTimestamp, final HttpDispatcher paramDispatcher) {
         httpDispatcher = paramDispatcher;
         lastUpdate = paramTimestamp;
         userToken = paramToken;
