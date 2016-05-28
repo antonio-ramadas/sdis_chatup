@@ -59,9 +59,7 @@ class MessageServiceHandler extends HttpDispatcher {
             }
             else {
                 sendJsonResponse(
-                    serverInstance.sendMessage(
-                        new Message(roomId, userToken, Instant.now().toEpochMilli(), messageBody)
-                    ),
+                    serverInstance.sendMessage(roomId, userToken,messageBody),
                     jsonObject.add(HttpFields.MessageTimestamp, Instant.now().toEpochMilli())
                 );
             }

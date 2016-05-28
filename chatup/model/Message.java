@@ -4,12 +4,14 @@ import java.io.Serializable;
 
 public class Message implements Comparable<Message>, Serializable {
 
-    private String messageAuthor;
+    private String userEmail;
+    private String userToken;
     private String messageContents;
 
-    public Message(int paramId, final String paramAuthor, long paramTimestamp, final String paramContents) {
+    public Message(int paramId, final String paramAuthor, final String paramEmail, long paramTimestamp, final String paramContents) {
         messageRoom = paramId;
-        messageAuthor = paramAuthor;
+        userEmail = paramEmail;
+        userToken = paramAuthor;
         messageContents = paramContents;
         messageTimestamp = paramTimestamp;
     }
@@ -26,7 +28,11 @@ public class Message implements Comparable<Message>, Serializable {
     }
 
     public final String getAuthor() {
-        return messageAuthor;
+        return userEmail;
+    }
+
+    public final String getToken() {
+        return userToken;
     }
 
     public final String getMessage() {
@@ -38,7 +44,7 @@ public class Message implements Comparable<Message>, Serializable {
         return otherObject instanceof Message
             && ((Message) otherObject).getId() == messageRoom
             && ((Message) otherObject).getTimestamp() == messageTimestamp
-            && ((Message) otherObject).getAuthor().equals(messageAuthor);
+            && ((Message) otherObject).getToken().equals(userToken);
     }
 
     @Override
@@ -48,7 +54,7 @@ public class Message implements Comparable<Message>, Serializable {
 
         hash = 11 * hash + (int) (messageTimestamp ^ (messageTimestamp >>> 32));
         hash = 11 * hash + messageRoom;
-        hash = 11 * hash + messageAuthor.hashCode();
+        hash = 11 * hash + userToken.hashCode();
 
         return hash;
     }

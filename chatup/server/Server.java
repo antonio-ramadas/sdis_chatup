@@ -135,4 +135,8 @@ public abstract class Server {
     public boolean validateToken(final String userToken) {
         throw new UnsupportedOperationException("ValdiateToken");
     }
+
+    public ServerResponse sendMessage(int roomId, String userToken, String messageBody) {
+        throw new UnsupportedOperationException("SendMessage");
+    }
 }

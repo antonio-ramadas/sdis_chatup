@@ -43,7 +43,7 @@ class SecondaryClientListener extends Listener {
             mLogger.roomNotFound(paramMessage.getId());
             break;
         case InvalidToken:
-            mLogger.userNotFound(paramMessage.getAuthor());
+            mLogger.userNotFound(paramMessage.getToken());
             break;
         case DatabaseError:
             mLogger.databaseError();

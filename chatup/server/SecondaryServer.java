@@ -456,11 +456,35 @@ public class SecondaryServer extends Server {
         return ServerResponse.SuccessResponse;
     }
 
+    public ServerResponse sendMessage(int roomId, final String userToken, final String messageBody) {
+
+        final String userRecord = users.get(userToken);
+
+        if (userRecord == null) {
+            return ServerResponse.InvalidToken;
+        }
+
+        return sendMessage(
+            new Message(roomId, userToken, userRecord, Instant.now().toEpochMilli(), messageBody)
+        );
+    }
+
     @Override
     public ServerResponse sendMessage(final Message paramMessage) {
 
+        //-----------------------------------------------------------
+        // 1) Verificar se utilizador tem sessão iniciada no servidor
+        //-----------------------------------------------------------
+
+        final String userToken = paramMessage.getToken();
+        final String userRecord = users.get(userToken);
+
+        if (userRecord == null) {
+            return ServerResponse.InvalidToken;
+        }
+
         //---------------------------------------------------------
-        // 1) Verificar se sala de destino existe no servidor local
+        // 2) Verificar se sala de destino existe no servidor local
         //---------------------------------------------------------
 
         final Room selectedRoom = rooms.get(paramMessage.getId());
@@ -470,7 +494,7 @@ public class SecondaryServer extends Server {
         }
 
         //------------------------------------------------
-        // 2) Registar mensagem recebida no servidor local
+        // 3) Registar mensagem recebida no servidor local
         //------------------------------------------------
 
         if (selectedRoom.insertMessage(paramMessage)) {
@@ -483,7 +507,7 @@ public class SecondaryServer extends Server {
         }
 
         //--------------------------------------------------------------------
-        // 3) Enviar mensagem para os outros servidores secundários conectados
+        // 4) Enviar mensagem para os outros servidores secundários conectados
         //--------------------------------------------------------------------
 
         final Set<Integer> roomServers = selectedRoom.getServers();
@@ -493,7 +517,7 @@ public class SecondaryServer extends Server {
         }
 
         //-----------------------------------------------------------------------
-        // 4) Responder aos pedidos pendentes de todos os utilizadores desta sala
+        // 5) Responder aos pedidos pendentes de todos os utilizadores desta sala
         //-----------------------------------------------------------------------
 
         for (final PushRequest pushRequest : pendingRequests) {
@@ -515,7 +539,7 @@ public class SecondaryServer extends Server {
         // 1) Verificar se utilizador tem sessão iniciada no servidor
         //-----------------------------------------------------------
 
-        final String userToken = paramMessage.getAuthor();
+        final String userToken = paramMessage.getToken();
         final String userRecord = users.get(userToken);
 
         if (userRecord == null) {

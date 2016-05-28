@@ -25,7 +25,7 @@ class ServerLogger {
             serverName = "secondary-" + paramServer.getId();
         }
 
-        if (createDirectory(serverName)) {
+        if (ChatupGlobals.createDirectory(serverName)) {
 
             final File fileObject = new File(serverName + generateFilename());
 
@@ -36,11 +36,6 @@ class ServerLogger {
                 ChatupGlobals.abort(serverType, ex);
             }
         }
-    }
-
-    private boolean createDirectory(final String paramDirectory) {
-        final File myFile = new File(paramDirectory);
-        return !(!myFile.exists() || !myFile.isDirectory()) || myFile.mkdir();
     }
 
     private String generateFilename() {

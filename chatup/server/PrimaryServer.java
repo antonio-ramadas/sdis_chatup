@@ -578,6 +578,8 @@ public class PrimaryServer extends Server {
 
             int serverId = currentEntry.getKey();
 
+            System.out.println("Server #" + serverId + " is inactive for " + (selectedServer.getTimestamp() -Instant.now().getEpochSecond()) + "seconds" );
+
             //---------------------------------------------------------------
             // 2) Notificar os restantes servidores da remoção desse servidor
             //---------------------------------------------------------------
@@ -612,13 +614,11 @@ public class PrimaryServer extends Server {
             }
 
             if (serverDatabase.deleteServer(serverId)) {
-                servers.remove(serverId);
+                serverIterator.remove();
             }
             else {
                 return ServerResponse.DatabaseError;
             }
-
-            serverIterator.remove();
         }
 
         return ServerResponse.SuccessResponse;

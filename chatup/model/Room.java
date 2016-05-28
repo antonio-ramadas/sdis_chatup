@@ -51,7 +51,7 @@ public class Room {
 
 	public boolean insertMessage(final Message paramMessage) {
 
-		final String userToken = paramMessage.getAuthor();
+		final String userToken = paramMessage.getToken();
 
 		if (mUsers.contains(userToken)) {
 			mMessages.push(paramMessage);

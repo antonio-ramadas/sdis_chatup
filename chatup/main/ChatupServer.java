@@ -5,6 +5,13 @@ import chatup.server.ServerInfo;
 import chatup.server.ServerKeystore;
 import chatup.server.ServerType;
 
+import java.io.IOException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.sql.SQLException;
+
 public class ChatupServer {
 
     private static Server serverInstance;

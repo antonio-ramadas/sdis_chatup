@@ -4,6 +4,8 @@ import chatup.server.ServerType;
 
 import com.esotericsoftware.minlog.Log;
 
+import java.io.File;
+
 public class ChatupGlobals {
 
     public static final String DefaultEncoding = "utf-8";
@@ -37,6 +39,11 @@ public class ChatupGlobals {
 
         System.out.println(usageMessage);
         System.exit(1);
+    }
+
+    public static  boolean createDirectory(final String paramDirectory) {
+        final File myFile = new File(paramDirectory);
+        return !(!myFile.exists() || !myFile.isDirectory()) || myFile.mkdir();
     }
 
     public static void abort(final Exception paramException) {

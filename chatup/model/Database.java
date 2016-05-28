@@ -1,13 +1,11 @@
 package chatup.model;
 
+import chatup.main.ChatupGlobals;
 import chatup.server.Server;
 import chatup.server.ServerInfo;
 import chatup.server.ServerType;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.channels.FileChannel;
 import java.sql.*;
 import java.util.*;
@@ -23,6 +21,7 @@ public class Database {
     private static final String RoomOwner = "owner";
     private static final String RoomPassword = "password";
     private static final String MessageAuthor = "author";
+    private static final String MessageToken = "token";
     private static final String MessageContent = "contents";
     private static final String MessageRoom = "room";
     private static final String MessageTimestamp = "epoch";
@@ -50,11 +49,17 @@ public class Database {
 
             final File defaultDatabase = new File("default/" + serverType + ".db");
 
-            if (defaultDatabase.exists()) {
-                copyFile(defaultDatabase, databaseFile);
+            if (ChatupGlobals.createDirectory(serverDirectory)) {
+
+                if (defaultDatabase.exists()) {
+                    copyFile(defaultDatabase, databaseFile);
+                }
+                else {
+                    throw new FileNotFoundException(defaultDatabase.getName());
+                }
             }
             else {
-                throw new IOException();
+                throw new FileNotFoundException(serverDirectory);
             }
         }
 
@@ -71,10 +76,6 @@ public class Database {
         }
 
         if (!destFile.exists()) {
-
-            if (!destFile.mkdirs()) {
-                return false;
-            }
 
             if (!destFile.createNewFile()) {
                 return false;
@@ -207,7 +208,7 @@ public class Database {
 
         try (final PreparedStatement stmt = dbConnection.prepareStatement(queryInsertMessage)) {
             stmt.setInt(1, paramMessage.getId());
-            stmt.setString(2, paramMessage.getAuthor());
+            stmt.setString(2, paramMessage.getToken());
             stmt.setLong(3, paramMessage.getTimestamp());
             stmt.setString(4, paramMessage.getMessage());
             stmt.executeUpdate();
@@ -233,6 +234,7 @@ public class Database {
 
                     final Message newMessage = new Message(
                         rs.getInt(MessageRoom),
+                        rs.getString(MessageToken),
                         rs.getString(MessageAuthor),
                         rs.getLong(MessageTimestamp),
                         rs.getString(MessageContent)
