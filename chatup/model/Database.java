@@ -33,7 +33,7 @@ public class Database {
     private static final String MessageContent = "contents";
     private static final String MessageRoom = "room";
     private static final String MessageTimestamp = "epoch";
-    private static final String queryInsertRoom = "INSERT INTO Rooms(id, name, password, owner) VALUES(?, ?, ?, ?)";
+    private static final String queryInsertRoom = "INSERT INTO Rooms(id, name, password, owner, timestamp) VALUES(?, ?, ?, ?, ?)";
     private static final String queryDeleteRoom = "DELETE FROM Rooms WHERE id = ?";
     private static final String querySelectRooms = "SELECT * FROM Rooms";
 
@@ -113,6 +113,7 @@ public class Database {
             stmt.setString(2, paramRoom.getName());
             stmt.setString(3, paramRoom.getPassword());
             stmt.setString(4, paramRoom.getOwner());
+            stmt.setLong(5, paramRoom.getTimestamp());
             stmt.executeUpdate();
         }
         catch (SQLException ex) {
@@ -129,6 +130,7 @@ public class Database {
             stmt.setString(2, paramRoom.getName());
             stmt.setString(3, paramRoom.getPassword());
             stmt.setString(4, paramRoom.getOwner());
+            stmt.setLong(5, paramRoom.getTimestamp());
             stmt.executeUpdate();
         }
         catch (SQLException ex) {
@@ -163,6 +165,7 @@ public class Database {
                 final Room newRoom = new Room(
                     rs.getString(RoomName),
                     rs.getString(RoomPassword),
+                    rs.getLong(ServerTimestamp),
                     rs.getString(RoomOwner)
                 );
 
