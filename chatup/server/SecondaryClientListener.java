@@ -23,21 +23,19 @@ class SecondaryClientListener extends Listener {
     @Override
     public void received(final Connection paramConnection, final Object paramObject) {
 
-        final ServerConnection serverConnection = (ServerConnection) paramConnection;
-
         if (paramObject instanceof UpdateRoom) {
-            updateRoom(serverConnection, (UpdateRoom)paramObject);
+            updateRoom((UpdateRoom)paramObject);
         }
         else if (paramObject instanceof Message){
-            receiveMessage(serverConnection, (Message)paramObject);
+            receiveMessage((Message)paramObject);
         }
     }
 
-    private void receiveMessage(final ServerConnection paramConnection, final Message paramMessage) {
+    private void receiveMessage(final Message paramMessage) {
 
         switch (mSecondary.insertMessage(paramMessage)) {
         case SuccessResponse:
-            mLogger.insertMessage(paramMessage.getId(), paramConnection.serverId);
+            mLogger.insertMessage(paramMessage.getId(), -1);
             break;
         case RoomNotFound:
             mLogger.roomNotFound(paramMessage.getId());
@@ -54,11 +52,11 @@ class SecondaryClientListener extends Listener {
         }
     }
 
-    private void updateRoom(final ServerConnection paramConnection, final UpdateRoom updateRoom) {
+    private void updateRoom(final UpdateRoom updateRoom) {
 
         switch (mSecondary.updateRoom(updateRoom)) {
         case SuccessResponse:
-            mLogger.updateRoom(updateRoom.roomId, paramConnection.serverId);
+            mLogger.updateRoom(updateRoom.roomId, -1);
             break;
         case RoomNotFound:
             mLogger.roomNotFound(updateRoom.roomId);

@@ -10,16 +10,18 @@ public class ServerInfo implements Comparable<ServerInfo> {
     private String serverAddress;
     private Set<String> serverUsers;
 
-    public ServerInfo(int serverId, long serverTimestamp, final String serverAddress, int serverPort) {
+    public ServerInfo(int serverId, long serverTimestamp, final String serverAddress, int paramTcp, int paramHttp) {
         setId(serverId);
         setAddress(serverAddress);
-        setPort(serverPort);
+        setTcpPort(paramTcp);
+        setHttpPort(paramHttp);
         setTimestamp(serverTimestamp);
         serverStatus = false;
         serverUsers = new HashSet<>();
     }
 
-    private int serverPort;
+    private int serverTcpPort;
+    private int serverHttpPort;
     private int serverId;
     private long serverTimestamp;
     private boolean serverStatus;
@@ -28,8 +30,12 @@ public class ServerInfo implements Comparable<ServerInfo> {
         return serverId;
     }
 
-    public int getPort() {
-        return serverPort;
+    public int getHttpPort() {
+        return serverHttpPort;
+    }
+
+    public int getTcpPort() {
+        return serverTcpPort;
     }
 
     public long getTimestamp() {
@@ -44,8 +50,12 @@ public class ServerInfo implements Comparable<ServerInfo> {
         serverId = paramId;
     }
 
-    void setPort(int paramPort) {
-        serverPort = paramPort;
+    void setHttpPort(int paramPort) {
+        serverHttpPort = paramPort;
+    }
+
+    void setTcpPort(int paramPort) {
+        serverTcpPort = paramPort;
     }
 
     void setTimestamp(long paramTimestamp) {
@@ -107,7 +117,7 @@ public class ServerInfo implements Comparable<ServerInfo> {
 
     @Override
     public String toString() {
-        return serverAddress + ":" + serverPort;
+        return serverAddress + ":" + serverHttpPort + "(HTTP)," + serverTcpPort ;
     }
 
     void updateTimestamp() {

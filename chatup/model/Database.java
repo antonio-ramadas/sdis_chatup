@@ -201,16 +201,17 @@ public class Database {
         return myRooms;
     }
 
-    private final static String queryInsertMessage = "INSERT INTO Messages(room, author, epoch, contents) VALUES(?, ?, ?, ?)";
+    private final static String queryInsertMessage = "INSERT INTO Messages(room, author, token, epoch, contents) VALUES(?, ?, ?, ?, ?)";
     private final static String querySelectMessagesByRoom = "SELECT * FROM Messages WHERE room = ? ORDER BY epoch DESC";
 
     public boolean insertMessage(final Message paramMessage) {
 
         try (final PreparedStatement stmt = dbConnection.prepareStatement(queryInsertMessage)) {
             stmt.setInt(1, paramMessage.getId());
-            stmt.setString(2, paramMessage.getToken());
-            stmt.setLong(3, paramMessage.getTimestamp());
-            stmt.setString(4, paramMessage.getMessage());
+            stmt.setString(2, paramMessage.getAuthor());
+            stmt.setString(3, paramMessage.getToken());
+            stmt.setLong(4, paramMessage.getTimestamp());
+            stmt.setString(5, paramMessage.getMessage());
             stmt.executeUpdate();
         }
         catch (SQLException ex) {
@@ -261,7 +262,7 @@ public class Database {
         try (final PreparedStatement stmt = dbConnection.prepareStatement(queryInsertServer)) {
             stmt.setInt(1, paramServer.getId());
             stmt.setString(2, paramServer.getAddress());
-            stmt.setInt(3, paramServer.getPort());
+            stmt.setInt(3, paramServer.getHttpPort());
             stmt.setLong(4, paramServer.getTimestamp());
             stmt.executeUpdate();
         }
@@ -289,7 +290,7 @@ public class Database {
 
         try (final PreparedStatement stmt = dbConnection.prepareStatement(queryUpdateServer)) {
             stmt.setString(1, serverInfo.getAddress());
-            stmt.setInt(2, serverInfo.getPort());
+            stmt.setInt(2, serverInfo.getHttpPort());
             stmt.setLong(3, serverInfo.getTimestamp());
             stmt.setInt(4, serverInfo.getId());
             stmt.executeUpdate();
@@ -316,6 +317,7 @@ public class Database {
                     serverId,
                     rs.getLong(ServerTimestamp),
                     rs.getString(ServerAddress),
+                    -1,
                     rs.getInt(ServerPort)
                 );
 
@@ -378,7 +380,7 @@ public class Database {
         return true;
     }
 
-    public Set<Integer> getServerByRoom(int roomId) {
+    public HashSet<Integer> getServerByRoom(int roomId) {
 
         final HashSet<Integer> myServers = new HashSet<>();
 

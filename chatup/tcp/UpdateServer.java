@@ -7,7 +7,8 @@ import java.io.Serializable;
 public class UpdateServer implements Serializable
 {
     public int serverId;
-    public int serverPort;
+    public int httpPort;
+    public int tcpPort;
     public long serverTimestamp;
 
     public UpdateServer()
@@ -19,7 +20,8 @@ public class UpdateServer implements Serializable
         serverAddress = serverInfo.getAddress();
         serverTimestamp = serverInfo.getTimestamp();
         serverId = serverInfo.getId();
-        serverPort = serverInfo.getPort();
+        httpPort = serverInfo.getHttpPort();
+        tcpPort = serverInfo.getTcpPort();
     }
 
     public String serverAddress;

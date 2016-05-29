@@ -8,6 +8,10 @@ public class Message implements Comparable<Message>, Serializable {
     private String userToken;
     private String messageContents;
 
+    public Message()
+    {
+    }
+
     public Message(int paramId, final String paramAuthor, final String paramEmail, long paramTimestamp, final String paramContents) {
         messageRoom = paramId;
         userEmail = paramEmail;

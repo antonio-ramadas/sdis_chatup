@@ -54,7 +54,8 @@ public class SecondaryServer {
                 serverId,
                 Instant.now().getEpochSecond(),
                 addressString,
-                Integer.parseInt(args[1].substring(separatorPosition + 1))
+                Integer.parseInt(args[1].substring(separatorPosition + 1)),
+                -1
             );
 
            ChatupServer.initializeSecondary(primaryServer, httpPort, tcpPort);

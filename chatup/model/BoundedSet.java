@@ -2,7 +2,7 @@ package chatup.model;
 
 import java.util.TreeSet;
 
-class BoundedSet<E> extends TreeSet<E> {
+public class BoundedSet<E> extends TreeSet<E> {
 
     private int mSize;
 

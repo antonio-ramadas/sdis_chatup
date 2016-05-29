@@ -1,11 +1,14 @@
 package chatup.tcp;
 
+import chatup.server.ServerInfo;
+
 import java.io.Serializable;
 
 public class ServerOnline implements Serializable
 {
     public int serverId;
-    public int serverPort;
+    public int tcpPort;
+    public int httpPort;
     public long serverTimestamp;
 
     public ServerOnline()
@@ -14,11 +17,23 @@ public class ServerOnline implements Serializable
 
     public String serverAddress;
 
-    public ServerOnline(int paramId, long paramTimestamp, final String paramAddress, int paramPort)
+    public ServerOnline(int paramId, long paramTimestamp, final String paramAddress, int paramTcp, int paramHttp)
     {
         serverId = paramId;
         serverAddress = paramAddress;
         serverTimestamp = paramTimestamp;
-        serverPort = paramPort;
+        tcpPort = paramTcp;
+        httpPort = paramHttp;
+    }
+
+    public ServerInfo getServerInformation() {
+
+        return new ServerInfo(
+                serverId,
+                serverTimestamp,
+                serverAddress,
+                tcpPort,
+                httpPort
+        );
     }
 }

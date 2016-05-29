@@ -34,7 +34,7 @@ class MessageServiceHandler extends HttpDispatcher {
             final ServerResponse serverResponse = serverInstance.getMessages(this, userToken,roomId,roomTimestamp);
 
             if (serverResponse != ServerResponse.SuccessResponse) {
-                sendError(ServerResponse.OperationFailed);
+                sendError(serverResponse);
             }
         }
     }
@@ -59,7 +59,7 @@ class MessageServiceHandler extends HttpDispatcher {
             }
             else {
                 sendJsonResponse(
-                    serverInstance.sendMessage(roomId, userToken,messageBody),
+                    serverInstance.sendMessage(roomId, userToken, messageBody),
                     jsonObject.add(HttpFields.MessageTimestamp, Instant.now().toEpochMilli())
                 );
             }

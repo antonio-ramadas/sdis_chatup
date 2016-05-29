@@ -1,7 +1,5 @@
 package chatup.server;
 
-import chatup.http.ServerResponse;
-
 import chatup.tcp.ServerOffline;
 import chatup.tcp.ServerOnline;
 
@@ -9,7 +7,6 @@ import kryonet.Connection;
 import kryonet.KryoServer;
 import kryonet.Listener;
 
-import java.net.ServerSocket;
 import java.util.HashMap;
 
 class PrimaryServerListener extends Listener {
@@ -40,16 +37,15 @@ class PrimaryServerListener extends Listener {
                 serverOnline.serverId,
                 serverOnline.serverTimestamp,
                 paramConnection.getRemoteAddressTCP().getAddress().getHostAddress(),
-                serverOnline.serverPort
+                serverOnline.tcpPort,
+                serverOnline.httpPort
             );
 
             serverConnection.serverId = serverOnline.serverId;
             mKryoServer.sendToAllExceptTCP(serverConnection.getId(), serverOnline);
             mConnections.put(serverOnline.serverId, serverConnection.getId());
 
-            final ServerResponse operationResult = mPrimary.insertServer(serverInfo);
-
-            switch (operationResult) {
+            switch (mPrimary.insertServer(serverInfo)) {
             case SuccessResponse:
                 mLogger.serverOnline(serverOnline.serverId, serverInfo.getAddress());
                 break;

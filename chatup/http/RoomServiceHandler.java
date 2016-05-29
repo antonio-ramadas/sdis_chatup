@@ -69,7 +69,7 @@ class RoomServiceHandler extends HttpDispatcher {
                 if (serverResponse == ServerResponse.SuccessResponse) {
                     sendJsonResponse(serverResponse, jsonObject
                         .add("address", serverInfo.getAddress())
-                        .add("port", serverInfo.getPort()));
+                        .add("port", serverInfo.getHttpPort()));
                 }
                 else {
                     sendError(serverResponse);
@@ -82,7 +82,7 @@ class RoomServiceHandler extends HttpDispatcher {
     }
 
     @Override
-    public void parsePutRequest(JsonValue jsonValue) {
+    public void parsePutRequest(final JsonValue jsonValue) {
 
         final Server serverInstance = ChatupServer.getInstance();
         final JsonObject jsonObject = extractCommand(jsonValue, HttpCommands.CreateRoom);
@@ -109,7 +109,7 @@ class RoomServiceHandler extends HttpDispatcher {
     }
 
     @Override
-    public void parseDeleteRequest(JsonValue jsonValue) {
+    public void parseDeleteRequest(final JsonValue jsonValue) {
 
         final Server serverInstance = ChatupServer.getInstance();
         final JsonObject jsonObject = extractCommand(jsonValue, HttpCommands.LeaveRoom);

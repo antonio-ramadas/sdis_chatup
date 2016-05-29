@@ -135,7 +135,8 @@ class PrimaryClientListener extends Listener {
             updateServer.serverId,
             updateServer.serverTimestamp,
             updateServer.serverAddress,
-            updateServer.serverPort
+            updateServer.tcpPort,
+            updateServer.httpPort
         );
 
         final ServerResponse operationResult = mSecondary.updateServer(serverInfo);

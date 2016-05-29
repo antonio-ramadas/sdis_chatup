@@ -12,10 +12,10 @@ public class Room {
     private String mPassword;
     private String mOwner;
     private MessageCache mMessages;
-    private Set<String> mUsers;
-    private Set<Integer> mServers;
+    private HashSet<String> mUsers;
+    private HashSet<Integer> mServers;
 
-    Room(final String paramName, final String paramPassword, final String paramOwner) {
+    public Room(final String paramName, final String paramPassword, final String paramOwner) {
         this(paramName, paramPassword, Instant.now().getEpochSecond(), paramOwner);
 	}
 
@@ -26,10 +26,20 @@ public class Room {
         mMessages = new MessageCache();
         mUsers = new HashSet<>();
         mServers = new HashSet<>();
+        mRefreshed = false;
         mTimestamp = paramTimestamp;
     }
 
 	private long mTimestamp;
+    private boolean mRefreshed;
+
+    public void setRefreshed(boolean paramFreshed) {
+        mRefreshed = paramFreshed;
+    }
+
+    public boolean hasRefreshed() {
+        return mRefreshed;
+    }
 
     public Set<Integer> updateServers(final Set<Integer> paramServers) {
 
@@ -57,7 +67,7 @@ public class Room {
 			mMessages.push(paramMessage);
 		}
 
-        mTimestamp = mMessages.getLast().getTimestamp();
+        mTimestamp = Instant.now().getEpochSecond();
 
 		return true;
 	}
@@ -115,7 +125,7 @@ public class Room {
         return mTimestamp;
     }
 
-    public void setServers(final Set<Integer> paramServers) {
+    public void setServers(final HashSet<Integer> paramServers) {
         mServers = paramServers;
     }
 
@@ -136,7 +146,7 @@ public class Room {
         return mPassword;
     }
 
-    public final Set<Integer> getServers() {
+    public final HashSet<Integer> getServers() {
         return mServers;
     }
 

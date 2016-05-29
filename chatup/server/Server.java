@@ -3,7 +3,6 @@ package chatup.server;
 import chatup.http.HttpDispatcher;
 import chatup.http.ServerResponse;
 import chatup.main.ChatupGlobals;
-import chatup.main.ChatupServer;
 import chatup.model.Message;
 
 import com.eclipsesource.json.JsonValue;
@@ -11,8 +10,6 @@ import com.eclipsesource.json.JsonValue;
 import com.sun.net.httpserver.*;
 
 import javafx.util.Pair;
-
-import javax.net.ssl.*;
 
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
@@ -22,16 +19,22 @@ import java.util.concurrent.Executors;
 public abstract class Server {
 
     final HashMap<String, String> users = new HashMap<>();
+    final Object usersLock = new Object();
     private final ServerType serverType;
 
-    Server(final HttpHandler httpHandler, final ServerType paramType, int httpPort) throws SQLException {
+    private int mTcpPort;
+    private int mHttpPort;
+
+    Server(final HttpHandler httpHandler, final ServerType paramType, int tcpPort, int httpPort) throws SQLException {
 
         serverType = paramType;
+        mTcpPort = tcpPort;
+        mHttpPort = httpPort;
 
         try {
 
-            final HttpsServer httpServer = HttpsServer.create(new InetSocketAddress(httpPort), 0);
-            final ServerKeystore serverKeystore = ChatupServer.getKeystore();
+            final HttpServer httpServer = HttpServer.create(new InetSocketAddress(httpPort), 0);
+         /*   final ServerKeystore serverKeystore = ChatupServer.getKeystore();
             final KeyManagerFactory kmf = serverKeystore.getKeyManager();
             final TrustManagerFactory tmf = serverKeystore.getTrustManager();
             final SSLContext sslContext = SSLContext.getInstance("TLS");
@@ -61,7 +64,7 @@ public abstract class Server {
                         ChatupGlobals.abort(serverType, ex);
                     }
                 }
-            });
+            });*/
 
             httpServer.createContext("/", httpHandler);
             httpServer.setExecutor(Executors.newCachedThreadPool());
@@ -82,6 +85,14 @@ public abstract class Server {
 
     public int getId() {
         return -1;
+    }
+
+    public int getHttpPort() {
+        return mHttpPort;
+    }
+
+    public int getTcpPort() {
+        return mTcpPort;
     }
 
     public ServerResponse insertServer(final ServerInfo serverInfo) {

@@ -5,6 +5,7 @@ import chatup.http.PrimaryDispatcher;
 import chatup.http.ServerResponse;
 import chatup.model.Database;
 import chatup.model.CommandQueue;
+import chatup.model.Room;
 import chatup.model.RoomInfo;
 import chatup.tcp.*;
 
@@ -27,6 +28,7 @@ public class PrimaryServer extends Server {
     private final ServerLogger serverLogger;
     private final PrimaryServerListener myServerListener;
     private final HashMap<Integer, CommandQueue> messageQueue;
+    private final Object serversLock = new Object();
     private final HashMap<Integer, ServerInfo> servers;
     private final HashMap<Integer, RoomInfo> rooms;
 
@@ -36,7 +38,7 @@ public class PrimaryServer extends Server {
         // 1) Inicializar servidor HTTPS para receber pedidos dos clientes
         //----------------------------------------------------------------
 
-        super(new PrimaryDispatcher(), ServerType.PRIMARY, httpPort);
+        super(new PrimaryDispatcher(), ServerType.PRIMARY, tcpPort, httpPort);
 
         //--------------------------------------------------------------------
         // 2) Ler para memória informações dos servidores armazenadas em disco
@@ -112,13 +114,14 @@ public class PrimaryServer extends Server {
         // 6) Apaga todas os servidores inactivos nas últimas 24 horas
         //------------------------------------------------------------
 
-        purgeServers();
+     //   purgeServers();
 
         //-------------------------------------------------------
         // 7) Apaga todas as salas inactivas nas últimas 24 horas
         //-------------------------------------------------------
 
         purgeRooms();
+        //deleteRoom(7);
     }
 
     private int sequenceRoom;
@@ -148,12 +151,15 @@ public class PrimaryServer extends Server {
 
         final ArrayList<ServerInfo> serversList = new ArrayList<>();
 
-        for (final HashMap.Entry<Integer, ServerInfo> entry : servers.entrySet()) {
+        synchronized (serversLock) {
 
-            final ServerInfo currentServer = entry.getValue();
+            for (final HashMap.Entry<Integer, ServerInfo> entry : servers.entrySet()) {
 
-            if (currentServer.isOnline()) {
-                serversList.add(currentServer);
+                final ServerInfo currentServer = entry.getValue();
+
+                if (currentServer.isOnline()) {
+                    serversList.add(currentServer);
+                }
             }
         }
 
@@ -163,11 +169,7 @@ public class PrimaryServer extends Server {
 
         Collections.sort(serversList);
 
-        if (serversList.size() < replicationDegree) {
-            replicationDegree = serversList.size();
-        }
-
-        return (ArrayList<ServerInfo>) serversList.subList(0, replicationDegree);
+        return serversList;
     }
 
     // TODO: verificar algoritmo de replicação de emergência de uma sala (ver também @joinRoom)
@@ -182,18 +184,19 @@ public class PrimaryServer extends Server {
         final Set<Integer> roomServers = selectedRoom.getServers();
         final ArrayList<ServerInfo> serversList = new ArrayList<>();
 
-        for (final HashMap.Entry<Integer, ServerInfo> entry : servers.entrySet()) {
+        synchronized (serversLock) {
 
-            int serverId = entry.getKey();
+            for (final HashMap.Entry<Integer, ServerInfo> entry : servers.entrySet()) {
 
-            if (roomServers.contains(serverId)) {
-                continue;
-            }
+                if (roomServers.contains(entry.getKey())) {
+                    continue;
+                }
 
-            final ServerInfo currentServer = entry.getValue();
+                final ServerInfo currentServer = entry.getValue();
 
-            if (currentServer.isOnline()) {
-                serversList.add(currentServer);
+                if (currentServer.isOnline()) {
+                    serversList.add(currentServer);
+                }
             }
         }
 
@@ -219,7 +222,6 @@ public class PrimaryServer extends Server {
         return new Pair<>(ServerResponse.SuccessResponse, selectedServer);
     }
 
-    // TODO: verificar a atribuição das salas aos servidores, testar em casos excepcionais (ver também @cloneRoom)
     @Override
     public ServerResponse createRoom(final String roomName, final String roomPassword, final String roomOwner) {
 
@@ -227,10 +229,15 @@ public class PrimaryServer extends Server {
         // 1) Verificar se utilizador tem sessão iniciada no servidor
         //-----------------------------------------------------------
 
-        final String userRecord = users.get(roomOwner);
+        final String userEmail;
 
-        if (userRecord == null) {
-            return ServerResponse.InvalidToken;
+        synchronized (usersLock) {
+
+            userEmail = users.get(roomOwner);
+
+            if (userEmail == null) {
+                return ServerResponse.InvalidToken;
+            }
         }
 
         //--------------------------------------------------------
@@ -238,15 +245,23 @@ public class PrimaryServer extends Server {
         //--------------------------------------------------------
 
         int roomId = ++sequenceRoom;
-        int n = (int)(Math.floor(servers.size() / 2) + 1);
-        final RoomInfo newRoom = new RoomInfo(roomName, roomPassword, roomOwner);
+        int replicationDegree = (int)(Math.floor(servers.size() / 3) + 1);
+
+        final RoomInfo roomInformation = new RoomInfo(roomName, roomPassword, roomOwner);
+
+        final Room serializedRoom = new Room(
+            roomName,
+            roomPassword,
+            roomInformation.getTimestamp(),
+            roomOwner
+        );
 
         //----------------------------------------------------
         // 3) Registar alterações na base de dados do servidor
         //----------------------------------------------------
 
-        if (serverDatabase.insertRoom(roomId, newRoom)) {
-            rooms.put(roomId, newRoom);
+        if (serverDatabase.insertRoom(roomId, roomInformation)) {
+            rooms.put(roomId, roomInformation);
         }
         else {
             return ServerResponse.DatabaseError;
@@ -256,28 +271,32 @@ public class PrimaryServer extends Server {
         // 4) Notificar os restantes servidores da criação desta sala
         //-----------------------------------------------------------
 
-        final ArrayList<ServerInfo> mostEmpty = cloneRoom(n);
+        final ArrayList<ServerInfo> mostEmpty = cloneRoom(replicationDegree);
 
         if (mostEmpty == null || mostEmpty.isEmpty()) {
             return ServerResponse.ServiceOffline;
         }
 
-        for (final ServerInfo serverInformation : mostEmpty) {
+        if (mostEmpty.size() < replicationDegree) {
+            replicationDegree = mostEmpty.size();
+        }
 
-            int serverId = serverInformation.getId();
+        for (int i = 0; i < replicationDegree; i++) {
 
-            newRoom.registerServer(serverId);
+            int serverId = mostEmpty.get(i).getId();
 
             if (serverDatabase.associateServer(serverId, roomId)) {
-                newRoom.registerServer(serverId);
+                roomInformation.registerServer(serverId);
             }
             else {
                 return ServerResponse.DatabaseError;
             }
         }
 
-        for (final ServerInfo serverInformation : mostEmpty) {
-            myServerListener.sendServer(serverInformation.getId(), newRoom);
+        final CreateRoom createRoom = new CreateRoom(roomId, serializedRoom, userEmail);
+
+        for (int i = 0; i < replicationDegree; i++) {
+            myServerListener.sendServer(mostEmpty.get(i).getId(), createRoom);
         }
 
         return ServerResponse.SuccessResponse;
@@ -362,10 +381,11 @@ public class PrimaryServer extends Server {
         // 1) Verificar se utilizador tem sessão iniciada no servidor
         //-----------------------------------------------------------
 
-        final String userRecord = users.get(userToken);
+        synchronized (usersLock) {
 
-        if (userRecord == null) {
-            return ServerResponse.InvalidToken;
+            if (users.get(userToken) == null) {
+                return ServerResponse.InvalidToken;
+            }
         }
 
         //-----------------------------------------------------------
@@ -414,10 +434,15 @@ public class PrimaryServer extends Server {
         // 1) Verificar se utilizador tem sessão iniciada no servidor
         //-----------------------------------------------------------
 
-        final String userEmail = users.get(userToken);
+        final String userEmail;
 
-        if (userEmail == null) {
-            return new Pair<>(ServerResponse.InvalidToken, null);
+        synchronized (usersLock) {
+
+            userEmail = users.get(userToken);
+
+            if (users.get(userToken) == null) {
+                return new Pair<>(ServerResponse.InvalidToken, null);
+            }
         }
 
         //-----------------------------------------------------------
@@ -469,10 +494,15 @@ public class PrimaryServer extends Server {
 
         for (final Integer serverId : roomServers) {
 
-            final ServerInfo selectedServer = servers.get(serverId);
+            final ServerInfo selectedServer;
 
-            if (selectedServer == null) {
-                continue;
+            synchronized (serversLock) {
+
+                selectedServer = servers.get(serverId);
+
+                if (selectedServer == null) {
+                    continue;
+                }
             }
 
             if (selectedServer.isOnline()) {
@@ -511,13 +541,18 @@ public class PrimaryServer extends Server {
         // 8) Registar entrada do utilizador nos servidores secundários
         //-------------------------------------------------------------
 
-        final ServerInfo currentServer = servers.get(minimumServer);
+        final ServerInfo currentServer;
 
-        if (currentServer != null) {
-            currentServer.registerUser(userToken);
-        }
-        else {
-            return new Pair<>(ServerResponse.ServerNotFound, null);
+        synchronized (serversLock) {
+
+            currentServer = servers.get(minimumServer);
+
+            if (currentServer != null) {
+                currentServer.registerUser(userToken);
+            }
+            else {
+                return new Pair<>(ServerResponse.ServerNotFound, null);
+            }
         }
 
         //--------------------------------------------------------------
@@ -536,28 +571,26 @@ public class PrimaryServer extends Server {
     @Override
     public ServerResponse insertServer(final ServerInfo serverInfo) {
 
-        //--------------------------------------------------------------
-        // 1) Verificar se servidor escolhido já existe na base de dados
-        //--------------------------------------------------------------
-
         int serverId = serverInfo.getId();
 
-        if (servers.containsKey(serverId)) {
-            return updateServer(serverInfo);
-        }
+        synchronized (serversLock) {
 
-        if (serverDatabase.insertServer(serverInfo)) {
-            servers.put(serverId, serverInfo);
-            serverLogger.insertServer(serverId);
-        }
-        else {
-            return ServerResponse.DatabaseError;
+            if (servers.containsKey(serverId)) {
+                return updateServer(serverInfo);
+            }
+
+            if (serverDatabase.insertServer(serverInfo)) {
+                servers.put(serverId, serverInfo);
+                serverLogger.insertServer(serverId);
+            }
+            else {
+                return ServerResponse.DatabaseError;
+            }
         }
 
         return serverOnline(serverId, serverInfo.getTimestamp());
     }
 
-    // TODO: testar algoritmo para apagar servidores inactivos (24 horas ou mais de inactividade)
     private ServerResponse purgeServers() {
 
         final long currentTimestamp = Instant.now().getEpochSecond() - (3600 * 24);
@@ -578,7 +611,7 @@ public class PrimaryServer extends Server {
 
             int serverId = currentEntry.getKey();
 
-            System.out.println("Server #" + serverId + " is inactive for " + (selectedServer.getTimestamp() -Instant.now().getEpochSecond()) + "seconds" );
+            System.out.println("Server #" + serverId + " is inactive for " + (Instant.now().getEpochSecond() - selectedServer.getTimestamp()) + "seconds" );
 
             //---------------------------------------------------------------
             // 2) Notificar os restantes servidores da remoção desse servidor
@@ -632,34 +665,37 @@ public class PrimaryServer extends Server {
         // 1) Verificar se servidor escolhido existe na base de dados
         //-----------------------------------------------------------
 
-        final ServerInfo selectedServer = servers.get(serverId);
+        synchronized (serversLock) {
 
-        if (selectedServer == null) {
-            return ServerResponse.ServerNotFound;
+            if (servers.get(serverId) == null) {
+                return ServerResponse.ServerNotFound;
+            }
         }
-
         //---------------------------------------------------------------
         // 2) Notificar os restantes servidores da remoção desse servidor
         //---------------------------------------------------------------
 
         final DeleteServer deleteServer = new DeleteServer(serverId);
 
-        servers.forEach((currentId, currentServer) -> {
+        synchronized (serversLock) {
 
-            if (currentId != serverId) {
+            servers.forEach((currentId, currentServer) -> {
 
-                if (currentServer.isOnline()) {
-                    myServerListener.sendServer(currentId, deleteServer);
+                if (currentId != serverId) {
+
+                    if (currentServer.isOnline()) {
+                        myServerListener.sendServer(currentId, deleteServer);
+                    }
+                    else {
+                        System.out.println("Server #" + currentId + " is offline, will be notified as soon as it connects!");
+                        insertQueue(currentId, deleteServer);
+                    }
+
+                    currentServer.updateTimestamp();
+                    serverDatabase.updateServer(currentServer);
                 }
-                else {
-                    System.out.println("Server #" + currentId + " is offline, will be notified as soon as it connects!");
-                    insertQueue(currentId, deleteServer);
-                }
-
-                currentServer.updateTimestamp();
-                serverDatabase.updateServer(currentServer);
-            }
-        });
+            });
+        }
 
         //---------------------------------------------------
         // 3) Registar alterações efectuadas na base de dados
@@ -672,11 +708,14 @@ public class PrimaryServer extends Server {
             return ServerResponse.DatabaseError;
         }
 
-        if (serverDatabase.deleteServer(serverId)) {
-            servers.remove(serverId);
-        }
-        else {
-            return ServerResponse.DatabaseError;
+        synchronized (serversLock) {
+
+            if (serverDatabase.deleteServer(serverId)) {
+                servers.remove(serverId);
+            }
+            else {
+                return ServerResponse.DatabaseError;
+            }
         }
 
         return ServerResponse.SuccessResponse;
@@ -710,24 +749,27 @@ public class PrimaryServer extends Server {
             final DeleteRoom deleteRoom = new DeleteRoom(roomId);
             final Set<Integer> serverRooms = selectedRoom.getServers();
 
-            for (final Integer serverId : serverRooms) {
+            if (serverRooms != null && serverRooms.size() > 0) {
 
-                final ServerInfo currentServer = servers.get(serverId);
+                for (final Integer serverId : serverRooms) {
 
-                if (currentServer == null) {
-                    continue;
+                    final ServerInfo currentServer = servers.get(serverId);
+
+                    if (currentServer == null) {
+                        continue;
+                    }
+
+                    if (currentServer.isOnline()) {
+                        myServerListener.sendServer(serverId, deleteRoom);
+                    }
+                    else {
+                        System.out.println("Server #" + serverId + " is offline, will be notified as soon as it connects!");
+                        insertQueue(serverId, deleteRoom);
+                    }
+
+                    currentServer.updateTimestamp();
+                    serverDatabase.updateServer(currentServer);
                 }
-
-                if (currentServer.isOnline()) {
-                    myServerListener.sendServer(serverId, deleteRoom);
-                }
-                else {
-                    System.out.println("Server #" + serverId + " is offline, will be notified as soon as it connects!");
-                    insertQueue(serverId, deleteRoom);
-                }
-
-                currentServer.updateTimestamp();
-                serverDatabase.updateServer(currentServer);
             }
 
             //----------------------------------------------------
@@ -747,14 +789,17 @@ public class PrimaryServer extends Server {
         return ServerResponse.SuccessResponse;
     }
 
-    // TODO: testar algoritmo que envia comandos UpdateServer, DeleteRoom, UpdateRoom
-    // TODO: para um servidor que estava offline quando estes foram gerados
     private ServerResponse serverOnline(int serverId, long serverTimestamp) {
 
-        final ServerInfo selectedServer = servers.get(serverId);
+        final ServerInfo selectedServer;
 
-        if (selectedServer == null) {
-            return ServerResponse.ServerNotFound;
+        synchronized (serversLock) {
+
+            selectedServer = servers.get(serverId);
+
+            if (selectedServer == null) {
+                return ServerResponse.ServerNotFound;
+            }
         }
 
         long currentTimestamp = selectedServer.getTimestamp();
@@ -779,13 +824,17 @@ public class PrimaryServer extends Server {
 
     final ServerResponse disconnectServer(int serverId) {
 
-        final ServerInfo selectedServer = servers.get(serverId);
+        synchronized (serversLock) {
 
-        if (selectedServer == null) {
-            return ServerResponse.ServerNotFound;
+            final ServerInfo selectedServer = servers.get(serverId);
+
+            if (selectedServer == null) {
+                return ServerResponse.ServerNotFound;
+            }
+
+            selectedServer.setStatus(false);
         }
 
-        selectedServer.setStatus(false);
         serverLogger.serverOffline(serverId);
 
         return ServerResponse.SuccessResponse;
@@ -796,8 +845,6 @@ public class PrimaryServer extends Server {
     }
 
     // TODO: verificar se todos os servidores recebem a notificação updateServer
-    //       alterar porta HTTP de um servidor secundário, verificar se todos os restantes recebem a nova porta
-    //       os secundários que estavam offline devem receber a mensagem assim que se reconectarem (@serverOnline)
     @Override
     public ServerResponse updateServer(final ServerInfo serverInfo) {
 
@@ -805,11 +852,16 @@ public class PrimaryServer extends Server {
         // 1) Verificar se servidor escolhido existe na base de dados
         //-----------------------------------------------------------
 
+        final ServerInfo selectedServer;
         int serverId = serverInfo.getId();
-        final ServerInfo selectedServer = servers.get(serverId);
 
-        if (selectedServer == null) {
-            return ServerResponse.ServerNotFound;
+        synchronized (serversLock) {
+
+            selectedServer = servers.get(serverId);
+
+            if (selectedServer == null) {
+                return ServerResponse.ServerNotFound;
+            }
         }
 
         //----------------------------------------------------
@@ -823,8 +875,13 @@ public class PrimaryServer extends Server {
             sameInformation = false;
         }
 
-        if (selectedServer.getPort() != serverInfo.getPort()) {
-            selectedServer.setPort(serverInfo.getPort());
+        if (selectedServer.getTcpPort() != serverInfo.getTcpPort()) {
+            selectedServer.setTcpPort(serverInfo.getTcpPort());
+            sameInformation = false;
+        }
+
+        if (selectedServer.getHttpPort() != serverInfo.getHttpPort()) {
+            selectedServer.setHttpPort(serverInfo.getHttpPort());
             sameInformation = false;
         }
 
@@ -845,22 +902,25 @@ public class PrimaryServer extends Server {
 
         final UpdateServer updateServer = new UpdateServer(selectedServer);
 
-        servers.forEach((currentId, currentServer) -> {
+        synchronized (serversLock) {
 
-            if (currentId != serverId) {
+            servers.forEach((currentId, currentServer) -> {
 
-                currentServer.updateTimestamp();
-                serverDatabase.updateServer(currentServer);
+                if (currentId != serverId) {
 
-                if (currentServer.isOnline()) {
-                    myServerListener.sendServer(currentId, updateServer);
+                    currentServer.updateTimestamp();
+                    serverDatabase.updateServer(currentServer);
+
+                    if (currentServer.isOnline()) {
+                        myServerListener.sendServer(currentId, updateServer);
+                    }
+                    else {
+                        System.out.println("Server #" + currentId + " is offline, will be notified as soon as it connects.");
+                        insertQueue(currentId, updateServer);
+                    }
                 }
-                else {
-                    System.out.println("Server #" + currentId + " is offline, will be notified as soon as it connects!");
-                    insertQueue(currentId, updateServer);
-                }
-            }
-        });
+            });
+        }
 
         return serverOnline(serverId, serverInfo.getTimestamp());
     }
@@ -872,10 +932,13 @@ public class PrimaryServer extends Server {
         // 1) Verificar se utilizador tem sessão iniciada no servidor
         //-----------------------------------------------------------
 
-        final String userRecord = users.get(userToken);
+        synchronized (usersLock) {
 
-        if (userRecord == null || !userRecord.equals(userEmail)) {
-            return ServerResponse.InvalidToken;
+            final String userRecord = users.get(userToken);
+
+            if (userRecord == null || !userRecord.equals(userEmail)) {
+                return ServerResponse.InvalidToken;
+            }
         }
 
         //-----------------------------------------------------------------------
@@ -884,12 +947,15 @@ public class PrimaryServer extends Server {
 
         final UserDisconnect userDisconnect = new UserDisconnect(userToken, userEmail);
 
-        servers.forEach((severId, server) -> {
+        synchronized (serversLock) {
 
-            if (server.removeUser(userToken)) {
-                myServerListener.sendServer(severId, userDisconnect);
-            }
-        });
+            servers.forEach((severId, server) -> {
+
+                if (server.removeUser(userToken)) {
+                    myServerListener.sendServer(severId, userDisconnect);
+                }
+            });
+        }
 
         //----------------------------------------------------------------
         // 3) Remover utilizador das salas existentes no servidor primário
@@ -901,7 +967,9 @@ public class PrimaryServer extends Server {
         // 4) Remover utilizador da lista de utilizadores ligados ao servidor
         //-------------------------------------------------------------------
 
-        users.remove(userToken);
+        synchronized (usersLock) {
+            users.remove(userToken);
+        }
 
         return ServerResponse.SuccessResponse;
     }
@@ -909,17 +977,22 @@ public class PrimaryServer extends Server {
     // TODO: implementar autenticação via facebook
     public ServerResponse userLogin(final String userEmail, final String userToken) {
 
-        if (users.containsKey(userToken)) {
-            return ServerResponse.SessionExists;
+        synchronized (usersLock) {
+
+            if (users.containsKey(userToken)) {
+                return ServerResponse.SessionExists;
+            }
+
+            users.put(userToken, userEmail);
         }
-
-        users.put(userToken, userEmail);
-
 
         return ServerResponse.SuccessResponse;
     }
 
     public boolean validateToken(final String userToken) {
-        return users.containsKey(userToken);
+
+        synchronized (usersLock) {
+            return users.containsKey(userToken);
+        }
     }
 }
