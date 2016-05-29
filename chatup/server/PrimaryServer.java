@@ -252,7 +252,7 @@ public class PrimaryServer extends AbstractServer {
             roomName,
             roomPassword,
             roomInformation.getTimestamp(),
-            userEmail
+            roomOwner
         );
 
         //----------------------------------------------------

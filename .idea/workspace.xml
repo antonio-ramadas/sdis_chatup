@@ -4,19 +4,10 @@
     <bookmark url="file://$PROJECT_DIR$/chatup/server/SecondaryServer.java" line="55" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="12837c42-8525-4718-b44a-390330e984d3" name="Default" comment="proper database data">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/chatup/http/FacebookService.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/secondary-2/secondary-2.db" afterPath="$PROJECT_DIR$/secondary-2/secondary-2.db" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/secondary-3/secondary-3.db" afterPath="$PROJECT_DIR$/secondary-3/secondary-3.db" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/secondary-4/secondary-4.db" afterPath="$PROJECT_DIR$/secondary-4/secondary-4.db" />
+    <list default="true" id="12837c42-8525-4718-b44a-390330e984d3" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/default/primary.db" afterPath="$PROJECT_DIR$/default/primary.db" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/http/HttpDispatcher.java" afterPath="$PROJECT_DIR$/chatup/http/HttpDispatcher.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/http/PushRequest.java" afterPath="$PROJECT_DIR$/chatup/http/PushRequest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/http/UserService.java" afterPath="$PROJECT_DIR$/chatup/http/UserService.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/model/RoomInfo.java" afterPath="$PROJECT_DIR$/chatup/model/RoomInfo.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/AbstractServer.java" afterPath="$PROJECT_DIR$/chatup/server/AbstractServer.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/PrimaryServer.java" afterPath="$PROJECT_DIR$/chatup/server/PrimaryServer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/ServerKeystore.java" afterPath="$PROJECT_DIR$/chatup/server/ServerKeystore.java" />
     </list>
     <ignored path="sdis_chatup.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -44,11 +35,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="PrimaryServer.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="PrimaryServer.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/chatup/server/PrimaryServer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-5175">
-              <caret line="254" column="12" selection-start-line="254" selection-start-column="12" selection-end-line="254" selection-end-column="12" />
+            <state relative-caret-position="-296">
+              <caret line="254" column="21" selection-start-line="254" selection-start-column="21" selection-end-line="254" selection-end-column="21" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -112,7 +103,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="FacebookService.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="FacebookService.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/chatup/http/FacebookService.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="153">
@@ -125,8 +116,8 @@
       <file leaf-file-name="SecondaryServer.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/chatup/server/SecondaryServer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="653">
-              <caret line="884" column="1" selection-start-line="884" selection-start-column="1" selection-end-line="884" selection-end-column="1" />
+            <state relative-caret-position="1268">
+              <caret line="263" column="46" selection-start-line="263" selection-start-column="37" selection-end-line="263" selection-end-column="46" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -224,9 +215,9 @@
         <option value="$PROJECT_DIR$/chatup/server/ServerKeystore.java" />
         <option value="$PROJECT_DIR$/chatup/http/UserService.java" />
         <option value="$PROJECT_DIR$/chatup/server/AbstractServer.java" />
-        <option value="$PROJECT_DIR$/chatup/server/PrimaryServer.java" />
         <option value="$PROJECT_DIR$/chatup/http/HttpDispatcher.java" />
         <option value="$PROJECT_DIR$/chatup/http/FacebookService.java" />
+        <option value="$PROJECT_DIR$/chatup/server/PrimaryServer.java" />
       </list>
     </option>
   </component>
@@ -968,7 +959,14 @@
       <option name="project" value="LOCAL" />
       <updated>1464544314441</updated>
     </task>
-    <option name="localTasksCounter" value="32" />
+    <task id="LOCAL-00032" summary="facebook authentication done">
+      <created>1464546911905</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1464546911905</updated>
+    </task>
+    <option name="localTasksCounter" value="33" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
@@ -1018,7 +1016,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="code readability improvements" />
     <MESSAGE value="secondary server now works" />
     <MESSAGE value="serverinfo now has serverId" />
     <MESSAGE value="sends and receives messages" />
@@ -1043,7 +1040,8 @@
     <MESSAGE value="latest kryonet version, renamed to abstractserver" />
     <MESSAGE value="before facebook authentication" />
     <MESSAGE value="proper database data" />
-    <option name="LAST_COMMIT_MESSAGE" value="proper database data" />
+    <MESSAGE value="facebook authentication done" />
+    <option name="LAST_COMMIT_MESSAGE" value="facebook authentication done" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1414,16 +1412,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/chatup/server/SecondaryServer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="653">
-          <caret line="884" column="1" selection-start-line="884" selection-start-column="1" selection-end-line="884" selection-end-column="1" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/chatup/http/RoomService.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="500">
@@ -1455,16 +1443,6 @@
         <state relative-caret-position="204">
           <caret line="15" column="11" selection-start-line="15" selection-start-column="11" selection-end-line="15" selection-end-column="11" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/chatup/server/PrimaryServer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-5175">
-          <caret line="254" column="12" selection-start-line="254" selection-start-column="12" selection-end-line="254" selection-end-column="12" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1501,6 +1479,26 @@
         <state relative-caret-position="153">
           <caret line="9" column="30" selection-start-line="9" selection-start-column="30" selection-end-line="9" selection-end-column="30" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/chatup/server/SecondaryServer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1268">
+          <caret line="263" column="46" selection-start-line="263" selection-start-column="37" selection-end-line="263" selection-end-column="46" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/chatup/server/PrimaryServer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-296">
+          <caret line="254" column="21" selection-start-line="254" selection-start-column="21" selection-end-line="254" selection-end-column="21" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
