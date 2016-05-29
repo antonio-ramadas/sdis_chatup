@@ -103,10 +103,6 @@ public class ServerInfo implements Comparable<ServerInfo> {
         serverStatus = paramStatus;
     }
 
-    public boolean hasUser(final String userToken) {
-        return serverUsers.contains(userToken);
-    }
-
     boolean isOnline() {
         return serverStatus;
     }

@@ -9,6 +9,8 @@ import java.io.File;
 public class ChatupGlobals {
 
     public static final String DefaultEncoding = "utf-8";
+    public static final String JsonType = "application/json";
+    public static final String UserAgent = "Mozilla/5.0";
     public static final String HeartbeatServiceUrl = "/HeartbeatService";
     public static final String MessageServiceUrl = "/MessageService";
     public static final String UserServiceUrl = "/UserService";
