@@ -5,35 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="12837c42-8525-4718-b44a-390330e984d3" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/chatup/tcp/SyncServers.java" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/primary.db" afterPath="$PROJECT_DIR$/primary.db" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/primary/primary.db" afterPath="$PROJECT_DIR$/primary/primary.db" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/secondary-1.db" afterPath="$PROJECT_DIR$/secondary-1.db" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/secondary-1/secondary-1.db" afterPath="$PROJECT_DIR$/secondary-1/secondary-1.db" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/secondary-2.db" afterPath="$PROJECT_DIR$/secondary-2.db" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/secondary-2/secondary-2.db" afterPath="$PROJECT_DIR$/secondary-2/secondary-2.db" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/secondary-3.db" afterPath="$PROJECT_DIR$/secondary-3.db" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/secondary-3/secondary-3.db" afterPath="$PROJECT_DIR$/secondary-3/secondary-3.db" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/secondary-4.db" afterPath="$PROJECT_DIR$/secondary-4.db" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/secondary-4/secondary-4.db" afterPath="$PROJECT_DIR$/secondary-4/secondary-4.db" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/http/MessageServiceHandler.java" afterPath="$PROJECT_DIR$/chatup/http/MessageServiceHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/http/RoomServiceHandler.java" afterPath="$PROJECT_DIR$/chatup/http/RoomServiceHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/main/SecondaryServer.java" afterPath="$PROJECT_DIR$/chatup/main/SecondaryServer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/model/BoundedSet.java" afterPath="$PROJECT_DIR$/chatup/model/BoundedSet.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/model/Database.java" afterPath="$PROJECT_DIR$/chatup/model/Database.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/model/Message.java" afterPath="$PROJECT_DIR$/chatup/model/Message.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/model/Room.java" afterPath="$PROJECT_DIR$/chatup/model/Room.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/PrimaryClientListener.java" afterPath="$PROJECT_DIR$/chatup/server/PrimaryClientListener.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/PrimaryServer.java" afterPath="$PROJECT_DIR$/chatup/server/PrimaryServer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/PrimaryServerListener.java" afterPath="$PROJECT_DIR$/chatup/server/PrimaryServerListener.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/SecondaryClientListener.java" afterPath="$PROJECT_DIR$/chatup/server/SecondaryClientListener.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/SecondaryServer.java" afterPath="$PROJECT_DIR$/chatup/server/SecondaryServer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/SecondaryServerListener.java" afterPath="$PROJECT_DIR$/chatup/server/SecondaryServerListener.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/Server.java" afterPath="$PROJECT_DIR$/chatup/server/Server.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/ServerInfo.java" afterPath="$PROJECT_DIR$/chatup/server/ServerInfo.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/tcp/CreateRoom.java" afterPath="$PROJECT_DIR$/chatup/tcp/CreateRoom.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/tcp/ServerOnline.java" afterPath="$PROJECT_DIR$/chatup/tcp/ServerOnline.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/tcp/TcpNetwork.java" afterPath="$PROJECT_DIR$/chatup/tcp/TcpNetwork.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/tcp/UpdateServer.java" afterPath="$PROJECT_DIR$/chatup/tcp/UpdateServer.java" />
     </list>
     <ignored path="sdis_chatup.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -132,7 +115,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SecondaryServer.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="SecondaryServer.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/chatup/server/SecondaryServer.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="579">
@@ -140,6 +123,26 @@
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SecondaryServer.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/chatup/main/SecondaryServer.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="867">
+              <caret line="54" column="19" selection-start-line="54" selection-start-column="16" selection-end-line="54" selection-end-column="19" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Database.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/chatup/model/Database.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-2333">
+              <caret line="263" column="48" selection-start-line="263" selection-start-column="48" selection-end-line="263" selection-end-column="48" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -210,11 +213,11 @@
         <option value="$PROJECT_DIR$/chatup/http/RoomServiceHandler.java" />
         <option value="$PROJECT_DIR$/chatup/tcp/CreateRoom.java" />
         <option value="$PROJECT_DIR$/chatup/model/Room.java" />
-        <option value="$PROJECT_DIR$/chatup/model/Database.java" />
         <option value="$PROJECT_DIR$/chatup/model/BoundedSet.java" />
         <option value="$PROJECT_DIR$/chatup/tcp/TcpNetwork.java" />
         <option value="$PROJECT_DIR$/chatup/server/PrimaryServer.java" />
         <option value="$PROJECT_DIR$/chatup/server/SecondaryServer.java" />
+        <option value="$PROJECT_DIR$/chatup/model/Database.java" />
       </list>
     </option>
   </component>
@@ -926,7 +929,14 @@
       <option name="project" value="LOCAL" />
       <updated>1464474318374</updated>
     </task>
-    <option name="localTasksCounter" value="26" />
+    <task id="LOCAL-00026" summary="almost there, but not yet">
+      <created>1464493785161</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1464493785161</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
@@ -944,7 +954,7 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2379936" sideWeight="0.50324374" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33084312" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21237993" sideWeight="0.49675626" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21237993" sideWeight="0.49675626" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -1002,7 +1012,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="time for testing, throws exception for now" />
     <MESSAGE value="how did this get here???" />
     <MESSAGE value="some logic cleanups" />
     <MESSAGE value="useless classes" />
@@ -1027,7 +1036,8 @@
     <MESSAGE value="what was that roomId???" />
     <MESSAGE value="trying to fix command queue" />
     <MESSAGE value="servers now run on localhost" />
-    <option name="LAST_COMMIT_MESSAGE" value="servers now run on localhost" />
+    <MESSAGE value="almost there, but not yet" />
+    <option name="LAST_COMMIT_MESSAGE" value="almost there, but not yet" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1179,14 +1189,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/chatup/main/SecondaryServer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="396">
-          <caret line="54" column="19" selection-start-line="54" selection-start-column="16" selection-end-line="54" selection-end-column="19" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/chatup/http/SecondaryDispatcher.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
@@ -1289,14 +1291,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="251">
           <caret line="69" column="63" selection-start-line="69" selection-start-column="60" selection-end-line="69" selection-end-column="63" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/chatup/model/Database.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="220">
-          <caret line="382" column="18" selection-start-line="382" selection-start-column="18" selection-end-line="382" selection-end-column="18" />
           <folding />
         </state>
       </provider>
@@ -1445,6 +1439,22 @@
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/chatup/main/SecondaryServer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="867">
+          <caret line="54" column="19" selection-start-line="54" selection-start-column="16" selection-end-line="54" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/chatup/model/Database.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2333">
+          <caret line="263" column="48" selection-start-line="263" selection-start-column="48" selection-end-line="263" selection-end-column="48" />
+          <folding />
         </state>
       </provider>
     </entry>

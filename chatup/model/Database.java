@@ -14,7 +14,8 @@ public class Database {
 
     private static final String ServerAddress = "address";
     private static final String ServerId = "id";
-    private static final String ServerPort = "port";
+    private static final String ServerHttpPort = "http";
+    private static final String ServerTcpPort = "tcp";
     private static final String ServerTimestamp = "timestamp";
     private static final String RoomId = "id";
     private static final String RoomName = "name";
@@ -252,8 +253,8 @@ public class Database {
         return myMessages;
     }
 
-    private static final String queryInsertServer = "INSERT INTO Servers(id, address, port, timestamp) VALUES(?, ?, ?, ?)";
-    private static final String queryUpdateServer = "UPDATE Servers SET address = ?, port = ?, timestamp = ? WHERE id = ?";
+    private static final String queryInsertServer = "INSERT INTO Servers(id, address, http, tcp, timestamp) VALUES(?, ?, ?, ?, ?)";
+    private static final String queryUpdateServer = "UPDATE Servers SET address = ?, http = ?, tcp = ?, timestamp = ? WHERE id = ?";
     private static final String queryDeleteServer = "DELETE FROM Servers WHERE id = ?";
     private static final String querySelectServers = "SELECT * FROM Servers";
 
@@ -263,7 +264,8 @@ public class Database {
             stmt.setInt(1, paramServer.getId());
             stmt.setString(2, paramServer.getAddress());
             stmt.setInt(3, paramServer.getHttpPort());
-            stmt.setLong(4, paramServer.getTimestamp());
+            stmt.setInt(4, paramServer.getTcpPort());
+            stmt.setLong(5, paramServer.getTimestamp());
             stmt.executeUpdate();
         }
         catch (SQLException ex) {
@@ -291,8 +293,9 @@ public class Database {
         try (final PreparedStatement stmt = dbConnection.prepareStatement(queryUpdateServer)) {
             stmt.setString(1, serverInfo.getAddress());
             stmt.setInt(2, serverInfo.getHttpPort());
-            stmt.setLong(3, serverInfo.getTimestamp());
-            stmt.setInt(4, serverInfo.getId());
+            stmt.setInt(3, serverInfo.getTcpPort());
+            stmt.setLong(4, serverInfo.getTimestamp());
+            stmt.setInt(5, serverInfo.getId());
             stmt.executeUpdate();
         }
         catch (SQLException ex) {
@@ -317,8 +320,8 @@ public class Database {
                     serverId,
                     rs.getLong(ServerTimestamp),
                     rs.getString(ServerAddress),
-                    -1,
-                    rs.getInt(ServerPort)
+                    rs.getInt(ServerTcpPort),
+                    rs.getInt(ServerHttpPort)
                 );
 
                 myServers.put(serverId, newServer);
