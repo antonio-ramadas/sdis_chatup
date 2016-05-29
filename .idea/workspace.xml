@@ -4,10 +4,18 @@
     <bookmark url="file://$PROJECT_DIR$/chatup/server/SecondaryServer.java" line="55" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="12837c42-8525-4718-b44a-390330e984d3" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/default/primary.db" afterPath="$PROJECT_DIR$/default/primary.db" />
+    <list default="true" id="12837c42-8525-4718-b44a-390330e984d3" name="Default" comment="correct room owner information">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/default/secondary.db" afterPath="$PROJECT_DIR$/default/secondary.db" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/primary.db" afterPath="$PROJECT_DIR$/primary.db" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/secondary-1.db" afterPath="$PROJECT_DIR$/secondary-1.db" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/secondary-2.db" afterPath="$PROJECT_DIR$/secondary-2.db" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/secondary-3.db" afterPath="$PROJECT_DIR$/secondary-3.db" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/secondary-4.db" afterPath="$PROJECT_DIR$/secondary-4.db" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/http/FacebookService.java" afterPath="$PROJECT_DIR$/chatup/http/FacebookService.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/chatup/server/PrimaryServer.java" afterPath="$PROJECT_DIR$/chatup/server/PrimaryServer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/default/primary.sql" afterPath="$PROJECT_DIR$/default/primary.sql" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/default/secondary.sql" afterPath="$PROJECT_DIR$/default/secondary.sql" />
     </list>
     <ignored path="sdis_chatup.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -35,11 +43,23 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="PrimaryServer.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="PrimaryServer.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/chatup/server/PrimaryServer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-296">
-              <caret line="254" column="21" selection-start-line="254" selection-start-column="21" selection-end-line="254" selection-end-column="21" />
+            <state relative-caret-position="265">
+              <caret line="938" column="86" selection-start-line="938" selection-start-column="86" selection-end-line="938" selection-end-column="86" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="FacebookService.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/chatup/http/FacebookService.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-77">
+              <caret line="42" column="24" selection-start-line="42" selection-start-column="24" selection-end-line="42" selection-end-column="24" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -99,16 +119,6 @@
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="FacebookService.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/chatup/http/FacebookService.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="153">
-              <caret line="9" column="30" selection-start-line="9" selection-start-column="30" selection-end-line="9" selection-end-column="30" />
-              <folding />
             </state>
           </provider>
         </entry>
@@ -966,7 +976,14 @@
       <option name="project" value="LOCAL" />
       <updated>1464546911905</updated>
     </task>
-    <option name="localTasksCounter" value="33" />
+    <task id="LOCAL-00033" summary="correct room owner information">
+      <created>1464547061893</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1464547061893</updated>
+    </task>
+    <option name="localTasksCounter" value="34" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
@@ -1016,7 +1033,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="secondary server now works" />
     <MESSAGE value="serverinfo now has serverId" />
     <MESSAGE value="sends and receives messages" />
     <MESSAGE value="fixed compile errors and bugs" />
@@ -1041,7 +1057,8 @@
     <MESSAGE value="before facebook authentication" />
     <MESSAGE value="proper database data" />
     <MESSAGE value="facebook authentication done" />
-    <option name="LAST_COMMIT_MESSAGE" value="facebook authentication done" />
+    <MESSAGE value="correct room owner information" />
+    <option name="LAST_COMMIT_MESSAGE" value="correct room owner information" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1420,28 +1437,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/chatup/server/AbstractServer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="229">
-          <caret line="104" column="26" selection-start-line="104" selection-start-column="26" selection-end-line="104" selection-end-column="26" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/chatup/model/Room.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="535">
           <caret line="43" column="24" selection-start-line="43" selection-start-column="24" selection-end-line="43" selection-end-column="24" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/chatup/model/RoomInfo.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="15" column="11" selection-start-line="15" selection-start-column="11" selection-end-line="15" selection-end-column="11" />
           <folding />
         </state>
       </provider>
@@ -1474,14 +1473,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/chatup/http/FacebookService.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="153">
-          <caret line="9" column="30" selection-start-line="9" selection-start-column="30" selection-end-line="9" selection-end-column="30" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/chatup/server/SecondaryServer.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1268">
@@ -1492,10 +1483,38 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/chatup/server/AbstractServer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="229">
+          <caret line="104" column="26" selection-start-line="104" selection-start-column="26" selection-end-line="104" selection-end-column="26" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/chatup/model/RoomInfo.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="204">
+          <caret line="15" column="11" selection-start-line="15" selection-start-column="11" selection-end-line="15" selection-end-column="11" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/chatup/server/PrimaryServer.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-296">
-          <caret line="254" column="21" selection-start-line="254" selection-start-column="21" selection-end-line="254" selection-end-column="21" />
+        <state relative-caret-position="265">
+          <caret line="938" column="86" selection-start-line="938" selection-start-column="86" selection-end-line="938" selection-end-column="86" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/chatup/http/FacebookService.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-77">
+          <caret line="42" column="24" selection-start-line="42" selection-start-column="24" selection-end-line="42" selection-end-column="24" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>

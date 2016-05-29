@@ -14,7 +14,8 @@ CREATE TABLE Rooms (
 CREATE TABLE Servers (
   id                     INTEGER NOT NULL PRIMARY KEY,
   address                TEXT NOT NULL,
-  port                   INTEGER NOT NULL,
+  http                   INTEGER NOT NULL,
+  tcp                    INTEGER NOT NULL,
   timestamp              TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

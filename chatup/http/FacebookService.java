@@ -40,7 +40,7 @@ public class FacebookService {
 
     private ServerResponse httpError;
 
-    public boolean validateToken() {
+    public final String validateToken() {
 
         final HttpURLConnection httpConnection;
 
@@ -48,7 +48,7 @@ public class FacebookService {
             httpConnection = (HttpURLConnection) new URL(serviceUrl).openConnection();
         }
         catch (final IOException ignored) {
-            return false;
+            return null;
         }
 
         boolean exceptionThrown = false;
@@ -105,10 +105,13 @@ public class FacebookService {
                             sendError(ServerResponse.AuthenticationFailed);
                         }
                         else {
+
                             sendJsonResponse(ServerResponse.SuccessResponse, Json.object()
-                                    .add(HttpFields.UserToken, userToken)
-                                    .add(HttpFields.UserEmail, userEmail)
+                                .add(HttpFields.UserToken, userToken)
+                                .add(HttpFields.UserEmail, userEmail)
                             );
+
+                            return userEmail;
                         }
                     }
                     else {
@@ -118,7 +121,7 @@ public class FacebookService {
             }
         }
 
-        return !exceptionThrown;
+        return null;
     }
 
     private void sendJsonResponse(final ServerResponse httpResponse, final JsonValue httpParameters) {

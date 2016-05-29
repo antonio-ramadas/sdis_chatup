@@ -936,8 +936,10 @@ public class PrimaryServer extends AbstractServer {
 
         try {
 
-            if (new FacebookService(httpExchange, userToken).validateToken()) {
-                users.put(userToken, "marques999@gmail.com");
+            final String userEmail = new FacebookService(httpExchange, userToken).validateToken();
+
+            if (userEmail != null) {
+                users.put(userToken, userEmail);
             }
             else {
                 return ServerResponse.AuthenticationFailed;

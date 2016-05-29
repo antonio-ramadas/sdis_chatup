@@ -3,7 +3,7 @@ DROP TABLE IF EXISTS Servers;
 DROP TABLE IF EXISTS Rooms;
 
 CREATE TABLE Rooms (
-  id                     INTEGER NOT NULL PRIMARY KEY,
+  id                      INTEGER NOT NULL PRIMARY KEY,
   name                    TEXT NOT NULL,
   owner                   TEXT NOT NULL,
   password                TEXT NULL,
@@ -13,7 +13,8 @@ CREATE TABLE Rooms (
 CREATE TABLE Servers (
   id                     INTEGER NOT NULL PRIMARY KEY,
   address                TEXT NOT NULL,
-  port                   INTEGER NOT NULL,
+  http                   INTEGER NOT NULL,
+  tcp                    INTEGER NOT NULL,
   timestamp              TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
