@@ -2,7 +2,7 @@ package chatup.http;
 
 import chatup.main.ChatupGlobals;
 import chatup.main.ChatupServer;
-import chatup.server.Server;
+import chatup.server.AbstractServer;
 import chatup.server.ServerInfo;
 
 import com.eclipsesource.json.JsonObject;
@@ -21,7 +21,7 @@ class RoomServiceHandler extends HttpDispatcher {
     @Override
     public void parseGetRequest(final String[] jsonValue) {
 
-        final Server serverInstance = ChatupServer.getInstance();
+        final AbstractServer serverInstance = ChatupServer.getInstance();
 
         if (jsonValue.length > 0) {
 
@@ -45,7 +45,7 @@ class RoomServiceHandler extends HttpDispatcher {
     @Override
     public void parsePostRequest(final JsonValue jsonValue) {
 
-        final Server serverInstance = ChatupServer.getInstance();
+        final AbstractServer serverInstance = ChatupServer.getInstance();
         final JsonObject jsonObject = extractCommand(jsonValue, HttpCommands.JoinRoom);
 
         if (jsonObject != null) {
@@ -84,7 +84,7 @@ class RoomServiceHandler extends HttpDispatcher {
     @Override
     public void parsePutRequest(final JsonValue jsonValue) {
 
-        final Server serverInstance = ChatupServer.getInstance();
+        final AbstractServer serverInstance = ChatupServer.getInstance();
         final JsonObject jsonObject = extractCommand(jsonValue, HttpCommands.CreateRoom);
 
         if (jsonObject != null) {
@@ -111,7 +111,7 @@ class RoomServiceHandler extends HttpDispatcher {
     @Override
     public void parseDeleteRequest(final JsonValue jsonValue) {
 
-        final Server serverInstance = ChatupServer.getInstance();
+        final AbstractServer serverInstance = ChatupServer.getInstance();
         final JsonObject jsonObject = extractCommand(jsonValue, HttpCommands.LeaveRoom);
 
         if (jsonObject != null) {

@@ -12,7 +12,7 @@ class ServerLogger {
     private BufferedWriter fileOutput;
     private ServerType serverType;
 
-    ServerLogger(final Server paramServer) {
+    ServerLogger(final AbstractServer paramServer) {
 
         serverType = paramServer.getType();
 

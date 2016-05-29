@@ -12,17 +12,16 @@ import chatup.tcp.*;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonValue;
 
+import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.Server;
 import javafx.util.Pair;
-
-import kryonet.Connection;
-import kryonet.KryoServer;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.*;
 
-public class PrimaryServer extends Server {
+public class PrimaryServer extends AbstractServer {
 
     private final Database serverDatabase;
     private final ServerLogger serverLogger;
@@ -96,7 +95,7 @@ public class PrimaryServer extends Server {
         // 5) Inicializar servidor TCP/SSL para receber pedidos dos servidores secundários
         //--------------------------------------------------------------------------------
 
-        final KryoServer myServer = new KryoServer(){
+        final Server myServer = new Server(){
 
             @Override
             protected Connection newConnection() {

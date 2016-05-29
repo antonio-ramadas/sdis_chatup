@@ -2,8 +2,7 @@ package chatup.http;
 
 import chatup.main.ChatupGlobals;
 import chatup.main.ChatupServer;
-import chatup.model.Message;
-import chatup.server.Server;
+import chatup.server.AbstractServer;
 
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
@@ -21,7 +20,7 @@ class MessageServiceHandler extends HttpDispatcher {
     @Override
     public void parseGetRequest(final String[] getValues) {
 
-        final Server serverInstance = ChatupServer.getInstance();
+        final AbstractServer serverInstance = ChatupServer.getInstance();
         final String userToken = parseString(getValues, 1, HttpFields.MessageSender);
         int roomId = parseInteger(getValues, 0, HttpFields.MessageRoomId);
         long roomTimestamp = parseLong(getValues, 2, HttpFields.MessageTimestamp);
@@ -42,7 +41,7 @@ class MessageServiceHandler extends HttpDispatcher {
     @Override
     public void parsePostRequest(final JsonValue jsonValue) {
 
-        final Server serverInstance = ChatupServer.getInstance();
+        final AbstractServer serverInstance = ChatupServer.getInstance();
         final JsonObject jsonObject = extractCommand(jsonValue, HttpCommands.SendMessage);
 
         if (jsonObject != null) {

@@ -16,7 +16,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.concurrent.Executors;
 
-public abstract class Server {
+public abstract class AbstractServer {
 
     final HashMap<String, String> users = new HashMap<>();
     final Object usersLock = new Object();
@@ -25,7 +25,7 @@ public abstract class Server {
     private int mTcpPort;
     private int mHttpPort;
 
-    Server(final HttpHandler httpHandler, final ServerType paramType, int tcpPort, int httpPort) throws SQLException {
+    AbstractServer(final HttpHandler httpHandler, final ServerType paramType, int tcpPort, int httpPort) throws SQLException {
 
         serverType = paramType;
         mTcpPort = tcpPort;

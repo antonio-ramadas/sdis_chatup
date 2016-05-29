@@ -8,9 +8,9 @@ import chatup.model.Room;
 import chatup.model.Message;
 import chatup.tcp.*;
 
-import kryonet.Connection;
-import kryonet.KryoClient;
-import kryonet.KryoServer;
+import com.esotericsoftware.kryonet.Client;
+import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.Server;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-public class SecondaryServer extends Server {
+public class SecondaryServer extends AbstractServer {
 
     private final Database mDatabase;
     private final ServerLogger mLogger;
@@ -106,7 +106,7 @@ public class SecondaryServer extends Server {
         // 6) Inicializar cliente TCP para receber comandos do servidor primário
         //----------------------------------------------------------------------
 
-        final KryoClient myClient = new KryoClient();
+        final Client myClient = new Client();
         final PrimaryClientListener myClientListener = new PrimaryClientListener(this, myClient);
 
         TcpNetwork.registerPrimary(myClient);
@@ -118,7 +118,7 @@ public class SecondaryServer extends Server {
         // 7) Inicializar servidor TCP para receber pedidos dos servidores secundários
         //----------------------------------------------------------------------------
 
-        final KryoServer mServer = new KryoServer() {
+        final Server mServer = new Server() {
 
             @Override
             protected Connection newConnection() {
@@ -280,7 +280,7 @@ public class SecondaryServer extends Server {
 
     private ServerResponse createConnection(int serverId) {
 
-        final KryoClient kryoClient = new KryoClient();
+        final Client kryoClient = new Client();
         final ServerInfo selectedServer;
 
         synchronized (serversLock) {

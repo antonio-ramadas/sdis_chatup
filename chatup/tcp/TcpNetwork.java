@@ -6,8 +6,7 @@ import chatup.model.Message;
 import chatup.model.MessageCache;
 
 import com.esotericsoftware.kryo.Kryo;
-
-import kryonet.EndPoint;
+import com.esotericsoftware.kryonet.EndPoint;
 
 import java.util.HashMap;
 import java.util.HashSet;

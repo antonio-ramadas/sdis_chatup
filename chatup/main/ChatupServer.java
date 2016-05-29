@@ -1,20 +1,13 @@
 package chatup.main;
 
-import chatup.server.Server;
+import chatup.server.AbstractServer;
 import chatup.server.ServerInfo;
 import chatup.server.ServerKeystore;
 import chatup.server.ServerType;
 
-import java.io.IOException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.sql.SQLException;
-
 public class ChatupServer {
 
-    private static Server serverInstance;
+    private static AbstractServer serverInstance;
     private static ServerKeystore serverKeystore;
 
     static void initializePrimary(int httpPort, int tcpPort) {
@@ -39,7 +32,7 @@ public class ChatupServer {
         }
     }
 
-    public static Server getInstance() {
+    public static AbstractServer getInstance() {
         return serverInstance;
     }
 

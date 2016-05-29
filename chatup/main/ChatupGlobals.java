@@ -46,21 +46,6 @@ public class ChatupGlobals {
         return !(!myFile.exists() || !myFile.isDirectory()) || myFile.mkdir();
     }
 
-    public static void abort(final Exception paramException) {
-
-        final StackTraceElement stackTrace = Thread.currentThread().getStackTrace()[2];
-
-        final String abortMessage = String.format(
-                fmtAbort,
-                paramException.getClass().getSimpleName(),
-                stackTrace.getMethodName(),
-                stackTrace.getClassName()
-        );
-
-        Log.error("kryonet", abortMessage);
-        System.exit(1);
-    }
-
     public static void abort(final ServerType serverType, final Exception paramException) {
 
         final StackTraceElement stackTrace = Thread.currentThread().getStackTrace()[2];

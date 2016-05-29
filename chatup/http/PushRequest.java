@@ -3,7 +3,7 @@ package chatup.http;
 import chatup.main.ChatupServer;
 import chatup.model.Message;
 import chatup.model.Room;
-import chatup.server.Server;
+import chatup.server.AbstractServer;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonValue;
@@ -36,7 +36,7 @@ public class PushRequest {
 
         final JsonValue messagesArray = Json.array();
         final ArrayList<Message> myMessages = myRoom.getMessages(lastUpdate);
-        final Server chatupInstance = ChatupServer.getInstance();
+        final AbstractServer chatupInstance = ChatupServer.getInstance();
 
         for (int i = myMessages.size() - 1; i >= 0; i--) {
 

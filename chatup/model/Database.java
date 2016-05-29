@@ -1,7 +1,7 @@
 package chatup.model;
 
 import chatup.main.ChatupGlobals;
-import chatup.server.Server;
+import chatup.server.AbstractServer;
 import chatup.server.ServerInfo;
 import chatup.server.ServerType;
 
@@ -30,7 +30,7 @@ public class Database {
     private static final String queryDeleteRoom = "DELETE FROM Rooms WHERE id = ?";
     private static final String querySelectRooms = "SELECT * FROM Rooms";
 
-    public Database(final Server paramServer) throws IOException, SQLException {
+    public Database(final AbstractServer paramServer) throws IOException, SQLException {
 
         final ServerType serverType = paramServer.getType();
         final String serverDirectory;

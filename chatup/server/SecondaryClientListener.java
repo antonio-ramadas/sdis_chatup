@@ -4,19 +4,19 @@ import chatup.model.Message;
 
 import chatup.tcp.UpdateRoom;
 
-import kryonet.Connection;
-import kryonet.KryoClient;
-import kryonet.Listener;
+import com.esotericsoftware.kryonet.Client;
+import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.Listener;
 
 class SecondaryClientListener extends Listener {
 
-    SecondaryClientListener(final SecondaryServer paramSecondary, final KryoClient paramClient) {
+    SecondaryClientListener(final SecondaryServer paramSecondary, final Client paramClient) {
         mKryoClient = paramClient;
         mLogger = paramSecondary.getLogger();
         mSecondary = paramSecondary;
     }
 
-    private final KryoClient mKryoClient;
+    private final Client mKryoClient;
     private final ServerLogger mLogger;
     private final SecondaryServer mSecondary;
 

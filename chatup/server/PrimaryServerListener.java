@@ -3,9 +3,9 @@ package chatup.server;
 import chatup.tcp.ServerOffline;
 import chatup.tcp.ServerOnline;
 
-import kryonet.Connection;
-import kryonet.KryoServer;
-import kryonet.Listener;
+import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.Listener;
+import com.esotericsoftware.kryonet.Server;
 
 import java.util.HashMap;
 
@@ -13,14 +13,14 @@ class PrimaryServerListener extends Listener {
 
     private HashMap<Integer, Integer> mConnections;
 
-    PrimaryServerListener(final PrimaryServer paramPrimary, final KryoServer paramServer) {
+    PrimaryServerListener(final PrimaryServer paramPrimary, final Server paramServer) {
         mKryoServer = paramServer;
         mConnections = new HashMap<>();
         mLogger = paramPrimary.getLogger();
         mPrimary = paramPrimary;
     }
 
-    private final KryoServer mKryoServer;
+    private final Server mKryoServer;
     private final ServerLogger mLogger;
     private final PrimaryServer mPrimary;
 
@@ -42,8 +42,8 @@ class PrimaryServerListener extends Listener {
             );
 
             serverConnection.serverId = serverOnline.serverId;
-            mKryoServer.sendToAllExceptTCP(serverConnection.getId(), serverOnline);
-            mConnections.put(serverOnline.serverId, serverConnection.getId());
+            mKryoServer.sendToAllExceptTCP(serverConnection.getID(), serverOnline);
+            mConnections.put(serverOnline.serverId, serverConnection.getID());
 
             switch (mPrimary.insertServer(serverInfo)) {
             case SuccessResponse:
@@ -68,7 +68,7 @@ class PrimaryServerListener extends Listener {
         final ServerConnection serverConnection = (ServerConnection) paramConnection;
 
         if (serverConnection.serverId > 0) {
-            mKryoServer.sendToAllExceptTCP(serverConnection.getId(), new ServerOffline(serverConnection.serverId));
+            mKryoServer.sendToAllExceptTCP(serverConnection.getID(), new ServerOffline(serverConnection.serverId));
             mConnections.remove(serverConnection.serverId);
             mPrimary.disconnectServer(serverConnection.serverId);
         }

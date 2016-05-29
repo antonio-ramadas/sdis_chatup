@@ -4,9 +4,9 @@ import chatup.http.ServerResponse;
 import chatup.tcp.ServerOnline;
 import chatup.tcp.SyncRoom;
 
-import kryonet.Connection;
-import kryonet.KryoServer;
-import kryonet.Listener;
+import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.Listener;
+import com.esotericsoftware.kryonet.Server;
 
 import java.util.HashMap;
 
@@ -14,14 +14,14 @@ class SecondaryServerListener extends Listener {
 
     private HashMap<Integer, Integer> mConnections;
 
-    SecondaryServerListener(final SecondaryServer paramSecondary, final KryoServer paramClient) {
+    SecondaryServerListener(final SecondaryServer paramSecondary, final Server paramClient) {
         mKryoServer = paramClient;
         mConnections = new HashMap<>();
         mLogger = paramSecondary.getLogger();
         mSecondary = paramSecondary;
     }
 
-    private final KryoServer mKryoServer;
+    private final Server mKryoServer;
     private final ServerLogger mLogger;
     private final SecondaryServer mSecondary;
 
@@ -73,7 +73,7 @@ class SecondaryServerListener extends Listener {
         );
 
         paramConnection.serverId = serverOnline.serverId;
-        mConnections.put(serverOnline.serverId, paramConnection.getId());
+        mConnections.put(serverOnline.serverId, paramConnection.getID());
 
         final ServerResponse operationResult = mSecondary.insertServer(serverInfo);
 

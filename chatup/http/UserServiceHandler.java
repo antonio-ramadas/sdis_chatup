@@ -2,7 +2,7 @@ package chatup.http;
 
 import chatup.main.ChatupGlobals;
 import chatup.main.ChatupServer;
-import chatup.server.Server;
+import chatup.server.AbstractServer;
 
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
@@ -18,7 +18,7 @@ class UserServiceHandler extends HttpDispatcher {
     @Override
     public void parsePostRequest(final JsonValue jsonValue) {
 
-        final Server serverInstance = ChatupServer.getInstance();
+        final AbstractServer serverInstance = ChatupServer.getInstance();
         final JsonObject jsonObject = extractCommand(jsonValue, HttpCommands.UserLogin);
 
         if (jsonObject != null) {
@@ -43,7 +43,7 @@ class UserServiceHandler extends HttpDispatcher {
     @Override
     public void parseDeleteRequest(final JsonValue jsonValue) {
 
-        final Server serverInstance = ChatupServer.getInstance();
+        final AbstractServer serverInstance = ChatupServer.getInstance();
         final JsonObject jsonObject = extractCommand(jsonValue, HttpCommands.UserDisconnect);
 
         if (jsonObject != null) {

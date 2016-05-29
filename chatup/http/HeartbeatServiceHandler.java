@@ -2,7 +2,7 @@ package chatup.http;
 
 import chatup.main.ChatupGlobals;
 import chatup.main.ChatupServer;
-import chatup.server.Server;
+import chatup.server.AbstractServer;
 
 import com.sun.net.httpserver.HttpExchange;
 
@@ -16,7 +16,7 @@ class HeartbeatServiceHandler extends HttpDispatcher {
     public void parseGetRequest(final String[] jsonValue) {
 
         final String userToken = parseString(jsonValue, 0, HttpFields.UserToken);
-        final Server serverInstance = ChatupServer.getInstance();
+        final AbstractServer serverInstance = ChatupServer.getInstance();
 
         if (userToken != null) {
 

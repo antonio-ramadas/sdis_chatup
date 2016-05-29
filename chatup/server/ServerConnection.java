@@ -1,6 +1,6 @@
 package chatup.server;
 
-import kryonet.Connection;
+import com.esotericsoftware.kryonet.Connection;
 
 public class ServerConnection extends Connection {
 

@@ -15,7 +15,7 @@ public class Room {
     private HashSet<String> mUsers;
     private HashSet<Integer> mServers;
 
-    public Room(final String paramName, final String paramPassword, final String paramOwner) {
+    Room(final String paramName, final String paramPassword, final String paramOwner) {
         this(paramName, paramPassword, Instant.now().getEpochSecond(), paramOwner);
 	}
 
