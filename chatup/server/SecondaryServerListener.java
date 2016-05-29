@@ -1,10 +1,12 @@
 package chatup.server;
 
 import chatup.http.ServerResponse;
+import chatup.main.ChatupGlobals;
 import chatup.tcp.ServerOnline;
 import chatup.tcp.SyncRoom;
 
 import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.KryoNetException;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 
@@ -96,7 +98,13 @@ class SecondaryServerListener extends Listener {
     void sendServer(int serverId, final Object paramObject) {
 
         if (mConnections.containsKey(serverId)) {
-            mKryoServer.sendToTCP(mConnections.get(serverId), paramObject);
+
+            try {
+                mKryoServer.sendToTCP(mConnections.get(serverId), paramObject);
+            }
+            catch (final KryoNetException ex) {
+                ChatupGlobals.abort(mSecondary.getType(), ex);
+            }
         }
         else {
             mLogger.serverNotFound(serverId);

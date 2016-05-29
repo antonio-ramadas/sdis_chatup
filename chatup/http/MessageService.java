@@ -11,14 +11,14 @@ import com.sun.net.httpserver.HttpExchange;
 
 import java.time.Instant;
 
-class MessageServiceHandler extends HttpDispatcher {
+public class MessageService extends HttpDispatcher {
 
-    MessageServiceHandler(final HttpExchange httpExchange) {
-        super(ChatupGlobals.MessageServiceUrl, httpExchange);
+    public MessageService() {
+        super(ChatupGlobals.MessageServiceUrl);
     }
 
     @Override
-    public void parseGetRequest(final String[] getValues) {
+    public void parseGetRequest(final HttpExchange httpExchange, final String[] getValues) {
 
         final AbstractServer serverInstance = ChatupServer.getInstance();
         final String userToken = parseString(getValues, 1, HttpFields.MessageSender);
@@ -26,20 +26,25 @@ class MessageServiceHandler extends HttpDispatcher {
         long roomTimestamp = parseLong(getValues, 2, HttpFields.MessageTimestamp);
 
         if (userToken == null || roomId < 0) {
-            sendError(ServerResponse.MissingParameters);
+            sendError(httpExchange, ServerResponse.MissingParameters);
         }
         else {
 
-            final ServerResponse serverResponse = serverInstance.getMessages(this, userToken,roomId,roomTimestamp);
+            final ServerResponse serverResponse = serverInstance.getMessages(
+                httpExchange,
+                userToken,
+                roomId,
+                roomTimestamp
+            );
 
             if (serverResponse != ServerResponse.SuccessResponse) {
-                sendError(serverResponse);
+                sendError(httpExchange, serverResponse);
             }
         }
     }
 
     @Override
-    public void parsePostRequest(final JsonValue jsonValue) {
+    public void parsePostRequest(final HttpExchange httpExchange, final JsonValue jsonValue) {
 
         final AbstractServer serverInstance = ChatupServer.getInstance();
         final JsonObject jsonObject = extractCommand(jsonValue, HttpCommands.SendMessage);
@@ -51,13 +56,14 @@ class MessageServiceHandler extends HttpDispatcher {
             final String messageBody = jsonObject.getString(HttpFields.MessageContents, null);
 
             if (roomId < 0 || userToken == null || userToken.isEmpty()) {
-                sendError(ServerResponse.MissingParameters);
+                sendError(httpExchange, ServerResponse.MissingParameters);
             }
             else if (messageBody == null || messageBody.isEmpty()) {
-                sendError(ServerResponse.MissingParameters);
+                sendError(httpExchange, ServerResponse.MissingParameters);
             }
             else {
                 sendJsonResponse(
+                    httpExchange,
                     serverInstance.sendMessage(roomId, userToken, messageBody), jsonObject
                     .add(HttpFields.MessageTimestamp, Instant.now().toEpochMilli())
                     .add(HttpFields.UserEmail, serverInstance.getEmail(userToken))
@@ -65,7 +71,7 @@ class MessageServiceHandler extends HttpDispatcher {
             }
         }
         else {
-            sendError(ServerResponse.InvalidOperation);
+            sendError(httpExchange, ServerResponse.InvalidOperation);
         }
     }
 }

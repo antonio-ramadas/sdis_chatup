@@ -7,7 +7,6 @@ public enum ServerResponse {
     DatabaseError("databaseError"),
     InvalidOperation("unexpectedCommand"),
     InvalidMethod("invalidMethod"),
-    InvalidService("invalidService"),
     InvalidToken("invalidToken"),
     MissingParameters("missingParameters"),
     OperationFailed("operationFailed"),

@@ -1,7 +1,6 @@
 package chatup.server;
 
-import chatup.http.HttpDispatcher;
-import chatup.http.ServerResponse;
+import chatup.http.*;
 import chatup.main.ChatupGlobals;
 import chatup.model.Message;
 
@@ -13,19 +12,18 @@ import javafx.util.Pair;
 
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 
 public abstract class AbstractServer {
 
-    final HashMap<String, String> users = new HashMap<>();
-    final Object usersLock = new Object();
+    final ConcurrentHashMap<String, String> users = new ConcurrentHashMap<>();
     private final ServerType serverType;
 
     private int mTcpPort;
     private int mHttpPort;
 
-    AbstractServer(final HttpHandler httpHandler, final ServerType paramType, int tcpPort, int httpPort) throws SQLException {
+    AbstractServer(final ServerType paramType, int tcpPort, int httpPort) throws SQLException {
 
         serverType = paramType;
         mTcpPort = tcpPort;
@@ -66,7 +64,16 @@ public abstract class AbstractServer {
                 }
             });*/
 
-            httpServer.createContext("/", httpHandler);
+            if (paramType == ServerType.PRIMARY) {
+                httpServer.createContext(ChatupGlobals.HeartbeatServiceUrl, new HeartbeatService());
+                httpServer.createContext(ChatupGlobals.RoomServiceUrl, new RoomService());
+                httpServer.createContext(ChatupGlobals.UserServiceUrl, new UserService());
+            }
+            else {
+                httpServer.createContext(ChatupGlobals.HeartbeatServiceUrl, new HeartbeatService());
+                httpServer.createContext(ChatupGlobals.MessageServiceUrl, new MessageService());
+            }
+
             httpServer.setExecutor(Executors.newCachedThreadPool());
             httpServer.start();
         }
@@ -75,7 +82,7 @@ public abstract class AbstractServer {
         }
     }
 
-    public HashMap<String, String> getUsers() {
+    public ConcurrentHashMap<String, String> getUsers() {
         return users;
     }
 
@@ -135,7 +142,7 @@ public abstract class AbstractServer {
         throw new UnsupportedOperationException("DeleteRoom");
     }
 
-    public ServerResponse getMessages(final HttpDispatcher httpExchange, final String userToken, int roomId, long roomTimestamp) {
+    public ServerResponse getMessages(final HttpExchange httpExchange, final String userToken, int roomId, long roomTimestamp) {
         throw new UnsupportedOperationException("RetrieveMessages");
     }
 
@@ -153,15 +160,12 @@ public abstract class AbstractServer {
 
     public String getEmail(String userToken) {
 
-        synchronized (usersLock) {
+        final String userEmail = users.get(userToken);
 
-            final String userEmail = users.get(userToken);
-
-            if (userEmail == null) {
-                return userToken;
-            }
-
-            return userEmail;
+        if (userEmail == null) {
+            return userToken;
         }
+
+        return userEmail;
     }
 }

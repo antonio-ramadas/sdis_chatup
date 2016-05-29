@@ -1,6 +1,7 @@
 package chatup.server;
 
 import chatup.main.ChatupGlobals;
+
 import com.esotericsoftware.minlog.Log;
 
 import java.io.*;
@@ -43,7 +44,7 @@ class ServerLogger {
     }
 
     private String generateTimestamp() {
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss' | '").format(new Date());
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
     }
 
     void invalidOperation(final Object paramObject) {
@@ -128,27 +129,27 @@ class ServerLogger {
 
     private void warning(final String paramMessage) {
         Log.warn(serverType.toString(), paramMessage);
-        write(fileOutput, String.format("%s | WARNING | %s", generateTimestamp(), paramMessage));
+        write(fileOutput, String.format("%s | WARNING | %s\n", generateTimestamp(), paramMessage));
     }
 
     private void error(final String paramMessage) {
         Log.error(serverType.toString(), paramMessage);
-        write(fileOutput, String.format("%s | ERROR | %s", generateTimestamp(), paramMessage));
+        write(fileOutput, String.format("%s | ERROR | %s\n", generateTimestamp(), paramMessage));
     }
 
     private void information(final String paramMessage) {
         Log.info(serverType.toString(), paramMessage);
-        write(fileOutput, String.format("%s | INFORMATION | %s", generateFilename(), paramMessage));
+        write(fileOutput, String.format("%s | INFORMATION | %s\n", generateTimestamp(), paramMessage));
     }
 
     private void write(final BufferedWriter buffer, final String message) {
 
         try {
             buffer.write(message);
-            buffer.newLine();
+            buffer.flush();
         }
-        catch (final IOException e) {
-            e.printStackTrace();
+        catch (final IOException ex) {
+            ChatupGlobals.abort(serverType, ex);
         }
     }
 

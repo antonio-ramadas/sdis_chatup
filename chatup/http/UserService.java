@@ -9,14 +9,14 @@ import com.eclipsesource.json.JsonValue;
 
 import com.sun.net.httpserver.HttpExchange;
 
-class UserServiceHandler extends HttpDispatcher {
+public class UserService extends HttpDispatcher {
 
-    UserServiceHandler(final HttpExchange httpExchange) {
-        super(ChatupGlobals.UserServiceUrl, httpExchange);
+    public UserService() {
+        super(ChatupGlobals.UserServiceUrl);
     }
 
     @Override
-    public void parsePostRequest(final JsonValue jsonValue) {
+    public void parsePostRequest(final HttpExchange httpExchange, final JsonValue jsonValue) {
 
         final AbstractServer serverInstance = ChatupServer.getInstance();
         final JsonObject jsonObject = extractCommand(jsonValue, HttpCommands.UserLogin);
@@ -26,22 +26,23 @@ class UserServiceHandler extends HttpDispatcher {
             final String userToken = jsonObject.getString(HttpFields.UserToken, null);
 
             if (userToken == null || userToken.isEmpty()) {
-                sendError(ServerResponse.MissingParameters);
+                sendError(httpExchange, ServerResponse.MissingParameters);
             }
             else {
                 sendJsonResponse(
+                    httpExchange,
                     serverInstance.userLogin(userToken),
                     jsonObject.add("email", serverInstance.getEmail(userToken))
                 );
             }
         }
         else {
-            sendError(ServerResponse.InvalidOperation);
+            sendError(httpExchange, ServerResponse.InvalidOperation);
         }
     }
 
     @Override
-    public void parseDeleteRequest(final JsonValue jsonValue) {
+    public void parseDeleteRequest(final HttpExchange httpExchange, final JsonValue jsonValue) {
 
         final AbstractServer serverInstance = ChatupServer.getInstance();
         final JsonObject jsonObject = extractCommand(jsonValue, HttpCommands.UserDisconnect);
@@ -52,17 +53,17 @@ class UserServiceHandler extends HttpDispatcher {
             final String userToken = jsonObject.getString(HttpFields.UserToken, null);
 
             if (userEmail == null || userEmail.isEmpty()) {
-                sendError(ServerResponse.MissingParameters);
+                sendError(httpExchange, ServerResponse.MissingParameters);
             }
             else if (userToken == null || userToken.isEmpty()) {
-                sendError(ServerResponse.MissingParameters);
+                sendError(httpExchange, ServerResponse.MissingParameters);
             }
             else {
-                sendJsonResponse(serverInstance.userDisconnect(userEmail, userToken), jsonObject);
+                sendJsonResponse(httpExchange, serverInstance.userDisconnect(userEmail, userToken), jsonObject);
             }
         }
         else {
-            sendError(ServerResponse.InvalidOperation);
+            sendError(httpExchange, ServerResponse.InvalidOperation);
         }
     }
 }

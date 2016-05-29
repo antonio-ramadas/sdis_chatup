@@ -1,11 +1,13 @@
 package chatup.server;
 
 import chatup.http.ServerResponse;
+import chatup.main.ChatupGlobals;
 import chatup.model.CommandQueue;
 import chatup.tcp.*;
 
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Client;
+import com.esotericsoftware.kryonet.KryoNetException;
 import com.esotericsoftware.kryonet.Listener;
 
 class PrimaryClientListener extends Listener {
@@ -22,7 +24,13 @@ class PrimaryClientListener extends Listener {
 
     @Override
     public void connected(final Connection paramConnection) {
-        mKryoClient.sendTCP(mSecondary.getInformation());
+
+        try {
+            mKryoClient.sendTCP(mSecondary.getInformation());
+        }
+        catch (final KryoNetException ex) {
+            ChatupGlobals.abort(mSecondary.getType(), ex);
+        }
     }
 
     @Override

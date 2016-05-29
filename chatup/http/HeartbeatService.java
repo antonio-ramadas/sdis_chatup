@@ -6,14 +6,14 @@ import chatup.server.AbstractServer;
 
 import com.sun.net.httpserver.HttpExchange;
 
-class HeartbeatServiceHandler extends HttpDispatcher {
+public class HeartbeatService extends HttpDispatcher {
 
-    HeartbeatServiceHandler(final HttpExchange httpExchange) {
-        super(ChatupGlobals.HeartbeatServiceUrl, httpExchange);
+    public HeartbeatService() {
+        super(ChatupGlobals.HeartbeatServiceUrl);
     }
 
     @Override
-    public void parseGetRequest(final String[] jsonValue) {
+    public void parseGetRequest(final HttpExchange httpExchange, final String[] jsonValue) {
 
         final String userToken = parseString(jsonValue, 0, HttpFields.UserToken);
         final AbstractServer serverInstance = ChatupServer.getInstance();
@@ -21,14 +21,14 @@ class HeartbeatServiceHandler extends HttpDispatcher {
         if (userToken != null) {
 
             if (serverInstance.validateToken(userToken)) {
-                sendTextResponse(ServerResponse.SuccessResponse, userToken);
+                sendTextResponse(httpExchange, ServerResponse.SuccessResponse, userToken);
             }
             else {
-                sendError(ServerResponse.InvalidToken);
+                sendError(httpExchange, ServerResponse.InvalidToken);
             }
         }
         else {
-            sendError(ServerResponse.InvalidToken);
+            sendError(httpExchange, ServerResponse.InvalidToken);
         }
     }
 }

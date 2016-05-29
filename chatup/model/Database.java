@@ -5,10 +5,17 @@ import chatup.server.AbstractServer;
 import chatup.server.ServerInfo;
 import chatup.server.ServerType;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 import java.nio.channels.FileChannel;
 import java.sql.*;
-import java.util.*;
+
+import java.util.HashSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Database {
 
@@ -144,9 +151,9 @@ public class Database {
         return true;
     }
 
-    public HashMap<Integer, Room> getRooms() {
+    public ConcurrentHashMap<Integer, Room> getRooms() {
 
-        final HashMap<Integer, Room> myRooms = new HashMap<>();
+        final ConcurrentHashMap<Integer, Room> myRooms = new ConcurrentHashMap<>();
 
         try (final Statement stmt = dbConnection.createStatement();
              final ResultSet rs = stmt.executeQuery(querySelectRooms)) {
@@ -173,9 +180,9 @@ public class Database {
         return myRooms;
     }
 
-    public HashMap<Integer, RoomInfo> getRoomInformation() {
+    public ConcurrentHashMap<Integer, RoomInfo> getRoomInformation() {
 
-        final HashMap<Integer, RoomInfo> myRooms = new HashMap<>();
+        final ConcurrentHashMap<Integer, RoomInfo> myRooms = new ConcurrentHashMap<>();
 
         try (final Statement stmt = dbConnection.createStatement();
              final ResultSet rs = stmt.executeQuery(querySelectRooms)) {
@@ -305,9 +312,9 @@ public class Database {
         return true;
     }
 
-    public HashMap<Integer, ServerInfo> getServers() {
+    public ConcurrentHashMap<Integer, ServerInfo> getServers() {
 
-        final HashMap<Integer, ServerInfo> myServers = new HashMap<>();
+        final ConcurrentHashMap<Integer, ServerInfo> myServers = new ConcurrentHashMap<>();
 
         try (final Statement stmt = dbConnection.createStatement();
              final ResultSet rs = stmt.executeQuery(querySelectServers)) {
@@ -403,35 +410,5 @@ public class Database {
         }
 
         return myServers;
-    }
-
-    private static final String queryInsertUser = "INSERT INTO Users(token, email) VALUES(?, ?)";
-    private static final String queryDeleteUser = "DELETE FROM Users WHERE token = ?";
-
-    public boolean insertUser(final String userToken, final String userEmail) {
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(queryInsertUser)) {
-            stmt.setString(1, userToken);
-            stmt.setString(2, userEmail);
-            stmt.executeUpdate();
-        }
-        catch (SQLException ex) {
-            return false;
-        }
-
-        return true;
-    }
-
-    public boolean deleteUser(final String userToken) {
-
-        try (final PreparedStatement stmt = dbConnection.prepareStatement(queryDeleteUser)) {
-            stmt.setString(1, userToken);
-            stmt.executeUpdate();
-        }
-        catch (SQLException ex) {
-            return false;
-        }
-
-        return true;
     }
 }

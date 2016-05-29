@@ -10,7 +10,11 @@ import chatup.tcp.*;
 
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.KryoNetException;
 import com.esotericsoftware.kryonet.Server;
+
+import com.esotericsoftware.minlog.Log;
+import com.sun.net.httpserver.HttpExchange;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,19 +23,18 @@ import java.net.*;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SecondaryServer extends AbstractServer {
 
     private final Database mDatabase;
     private final ServerLogger mLogger;
     private final SecondaryServerListener mServerListener;
-    private final Object serversLock = new Object();
-    private final HashMap<Integer, ServerInfo> servers;
-    private final Object roomsLock = new Object();
-    private final HashMap<Integer, Room> rooms;
+    private final ConcurrentHashMap<Integer, ServerInfo> servers;
+    private final ConcurrentHashMap<Integer, Room> rooms;
 
 	public SecondaryServer(final ServerInfo paramPrimary, int tcpPort, int httpPort) throws SQLException, IOException {
 
@@ -39,7 +42,8 @@ public class SecondaryServer extends AbstractServer {
         // 1) Inicializar servidor HTTPS para receber pedidos dos clientes
         //----------------------------------------------------------------
 
-		super(new SecondaryDispatcher(), ServerType.SECONDARY, tcpPort, httpPort);
+		super(ServerType.SECONDARY, tcpPort, httpPort);
+        Log.set(2);
 
         //---------------------------------------------------------------
         // 2) Inicialização do servidor; obter data da última atualização
@@ -54,10 +58,10 @@ public class SecondaryServer extends AbstractServer {
         // 3) Ler para memória informações dos servidores armazenadas em disco
         //--------------------------------------------------------------------
 
-        final HashMap<Integer, ServerInfo> myServers = mDatabase.getServers();
+        final ConcurrentHashMap<Integer, ServerInfo> myServers = mDatabase.getServers();
 
         if (myServers == null) {
-            servers = new HashMap<>();
+            servers = new ConcurrentHashMap<>();
         }
         else {
             servers = myServers;
@@ -70,10 +74,10 @@ public class SecondaryServer extends AbstractServer {
         // 4) Ler para memória informações das salas armazenadas em disco
         //---------------------------------------------------------------
 
-        final HashMap<Integer, Room> myRooms = mDatabase.getRooms();
+        final ConcurrentHashMap<Integer, Room> myRooms = mDatabase.getRooms();
 
         if (myRooms == null) {
-            rooms = new HashMap<>();
+            rooms = new ConcurrentHashMap<>();
         }
         else {
             rooms = myRooms;
@@ -109,7 +113,7 @@ public class SecondaryServer extends AbstractServer {
         final Client myClient = new Client();
         final PrimaryClientListener myClientListener = new PrimaryClientListener(this, myClient);
 
-        TcpNetwork.registerPrimary(myClient);
+        TcpNetwork.register(myClient);
         myClient.addListener(myClientListener);
         myClient.start();
         myClient.connect(ChatupGlobals.DefaultTimeout, paramPrimary.getAddress(), paramPrimary.getTcpPort());
@@ -118,7 +122,7 @@ public class SecondaryServer extends AbstractServer {
         // 7) Inicializar servidor TCP para receber pedidos dos servidores secundários
         //----------------------------------------------------------------------------
 
-        final Server mServer = new Server() {
+        final Server mServer = new Server(32768, 8192) {
 
             @Override
             protected Connection newConnection() {
@@ -127,7 +131,7 @@ public class SecondaryServer extends AbstractServer {
         };
 
         mServerListener = new SecondaryServerListener(this, mServer);
-        TcpNetwork.registerSecondary(mServer);
+        TcpNetwork.register(mServer);
         mServer.addListener(mServerListener);
         mServer.bind(tcpPort);
         mServer.start();
@@ -149,13 +153,10 @@ public class SecondaryServer extends AbstractServer {
 
         final Room selectedRoom;
 
-        synchronized (roomsLock) {
+        selectedRoom = rooms.get(roomId);
 
-            selectedRoom = rooms.get(roomId);
-
-            if (selectedRoom == null) {
-                return ServerResponse.RoomNotFound;
-            }
+        if (selectedRoom == null) {
+            return ServerResponse.RoomNotFound;
         }
 
         if (selectedRoom.hasRefreshed()) {
@@ -202,11 +203,8 @@ public class SecondaryServer extends AbstractServer {
 
         int roomId = createRoom.roomId;
 
-        synchronized (roomsLock) {
-
-            if (rooms.containsKey(roomId)) {
-                return ServerResponse.RoomNotFound;
-            }
+        if (rooms.containsKey(roomId)) {
+            return ServerResponse.RoomNotFound;
         }
 
         final Room serializedRoom = new Room(
@@ -230,11 +228,7 @@ public class SecondaryServer extends AbstractServer {
                     continue;
                 }
 
-                final ServerInfo serverInformation;
-
-                synchronized (serversLock) {
-                    serverInformation = servers.get(serverId);
-                }
+                final ServerInfo serverInformation = servers.get(serverId);
 
                 if (serverInformation == null) {
                     mLogger.serverNotFound(serverId);
@@ -257,10 +251,7 @@ public class SecondaryServer extends AbstractServer {
         //-----------------------------------------------------------
 
         if (mDatabase.insertRoom(roomId, serializedRoom)) {
-
-            synchronized (roomsLock) {
-                rooms.put(roomId, serializedRoom);
-            }
+            rooms.put(roomId, serializedRoom);
         }
         else {
             return ServerResponse.DatabaseError;
@@ -270,10 +261,8 @@ public class SecondaryServer extends AbstractServer {
         // 4) Registar entrada do proprietário da sala no servidor local
         //--------------------------------------------------------------
 
-        synchronized (usersLock) {
-            users.putIfAbsent(createRoom.userToken, createRoom.userEmail);
-            mLogger.userConnected(createRoom.userEmail);
-        }
+        users.putIfAbsent(createRoom.userToken, createRoom.userEmail);
+        mLogger.userConnected(createRoom.userEmail);
 
         return ServerResponse.SuccessResponse;
     }
@@ -281,24 +270,24 @@ public class SecondaryServer extends AbstractServer {
     private ServerResponse createConnection(int serverId) {
 
         final Client kryoClient = new Client();
-        final ServerInfo selectedServer;
+        final ServerInfo selectedServer = servers.get(serverId);
 
-        synchronized (serversLock) {
-
-            selectedServer = servers.get(serverId);
-
-            if (selectedServer == null) {
-                return ServerResponse.ServerNotFound;
-            }
+        if (selectedServer == null) {
+            return ServerResponse.ServerNotFound;
         }
 
-        TcpNetwork.registerSecondary(kryoClient);
+        TcpNetwork.register(kryoClient);
         kryoClient.addListener(new SecondaryClientListener(this, kryoClient));
 
         try {
 
-            kryoClient.start();
-            kryoClient.connect(ChatupGlobals.DefaultTimeout, selectedServer.getAddress(), selectedServer.getTcpPort());
+            try {
+                kryoClient.start();
+                kryoClient.connect(ChatupGlobals.DefaultTimeout, selectedServer.getAddress(), selectedServer.getTcpPort());
+            }
+            catch (final KryoNetException ex) {
+                ChatupGlobals.warn(getType().toString(), ex);
+            }
 
             if (kryoClient.isConnected()) {
                 selectedServer.setStatus(true);
@@ -313,18 +302,13 @@ public class SecondaryServer extends AbstractServer {
 
     final ServerResponse disconnectServer(int serverId) {
 
-        final ServerInfo selectedServer;
+        final ServerInfo selectedServer = servers.get(serverId);
 
-        synchronized (serversLock) {
-
-            selectedServer = servers.get(serverId);
-
-            if (selectedServer == null) {
-                return ServerResponse.ServerNotFound;
-            }
-
-            selectedServer.setStatus(false);
+        if (selectedServer == null) {
+            return ServerResponse.ServerNotFound;
         }
+
+        selectedServer.setStatus(false);
 
         mLogger.serverOffline(serverId);
 
@@ -337,35 +321,27 @@ public class SecondaryServer extends AbstractServer {
         // 1) Verificar se utilizador tem sessão iniciada no servidor
         //-----------------------------------------------------------
 
-        final Room selectedRoom;
-        final String userToken = joinRoom.userToken;
-
-        synchronized (usersLock) {
-            users.putIfAbsent(userToken, joinRoom.userEmail);
-        }
+        users.putIfAbsent(joinRoom.userToken, joinRoom.userEmail);
 
         //--------------------------------------------------------
         // 2) Verificar se sala escolhida existe no servidor local
         //--------------------------------------------------------
 
-        synchronized (roomsLock) {
+        final Room selectedRoom = rooms.get(joinRoom.roomId);
 
-            selectedRoom = rooms.get(joinRoom.roomId);
-
-            if (selectedRoom == null) {
-                return ServerResponse.RoomNotFound;
-            }
+        if (selectedRoom == null) {
+            return ServerResponse.RoomNotFound;
         }
 
         //----------------------------------------------------
         // 3) Registar entrada do utilizador na sala escolhida
         //----------------------------------------------------
 
-        if (selectedRoom.hasUser(userToken)) {
+        if (selectedRoom.hasUser(joinRoom.userToken)) {
             return ServerResponse.AlreadyJoined;
         }
 
-		selectedRoom.registerUser(userToken);
+		selectedRoom.registerUser(joinRoom.userToken);
         connectMirrors(selectedRoom);
 
         //-----------------------------------------------------------------------
@@ -374,13 +350,10 @@ public class SecondaryServer extends AbstractServer {
 
         final ServerResponse operationResult = refreshRoom(joinRoom.roomId);
 
-        synchronized (usersLock) {
+        for (final PushRequest cometRequest : pendingRequests) {
 
-            for (final PushRequest cometRequest : pendingRequests) {
-
-                if (users.containsKey(cometRequest.getToken())) {
-                    cometRequest.send();
-                }
+            if (users.containsKey(cometRequest.getToken())) {
+                cometRequest.send();
             }
         }
 
@@ -399,15 +372,10 @@ public class SecondaryServer extends AbstractServer {
 
         for (final Integer serverId : roomServers) {
 
-            final ServerInfo serverInformation;
+            final ServerInfo serverInformation = servers.get(serverId);
 
-            synchronized (serversLock) {
-
-                serverInformation = servers.get(serverId);
-
-                if (serverInformation == null) {
-                    continue;
-                }
+            if (serverInformation == null) {
+                continue;
             }
 
             if (serverInformation.isOnline()) {
@@ -438,28 +406,20 @@ public class SecondaryServer extends AbstractServer {
         // 1) Verificar se utilizador tem sessão iniciada no servidor
         //-----------------------------------------------------------
 
-        synchronized (usersLock) {
+        final String userEmail = users.get(userToken);
 
-            final String userEmail = users.get(userToken);
-
-            if (userEmail == null) {
-                return ServerResponse.InvalidToken;
-            }
+        if (userEmail == null) {
+            return ServerResponse.InvalidToken;
         }
 
         //--------------------------------------------------------
         // 2) Verificar se sala escolhida existe no servidor local
         //--------------------------------------------------------
 
-        final Room selectedRoom;
+        final Room selectedRoom = rooms.get(roomId);
 
-        synchronized (roomsLock) {
-
-            selectedRoom = rooms.get(roomId);
-
-            if (selectedRoom == null) {
-                return ServerResponse.RoomNotFound;
-            }
+        if (selectedRoom == null) {
+            return ServerResponse.RoomNotFound;
         }
 
         //-----------------------------------------------
@@ -477,13 +437,10 @@ public class SecondaryServer extends AbstractServer {
         // 4) Responder aos pedidos pendentes de todos os utilizadores desta sala
         //-----------------------------------------------------------------------
 
-        synchronized (usersLock) {
+        for (final PushRequest pushRequest : pendingRequests) {
 
-            for (final PushRequest pushRequest : pendingRequests) {
-
-                if (users.containsKey(pushRequest.getToken())) {
-                    pushRequest.send();
-                }
+            if (users.containsKey(pushRequest.getToken())) {
+                pushRequest.send();
             }
         }
 
@@ -496,61 +453,46 @@ public class SecondaryServer extends AbstractServer {
 
         boolean userRemoved = true;
 
-        synchronized (roomsLock) {
+        for (final Room currentRoom : rooms.values()) {
 
-            for (final Room currentRoom : rooms.values()) {
-
-                if (currentRoom.hasUser(userToken)) {
-                    userRemoved = false;
-                }
+            if (currentRoom.hasUser(userToken)) {
+                userRemoved = false;
             }
         }
 
         if (userRemoved) {
-
             mLogger.removeUser(userToken);
-
-            synchronized (usersLock) {
-                users.remove(userToken);
-            }
+            users.remove(userToken);
         }
     }
 
     @Override
     public ServerResponse deleteRoom(int roomId) {
 
-        synchronized (roomsLock) {
+        final Room selectedRoom = rooms.get(roomId);
 
-            final Room selectedRoom = rooms.get(roomId);
-
-            if (selectedRoom == null) {
-                return ServerResponse.RoomNotFound;
-            }
-
-            if (mDatabase.deleteRoom(roomId)) {
-                rooms.remove(roomId);
-            }
-            else {
-                return ServerResponse.DatabaseError;
-            }
-
-            selectedRoom.getUsers().forEach(this::cascadeUser);
+        if (selectedRoom == null) {
+            return ServerResponse.RoomNotFound;
         }
+
+        if (mDatabase.deleteRoom(roomId)) {
+            rooms.remove(roomId);
+        }
+        else {
+            return ServerResponse.DatabaseError;
+        }
+
+        selectedRoom.getUsers().forEach(this::cascadeUser);
 
         return ServerResponse.SuccessResponse;
     }
 
     public ServerResponse sendMessage(int roomId, final String userToken, final String messageBody) {
 
-        final String userRecord;
+        final String userRecord = users.get(userToken);
 
-        synchronized (usersLock) {
-
-            userRecord = users.get(userToken);
-
-            if (userRecord == null) {
-                return ServerResponse.InvalidToken;
-            }
+        if (userRecord == null) {
+            return ServerResponse.InvalidToken;
         }
 
         return sendMessage(
@@ -567,26 +509,18 @@ public class SecondaryServer extends AbstractServer {
 
         final String userToken = paramMessage.getToken();
 
-        synchronized (usersLock) {
-
-            if (users.get(userToken) == null) {
-                return ServerResponse.InvalidToken;
-            }
+        if (users.get(userToken) == null) {
+            return ServerResponse.InvalidToken;
         }
 
         //---------------------------------------------------------
         // 2) Verificar se sala de destino existe no servidor local
         //---------------------------------------------------------
 
-        final Room selectedRoom;
+        final Room selectedRoom = rooms.get(paramMessage.getId());
 
-        synchronized (roomsLock) {
-
-            selectedRoom = rooms.get(paramMessage.getId());
-
-            if (selectedRoom == null) {
-                return ServerResponse.RoomNotFound;
-            }
+        if (selectedRoom == null) {
+            return ServerResponse.RoomNotFound;
         }
 
         //------------------------------------------------
@@ -609,7 +543,10 @@ public class SecondaryServer extends AbstractServer {
         if (roomServers != null && roomServers.size() > 0) {
 
             for (final Integer serverId : roomServers) {
-                mServerListener.sendServer(serverId, paramMessage);
+
+                if (serverId != mServerId) {
+                    mServerListener.sendServer(serverId, paramMessage);
+                }
             }
         }
 
@@ -617,13 +554,10 @@ public class SecondaryServer extends AbstractServer {
         // 5) Responder aos pedidos pendentes de todos os utilizadores desta sala
         //-----------------------------------------------------------------------
 
-        synchronized (usersLock) {
+        for (final PushRequest pushRequest : pendingRequests) {
 
-            for (final PushRequest pushRequest : pendingRequests) {
-
-                if (users.containsKey(pushRequest.getToken())) {
-                    pushRequest.send();
-                }
+            if (users.containsKey(pushRequest.getToken())) {
+                pushRequest.send();
             }
         }
 
@@ -635,15 +569,10 @@ public class SecondaryServer extends AbstractServer {
 
     final ServerResponse insertMessage(final Message paramMessage) {
 
-        final Room selectedRoom;
+        final Room selectedRoom = rooms.get(paramMessage.getId());
 
-        synchronized (roomsLock) {
-
-            selectedRoom = rooms.get(paramMessage.getId());
-
-            if (selectedRoom == null) {
-                return ServerResponse.RoomNotFound;
-            }
+        if (selectedRoom == null) {
+            return ServerResponse.RoomNotFound;
         }
 
         if (mDatabase.insertMessage(paramMessage)) {
@@ -653,13 +582,10 @@ public class SecondaryServer extends AbstractServer {
             return ServerResponse.DatabaseError;
         }
 
-        synchronized (usersLock) {
+        for (final PushRequest pushRequest : pendingRequests) {
 
-            for (final PushRequest pushRequest : pendingRequests) {
-
-                if (users.containsKey(pushRequest.getToken())) {
-                    pushRequest.send();
-                }
+            if (users.containsKey(pushRequest.getToken())) {
+                pushRequest.send();
             }
         }
 
@@ -670,47 +596,36 @@ public class SecondaryServer extends AbstractServer {
 
     @Override
     public boolean validateToken(final String userToken) {
-
-        synchronized (usersLock) {
-            return users.containsKey(userToken);
-        }
+        return users.containsKey(userToken);
     }
 
     private ArrayList<PushRequest> pendingRequests = new ArrayList<>();
 
     @Override
-	public ServerResponse getMessages(final HttpDispatcher httpExchange, final String userToken, int roomId, long lastUpdate) {
+	public ServerResponse getMessages(final HttpExchange httpExchange, final String userToken, int roomId, long lastUpdate) {
 
         //-----------------------------------------------------------
         // 1) Verificar se utilizador tem sessão iniciada no servidor
         //-----------------------------------------------------------
 
-        synchronized (usersLock) {
+        final String userRecord = users.get(userToken);
 
-            final String userRecord = users.get(userToken);
-
-            if (userRecord == null) {
-                return ServerResponse.InvalidToken;
-            }
+        if (userRecord == null) {
+            return ServerResponse.InvalidToken;
         }
 
         //-------------------------------------------------------
         // 2) Verificar se sala escolhida existe na base de dados
         //-------------------------------------------------------
 
-        final Room selectedRoom;
+        final Room selectedRoom = rooms.get(roomId);
 
-        synchronized (roomsLock) {
+        if (selectedRoom == null) {
+            return ServerResponse.RoomNotFound;
+        }
 
-            selectedRoom = rooms.get(roomId);
-
-            if (selectedRoom == null) {
-                return ServerResponse.RoomNotFound;
-            }
-
-            if (!selectedRoom.hasUser(userToken)) {
-                return ServerResponse.InvalidToken;
-            }
+        if (!selectedRoom.hasUser(userToken)) {
+            return ServerResponse.InvalidToken;
         }
 
         //----------------------------------------------------------------------------------
@@ -745,11 +660,8 @@ public class SecondaryServer extends AbstractServer {
 
         int serverId = serverInfo.getId();
 
-        synchronized (serversLock) {
-
-            if (servers.containsKey(serverId)) {
-                return updateServer(serverInfo);
-            }
+        if (servers.containsKey(serverId)) {
+            return updateServer(serverInfo);
         }
 
         //------------------------------------------------
@@ -757,11 +669,7 @@ public class SecondaryServer extends AbstractServer {
         //------------------------------------------------
 
 		if (mDatabase.insertServer(serverInfo)) {
-
-            synchronized (serversLock) {
-                servers.put(serverId, serverInfo);
-            }
-
+            servers.put(serverId, serverInfo);
             mLogger.insertServer(serverId);
         }
         else {
@@ -785,15 +693,10 @@ public class SecondaryServer extends AbstractServer {
         //-----------------------------------------------------------
 
         int serverId = serverInfo.getId();
-        final ServerInfo selectedServer;
+        final ServerInfo selectedServer = servers.get(serverId);
 
-        synchronized (serversLock) {
-
-            selectedServer = servers.get(serverId);
-
-            if (selectedServer == null) {
-                return ServerResponse.ServerNotFound;
-            }
+        if (selectedServer == null) {
+            return ServerResponse.ServerNotFound;
         }
 
         //------------------------------------------------
@@ -827,28 +730,19 @@ public class SecondaryServer extends AbstractServer {
         // 1) Verificar se servidor escolhido existe na base de dados
         //-----------------------------------------------------------
 
-        synchronized (serversLock) {
-
-            if (servers.get(serverId) == null) {
-                return ServerResponse.ServerNotFound;
-            }
+        if (servers.get(serverId) == null) {
+            return ServerResponse.ServerNotFound;
         }
 
-        synchronized (roomsLock) {
-
-            if (mDatabase.deleteServerRooms(serverId)) {
-                rooms.forEach((roomId, room) -> room.removeServer(serverId));
-            }
-            else {
-                return ServerResponse.DatabaseError;
-            }
+        if (mDatabase.deleteServerRooms(serverId)) {
+            rooms.forEach((roomId, room) -> room.removeServer(serverId));
+        }
+        else {
+            return ServerResponse.DatabaseError;
         }
 
         if (mDatabase.deleteServer(serverId)) {
-
-            synchronized (serversLock) {
-                servers.remove(serverId);
-            }
+            servers.remove(serverId);
         }
         else {
             return ServerResponse.DatabaseError;
@@ -865,14 +759,8 @@ public class SecondaryServer extends AbstractServer {
         final String userRecord = users.get(userToken);
 
         if (userRecord != null && userRecord.equals(userEmail)) {
-
-            synchronized (roomsLock) {
-                rooms.forEach((roomId, room) -> room.removeUser(userToken));
-            }
-
-            synchronized (usersLock) {
-                users.remove(userToken);
-            }
+            rooms.forEach((roomId, room) -> room.removeUser(userToken));
+            users.remove(userToken);
         }
         else {
             return ServerResponse.InvalidToken;
@@ -889,15 +777,10 @@ public class SecondaryServer extends AbstractServer {
         System.out.println("serverId:" + serverId);
         System.out.println("--------------------------");
 
-        final Room selectedRoom;
+        final Room selectedRoom = rooms.get(syncRoom.roomId);
 
-        synchronized (roomsLock) {
-
-            selectedRoom = rooms.get(syncRoom.roomId);
-
-            if (selectedRoom == null) {
-                return ServerResponse.RoomNotFound;
-            }
+        if (selectedRoom == null) {
+            return ServerResponse.RoomNotFound;
         }
 
         final UpdateRoom updateRoom = new UpdateRoom(syncRoom.roomId, selectedRoom);
@@ -929,14 +812,11 @@ public class SecondaryServer extends AbstractServer {
             return ServerResponse.MissingParameters;
         }
 
-        synchronized (roomsLock) {
-
-            if (rooms.containsKey(updateRoom.roomId)) {
-                rooms.put(updateRoom.roomId, updateRoom.roomObject);
-            }
-            else {
-                return ServerResponse.RoomNotFound;
-            }
+        if (rooms.containsKey(updateRoom.roomId)) {
+            rooms.put(updateRoom.roomId, updateRoom.roomObject);
+        }
+        else {
+            return ServerResponse.RoomNotFound;
         }
 
         if (mDatabase.deleteRoomServers(updateRoom.roomId)) {

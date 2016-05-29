@@ -1,11 +1,13 @@
 package chatup.server;
 
+import chatup.main.ChatupGlobals;
 import chatup.model.Message;
 
 import chatup.tcp.UpdateRoom;
 
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.KryoNetException;
 import com.esotericsoftware.kryonet.Listener;
 
 class SecondaryClientListener extends Listener {
@@ -72,17 +74,12 @@ class SecondaryClientListener extends Listener {
 
     @Override
     public void connected(final Connection paramConnection) {
-        mKryoClient.sendTCP(mSecondary.getInformation());
-    }
 
-    @Override
-    public void disconnected(final Connection paramConnection) {
-
-        final ServerConnection serverConnection = (ServerConnection) paramConnection;
-
-        if (serverConnection.serverId > 0) {
-            mSecondary.disconnectServer(serverConnection.serverId);
-            mLogger.serverOffline(serverConnection.serverId);
+        try {
+            mKryoClient.sendTCP(mSecondary.getInformation());
+        }
+        catch (final KryoNetException ex) {
+            ChatupGlobals.abort(mSecondary.getType(), ex);
         }
     }
 }

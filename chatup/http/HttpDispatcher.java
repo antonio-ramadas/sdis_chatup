@@ -8,24 +8,25 @@ import com.eclipsesource.json.JsonValue;
 import com.esotericsoftware.minlog.Log;
 
 import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
 import java.net.HttpURLConnection;
 
-public abstract class HttpDispatcher {
+abstract class HttpDispatcher implements HttpHandler {
 
     private final String httpService;
-    private final HttpExchange httpExchange;
 
-    HttpDispatcher(final String paramService, final HttpExchange paramExchange) {
+    HttpDispatcher(final String paramService) {
         httpService = paramService;
-        httpExchange = paramExchange;
     }
 
-    void processRequest() {
+    @Override
+    public void handle(final HttpExchange httpExchange) {
 
         final String requestMethod = httpExchange.getRequestMethod();
 
@@ -37,10 +38,10 @@ public abstract class HttpDispatcher {
             final String httpQuery = httpExchange.getRequestURI().getQuery();
 
             if (httpQuery == null || httpQuery.isEmpty()) {
-                sendError(ServerResponse.MissingParameters);
+                sendError(httpExchange, ServerResponse.MissingParameters);
             }
             else {
-                parseGetRequest(httpQuery.split("&"));
+                parseGetRequest(httpExchange, httpQuery.split("&"));
             }
 
             break;
@@ -50,10 +51,10 @@ public abstract class HttpDispatcher {
             final String postBody = parseRequestBody(httpExchange.getRequestBody());
 
             if (postBody == null || postBody.isEmpty()) {
-                sendError(ServerResponse.MissingParameters);
+                sendError(httpExchange, ServerResponse.MissingParameters);
             }
             else {
-                parsePostRequest(Json.parse(postBody));
+                parsePostRequest(httpExchange, Json.parse(postBody));
             }
 
             break;
@@ -63,10 +64,10 @@ public abstract class HttpDispatcher {
             final String putBody = parseRequestBody(httpExchange.getRequestBody());
 
             if (putBody == null || putBody.isEmpty()) {
-                sendError(ServerResponse.MissingParameters);
+                sendError(httpExchange, ServerResponse.MissingParameters);
             }
             else {
-                parsePutRequest(Json.parse(putBody));
+                parsePutRequest(httpExchange, Json.parse(putBody));
             }
 
             break;
@@ -76,38 +77,37 @@ public abstract class HttpDispatcher {
             final String deleteBody = parseRequestBody(httpExchange.getRequestBody());
 
             if (deleteBody == null || deleteBody.isEmpty()) {
-                sendError(ServerResponse.MissingParameters);
+                sendError(httpExchange, ServerResponse.MissingParameters);
             }
             else {
-                parseDeleteRequest(Json.parse(deleteBody));
+                parseDeleteRequest(httpExchange, Json.parse(deleteBody));
             }
 
             break;
 
         default:
 
-            sendError(ServerResponse.InvalidMethod);
+            sendError(httpExchange, ServerResponse.InvalidMethod);
 
             break;
         }
     }
 
-    boolean sendError(final ServerResponse serverResponse) {
+    void sendError(final HttpExchange httpExchange, final ServerResponse serverResponse) {
 
         try {
             sendResponse(
+                httpExchange,
                 Json.object().add(HttpCommands.GenericError, serverResponse.toString()).toString(),
                 HttpURLConnection.HTTP_OK
             );
         }
         catch (final IOException ex) {
-            return false;
+            ChatupGlobals.warn(httpService, ex);
         }
-
-        return true;
     }
 
-    private void sendResponse(final String serverResponse, int statusCode) throws IOException {
+    private void sendResponse(final HttpExchange httpExchange, final String serverResponse, int statusCode) throws IOException {
 
         Log.info(httpService, "sending response: " + serverResponse);
         httpExchange.sendResponseHeaders(statusCode, serverResponse.length());
@@ -116,48 +116,49 @@ public abstract class HttpDispatcher {
             os.write(serverResponse.getBytes());
             os.close();
         }
+        catch (final IOException ex) {
+            ChatupGlobals.warn(httpService, ex);
+        }
     }
 
-    boolean sendTextResponse(final ServerResponse httpResponse, final String httpParameters) {
+    void sendTextResponse(final HttpExchange httpExchange, final ServerResponse httpResponse, final String httpParameters) {
 
         if (httpResponse == ServerResponse.SuccessResponse) {
 
             try {
                 sendResponse(
+                    httpExchange,
                     Json.object().add(HttpCommands.GenericSuccess, httpParameters).toString(),
                     HttpURLConnection.HTTP_OK
                 );
             }
             catch (final IOException ex) {
-                return false;
+                ChatupGlobals.warn(httpService, ex);
             }
         }
         else {
-            return sendError(httpResponse);
+            sendError(httpExchange, httpResponse);
         }
-
-        return true;
     }
 
-    boolean sendJsonResponse(final ServerResponse httpResponse, final JsonValue httpParameters) {
+    void sendJsonResponse(final HttpExchange httpExchange, final ServerResponse httpResponse, final JsonValue httpParameters) {
 
         if (httpResponse == ServerResponse.SuccessResponse) {
 
             try {
                 sendResponse(
+                    httpExchange,
                     Json.object().add(HttpCommands.GenericSuccess, httpParameters).toString(),
                     HttpURLConnection.HTTP_OK
                 );
             }
             catch (final IOException ex) {
-                return false;
+                ChatupGlobals.warn(httpService, ex);
             }
         }
         else {
-            return sendError(httpResponse);
+            sendError(httpExchange, httpResponse);
         }
-
-        return true;
     }
 
     final JsonObject extractCommand(final JsonValue jsonObject, final String commandName) {
@@ -246,19 +247,19 @@ public abstract class HttpDispatcher {
         return null;
     }
 
-    public void parseGetRequest(final String[] getValues) {
-        sendError(ServerResponse.InvalidMethod);
+    public void parseGetRequest(final HttpExchange httpExchange, final String[] getValues) {
+        sendError(httpExchange, ServerResponse.InvalidMethod);
     }
 
-    public void parsePostRequest(final JsonValue jsonValue) {
-        sendError(ServerResponse.InvalidMethod);
+    public void parsePostRequest(final HttpExchange httpExchange, final JsonValue jsonValue) {
+        sendError(httpExchange, ServerResponse.InvalidMethod);
     }
 
-    public void parsePutRequest(final JsonValue jsonValue) {
-        sendError(ServerResponse.InvalidMethod);
+    public void parsePutRequest(final HttpExchange httpExchange, final JsonValue jsonValue) {
+        sendError(httpExchange, ServerResponse.InvalidMethod);
     }
 
-    public void parseDeleteRequest(final JsonValue jsonValue) {
-        sendError(ServerResponse.InvalidMethod);
+    public void parseDeleteRequest(final HttpExchange httpExchange, final JsonValue jsonValue) {
+        sendError(httpExchange, ServerResponse.InvalidMethod);
     }
 }

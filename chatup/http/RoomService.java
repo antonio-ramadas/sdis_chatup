@@ -12,14 +12,14 @@ import com.sun.net.httpserver.HttpExchange;
 
 import javafx.util.Pair;
 
-class RoomServiceHandler extends HttpDispatcher {
+public class RoomService extends HttpDispatcher {
 
-    RoomServiceHandler(final HttpExchange httpExchange) {
-        super(ChatupGlobals.RoomServiceUrl, httpExchange);
+    public RoomService() {
+        super(ChatupGlobals.RoomServiceUrl);
     }
 
     @Override
-    public void parseGetRequest(final String[] jsonValue) {
+    public void parseGetRequest(final HttpExchange httpExchange, final String[] jsonValue) {
 
         final AbstractServer serverInstance = ChatupServer.getInstance();
 
@@ -28,22 +28,22 @@ class RoomServiceHandler extends HttpDispatcher {
             final String userToken = parseString(jsonValue, 0, HttpFields.UserToken);
 
             if (userToken == null) {
-                sendError(ServerResponse.InvalidToken);
+                sendError(httpExchange, ServerResponse.InvalidToken);
             }
             else if (serverInstance.validateToken(userToken)){
-                sendJsonResponse(ServerResponse.SuccessResponse, serverInstance.getRooms());
+                sendJsonResponse(httpExchange, ServerResponse.SuccessResponse, serverInstance.getRooms());
             }
             else {
-                sendError(ServerResponse.InvalidToken);
+                sendError(httpExchange, ServerResponse.InvalidToken);
             }
         }
         else {
-            sendError(ServerResponse.MissingParameters);
+            sendError(httpExchange, ServerResponse.MissingParameters);
         }
     }
 
     @Override
-    public void parsePostRequest(final JsonValue jsonValue) {
+    public void parsePostRequest(final HttpExchange httpExchange, final JsonValue jsonValue) {
 
         final AbstractServer serverInstance = ChatupServer.getInstance();
         final JsonObject jsonObject = extractCommand(jsonValue, HttpCommands.JoinRoom);
@@ -55,7 +55,7 @@ class RoomServiceHandler extends HttpDispatcher {
             final String userToken = jsonObject.getString(HttpFields.UserToken, null);
 
             if (roomId < 0 || userToken == null || userToken.isEmpty()) {
-                sendError(ServerResponse.MissingParameters);
+                sendError(httpExchange, ServerResponse.MissingParameters);
             }
             else {
 
@@ -67,22 +67,22 @@ class RoomServiceHandler extends HttpDispatcher {
                 final ServerInfo serverInfo = serverPair.getValue();
 
                 if (serverResponse == ServerResponse.SuccessResponse) {
-                    sendJsonResponse(serverResponse, jsonObject
+                    sendJsonResponse(httpExchange, serverResponse, jsonObject
                         .add("address", serverInfo.getAddress())
                         .add("port", serverInfo.getHttpPort()));
                 }
                 else {
-                    sendError(serverResponse);
+                    sendError(httpExchange, serverResponse);
                 }
             }
         }
         else {
-            sendError(ServerResponse.InvalidOperation);
+            sendError(httpExchange, ServerResponse.InvalidOperation);
         }
     }
 
     @Override
-    public void parsePutRequest(final JsonValue jsonValue) {
+    public void parsePutRequest(final HttpExchange httpExchange, final JsonValue jsonValue) {
 
         final AbstractServer serverInstance = ChatupServer.getInstance();
         final JsonObject jsonObject = extractCommand(jsonValue, HttpCommands.CreateRoom);
@@ -94,22 +94,22 @@ class RoomServiceHandler extends HttpDispatcher {
             final String userToken = jsonObject.getString(HttpFields.UserToken, null);
 
             if (roomName == null || roomName.isEmpty()) {
-                sendError(ServerResponse.MissingParameters);
+                sendError(httpExchange, ServerResponse.MissingParameters);
             }
             else if (userToken == null || userToken.isEmpty()) {
-                sendError(ServerResponse.MissingParameters);
+                sendError(httpExchange, ServerResponse.MissingParameters);
             }
             else {
-                sendJsonResponse(serverInstance.createRoom(roomName, roomPassword, userToken), jsonObject);
+                sendJsonResponse(httpExchange, serverInstance.createRoom(roomName, roomPassword, userToken), jsonObject);
             }
         }
         else {
-            sendError(ServerResponse.InvalidOperation);
+            sendError(httpExchange, ServerResponse.InvalidOperation);
         }
     }
 
     @Override
-    public void parseDeleteRequest(final JsonValue jsonValue) {
+    public void parseDeleteRequest(final HttpExchange httpExchange, final JsonValue jsonValue) {
 
         final AbstractServer serverInstance = ChatupServer.getInstance();
         final JsonObject jsonObject = extractCommand(jsonValue, HttpCommands.LeaveRoom);
@@ -120,14 +120,14 @@ class RoomServiceHandler extends HttpDispatcher {
             final String userToken = jsonObject.getString(HttpFields.UserToken, null);
 
             if (roomId < 0 || userToken == null || userToken.isEmpty()) {
-                sendError(ServerResponse.MissingParameters);
+                sendError(httpExchange, ServerResponse.MissingParameters);
             }
             else {
-                sendJsonResponse(serverInstance.leaveRoom(roomId, userToken), jsonObject);
+                sendJsonResponse(httpExchange, serverInstance.leaveRoom(roomId, userToken), jsonObject);
             }
         }
         else {
-            sendError(ServerResponse.InvalidOperation);
+            sendError(httpExchange, ServerResponse.InvalidOperation);
         }
     }
 }
