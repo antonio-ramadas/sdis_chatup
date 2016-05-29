@@ -2,6 +2,7 @@ package chatup.server;
 
 import chatup.http.*;
 import chatup.main.ChatupGlobals;
+import chatup.main.ChatupServer;
 import chatup.model.Message;
 
 import com.eclipsesource.json.JsonValue;
@@ -10,6 +11,7 @@ import com.sun.net.httpserver.*;
 
 import javafx.util.Pair;
 
+import javax.net.ssl.*;
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,37 +34,15 @@ public abstract class AbstractServer {
         try {
 
             final HttpServer httpServer = HttpServer.create(new InetSocketAddress(httpPort), 0);
-         /*   final ServerKeystore serverKeystore = ChatupServer.getKeystore();
+
+            /*
+            final ServerKeystore serverKeystore = ChatupServer.getKeystore();
             final KeyManagerFactory kmf = serverKeystore.getKeyManager();
-            final TrustManagerFactory tmf = serverKeystore.getTrustManager();
             final SSLContext sslContext = SSLContext.getInstance("TLS");
 
-            sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-
-            httpServer.setHttpsConfigurator(new HttpsConfigurator(sslContext) {
-
-                @Override
-                public void configure(HttpsParameters params) {
-
-                    try {
-
-                        final SSLContext c = SSLContext.getDefault();
-                        final SSLEngine engine = c.createSSLEngine();
-
-                        params.setNeedClientAuth(false);
-                        params.setWantClientAuth(false);
-                        params.setCipherSuites(engine.getEnabledCipherSuites());
-                        params.setProtocols(engine.getEnabledProtocols());
-
-                        final SSLParameters defaultSSLParameters = c.getDefaultSSLParameters();
-
-                        params.setSSLParameters(defaultSSLParameters);
-                    }
-                    catch (final Exception ex) {
-                        ChatupGlobals.abort(serverType, ex);
-                    }
-                }
-            });*/
+            sslContext.init(kmf.getKeyManagers(), null, null);
+            httpServer.setHttpsConfigurator(new HttpsConfigurator(sslContext));
+            */
 
             if (paramType == ServerType.PRIMARY) {
                 httpServer.createContext(ChatupGlobals.HeartbeatServiceUrl, new HeartbeatService());
@@ -114,7 +94,7 @@ public abstract class AbstractServer {
         throw new UnsupportedOperationException("DeleteServer");
     }
 
-    public ServerResponse userLogin(final String userToken) {
+    public ServerResponse userLogin(final HttpExchange httpExchange, final String userToken) {
         throw new UnsupportedOperationException("UserLogin");
     }
 

@@ -8,9 +8,7 @@ import chatup.server.AbstractServer;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonValue;
-
 import com.esotericsoftware.minlog.Log;
-
 import com.sun.net.httpserver.HttpExchange;
 
 import java.io.IOException;

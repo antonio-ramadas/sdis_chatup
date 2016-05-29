@@ -241,7 +241,7 @@ abstract class HttpDispatcher implements HttpHandler {
             return new String(out.toByteArray(), ChatupGlobals.DefaultEncoding);
         }
         catch (final IOException ex) {
-            ex.printStackTrace();
+            ChatupGlobals.warn(httpService, ex);
         }
 
         return null;

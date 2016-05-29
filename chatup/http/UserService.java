@@ -29,11 +29,7 @@ public class UserService extends HttpDispatcher {
                 sendError(httpExchange, ServerResponse.MissingParameters);
             }
             else {
-                sendJsonResponse(
-                    httpExchange,
-                    serverInstance.userLogin(userToken),
-                    jsonObject.add("email", serverInstance.getEmail(userToken))
-                );
+                serverInstance.userLogin(httpExchange, userToken);
             }
         }
         else {

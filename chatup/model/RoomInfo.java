@@ -111,7 +111,7 @@ public class RoomInfo implements Serializable {
        roomServers = paramServers;
     }
 
-    public boolean validatePassword(String userPassword) {
+    public boolean validatePassword(final String userPassword) {
         return roomPassword.equals(userPassword);
     }
 }

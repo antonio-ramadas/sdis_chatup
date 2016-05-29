@@ -15,22 +15,15 @@ import java.security.cert.CertificateException;
 public class ServerKeystore {
 
     private final KeyManagerFactory kmf;
-    private final TrustManagerFactory tmf;
 
     public ServerKeystore(final String keystorePath, final String keystorePassword) throws IOException, NoSuchAlgorithmException, UnrecoverableKeyException, KeyStoreException, CertificateException {
         KeyStore keystore = KeyStore.getInstance("JKS");
         keystore.load(new FileInputStream(keystorePath), keystorePassword.toCharArray());
         kmf = KeyManagerFactory.getInstance("SunX509");
         kmf.init(keystore, keystorePassword.toCharArray());
-        tmf = TrustManagerFactory.getInstance("SunX509");
-        tmf.init(keystore);
     }
 
     final KeyManagerFactory getKeyManager() {
         return kmf;
-    }
-
-    final TrustManagerFactory getTrustManager() {
-        return tmf;
     }
 }

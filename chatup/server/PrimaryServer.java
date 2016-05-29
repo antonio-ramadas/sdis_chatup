@@ -1,7 +1,9 @@
 package chatup.server;
 
+import chatup.http.FacebookService;
 import chatup.http.HttpFields;
 import chatup.http.ServerResponse;
+import chatup.main.ChatupGlobals;
 import chatup.model.Database;
 import chatup.model.CommandQueue;
 import chatup.model.Room;
@@ -15,6 +17,7 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Server;
 import com.esotericsoftware.minlog.Log;
 
+import com.sun.net.httpserver.HttpExchange;
 import javafx.util.Pair;
 
 import java.io.IOException;
@@ -177,7 +180,6 @@ public class PrimaryServer extends AbstractServer {
         return serversList;
     }
 
-    // TODO: verificar algoritmo de replicação de emergência de uma sala (ver também @joinRoom)
     private Pair<ServerResponse, ServerInfo> relocateRoom(int roomId) {
 
         final RoomInfo selectedRoom = rooms.get(roomId);
@@ -244,13 +246,13 @@ public class PrimaryServer extends AbstractServer {
         int roomId = ++sequenceRoom;
         int replicationDegree = (int)(Math.floor(servers.size() / 3) + 1);
 
-        final RoomInfo roomInformation = new RoomInfo(roomName, roomPassword, roomOwner);
+        final RoomInfo roomInformation = new RoomInfo(roomName, roomPassword, userEmail);
 
         final Room serializedRoom = new Room(
             roomName,
             roomPassword,
             roomInformation.getTimestamp(),
-            roomOwner
+            userEmail
         );
 
         //----------------------------------------------------
@@ -425,8 +427,6 @@ public class PrimaryServer extends AbstractServer {
         return ServerResponse.SuccessResponse;
     }
 
-    // TODO: entrar numa sala quando nenhum dos servidores está disponível
-    // TODO: verificar se servidor primário replica a sala num outro servidor disponível
     @Override
     public Pair<ServerResponse, ServerInfo> joinRoom(int roomId, final String userPassword, final String userToken) {
 
@@ -927,15 +927,25 @@ public class PrimaryServer extends AbstractServer {
         return ServerResponse.SuccessResponse;
     }
 
-    // TODO: implementar autenticação via facebook
     @Override
-    public ServerResponse userLogin(final String userToken) {
+    public ServerResponse userLogin(final HttpExchange httpExchange, final String userToken) {
 
         if (users.containsKey(userToken)) {
             return ServerResponse.SessionExists;
         }
 
-        users.put(userToken, "marques999@gmail.com");
+        try {
+
+            if (new FacebookService(httpExchange, userToken).validateToken()) {
+                users.put(userToken, "marques999@gmail.com");
+            }
+            else {
+                return ServerResponse.AuthenticationFailed;
+            }
+        }
+        catch (final IOException ex) {
+            ChatupGlobals.warn(getType().toString(), ex);
+        }
 
         return ServerResponse.SuccessResponse;
     }
