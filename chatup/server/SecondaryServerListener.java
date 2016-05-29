@@ -73,7 +73,6 @@ class SecondaryServerListener extends Listener {
         );
 
         paramConnection.serverId = serverOnline.serverId;
-        System.out.println("server " + serverOnline.serverId + " is online!");
         mConnections.put(serverOnline.serverId, paramConnection.getId());
 
         final ServerResponse operationResult = mSecondary.insertServer(serverInfo);

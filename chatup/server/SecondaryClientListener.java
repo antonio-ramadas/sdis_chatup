@@ -35,7 +35,7 @@ class SecondaryClientListener extends Listener {
 
         switch (mSecondary.insertMessage(paramMessage)) {
         case SuccessResponse:
-            mLogger.insertMessage(paramMessage.getId(), -1);
+            mLogger.insertMessage(paramMessage.getId());
             break;
         case RoomNotFound:
             mLogger.roomNotFound(paramMessage.getId());
@@ -56,7 +56,7 @@ class SecondaryClientListener extends Listener {
 
         switch (mSecondary.updateRoom(updateRoom)) {
         case SuccessResponse:
-            mLogger.updateRoom(updateRoom.roomId, -1);
+            mLogger.updateRoom(updateRoom.roomId);
             break;
         case RoomNotFound:
             mLogger.roomNotFound(updateRoom.roomId);

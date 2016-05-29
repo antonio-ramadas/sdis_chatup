@@ -1,7 +1,5 @@
 package chatup.tcp;
 
-import chatup.server.ServerInfo;
-
 import java.io.Serializable;
 
 public class ServerOnline implements Serializable
@@ -24,16 +22,5 @@ public class ServerOnline implements Serializable
         serverTimestamp = paramTimestamp;
         tcpPort = paramTcp;
         httpPort = paramHttp;
-    }
-
-    public ServerInfo getServerInformation() {
-
-        return new ServerInfo(
-                serverId,
-                serverTimestamp,
-                serverAddress,
-                tcpPort,
-                httpPort
-        );
     }
 }

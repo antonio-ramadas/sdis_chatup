@@ -174,6 +174,10 @@ public class SecondaryServer extends Server {
 
             final ServerInfo serverInfo = servers.get(serverId);
 
+            if (serverInfo == null) {
+                continue;
+            }
+
             if (serverInfo.isOnline() /*&& serverInfo.getTimestamp() > mostRecentTimestamp*/) {
                 mostRecentServer = serverId;
                 mostRecentTimestamp = serverInfo.getTimestamp();

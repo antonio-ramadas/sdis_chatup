@@ -43,7 +43,7 @@ public class PushRequest {
             final Message currentMessage = myMessages.get(i);
 
             messagesArray.asArray().add(Json.object()
-                .add(HttpFields.MessageSender, currentMessage.getToken())
+                .add(HttpFields.MessageSender, currentMessage.getAuthor())
                 .add(HttpFields.MessageTimestamp, currentMessage.getTimestamp())
                 .add(HttpFields.MessageContents, currentMessage.getMessage())
                 .add(HttpFields.MessageRoomId, currentMessage.getId()));

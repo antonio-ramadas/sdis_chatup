@@ -23,17 +23,16 @@ class UserServiceHandler extends HttpDispatcher {
 
         if (jsonObject != null) {
 
-            final String userEmail = jsonObject.getString(HttpFields.UserEmail, null);
             final String userToken = jsonObject.getString(HttpFields.UserToken, null);
 
-            if (userEmail == null || userEmail.isEmpty()) {
-                sendError(ServerResponse.MissingParameters);
-            }
-            else if (userToken == null || userToken.isEmpty()) {
+            if (userToken == null || userToken.isEmpty()) {
                 sendError(ServerResponse.MissingParameters);
             }
             else {
-                sendJsonResponse(serverInstance.userLogin(userEmail, userToken), jsonObject);
+                sendJsonResponse(
+                    serverInstance.userLogin(userToken),
+                    jsonObject.add("email", serverInstance.getEmail(userToken))
+                );
             }
         }
         else {

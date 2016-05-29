@@ -58,7 +58,7 @@ class PrimaryClientListener extends Listener {
 
         switch (mSecondary.createRoom(createRoom)) {
         case SuccessResponse:
-            mLogger.createRoom(createRoom.userToken, createRoom.roomName);
+            mLogger.createRoom(createRoom.userEmail, createRoom.roomName);
             break;
         case RoomExists:
             mLogger.roomExists(createRoom.roomName);
@@ -73,25 +73,27 @@ class PrimaryClientListener extends Listener {
 
         switch (mSecondary.joinRoom(joinRoom)) {
         case SuccessResponse:
-            mLogger.joinRoom(joinRoom.userToken, joinRoom.roomId);
+            mLogger.joinRoom(joinRoom.userEmail, joinRoom.roomId);
             break;
         case RoomNotFound:
             mLogger.roomNotFound(joinRoom.roomId);
             break;
         case AlreadyJoined:
-            mLogger.alreadyJoined(joinRoom.roomId, joinRoom.userToken);
+            mLogger.alreadyJoined(joinRoom.roomId, joinRoom.userEmail);
             break;
         }
     }
 
     private void leaveRoom(final LeaveRoom leaveRoom) {
 
+        final String userEmail = mSecondary.getEmail(leaveRoom.userToken);
+
         switch (mSecondary.leaveRoom(leaveRoom.roomId, leaveRoom.userToken)) {
         case SuccessResponse:
-            mLogger.leaveRoom(leaveRoom.userToken, leaveRoom.roomId);
+            mLogger.leaveRoom(userEmail, leaveRoom.roomId);
             break;
         case InvalidToken:
-            mLogger.roomInvalidToken(leaveRoom.roomId, leaveRoom.userToken);
+            mLogger.roomInvalidToken(leaveRoom.roomId, userEmail);
             break;
         case RoomNotFound:
             mLogger.roomNotFound(leaveRoom.roomId);

@@ -975,7 +975,8 @@ public class PrimaryServer extends Server {
     }
 
     // TODO: implementar autenticação via facebook
-    public ServerResponse userLogin(final String userEmail, final String userToken) {
+    @Override
+    public ServerResponse userLogin(final String userToken) {
 
         synchronized (usersLock) {
 
@@ -983,12 +984,13 @@ public class PrimaryServer extends Server {
                 return ServerResponse.SessionExists;
             }
 
-            users.put(userToken, userEmail);
+            users.put(userToken, "marques999@gmail.com");
         }
 
         return ServerResponse.SuccessResponse;
     }
 
+    @Override
     public boolean validateToken(final String userToken) {
 
         synchronized (usersLock) {

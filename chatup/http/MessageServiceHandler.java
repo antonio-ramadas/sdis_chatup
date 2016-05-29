@@ -59,8 +59,9 @@ class MessageServiceHandler extends HttpDispatcher {
             }
             else {
                 sendJsonResponse(
-                    serverInstance.sendMessage(roomId, userToken, messageBody),
-                    jsonObject.add(HttpFields.MessageTimestamp, Instant.now().toEpochMilli())
+                    serverInstance.sendMessage(roomId, userToken, messageBody), jsonObject
+                    .add(HttpFields.MessageTimestamp, Instant.now().toEpochMilli())
+                    .add(HttpFields.UserEmail, serverInstance.getEmail(userToken))
                 );
             }
         }

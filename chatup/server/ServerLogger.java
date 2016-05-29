@@ -66,8 +66,8 @@ class ServerLogger {
         information("Sending Room #" + roomId + " metadata to Server #" + serverId + "...");
     }
 
-    void updateRoom(final int roomId, int serverId) {
-        information("Received Room #" + roomId + " metadata from Server #" + serverId + "!");
+    void updateRoom(int roomId) {
+        information("Received Room #" + roomId + " metadata from server.");
     }
 
     void userConnected(final String userName) {
@@ -78,8 +78,8 @@ class ServerLogger {
         warning("User #" + userToken + " has already joined Room #" + roomId + "!");
     }
 
-    void insertMessage(final int roomId, int serverId) {
-        information("Received Message #" + roomId + " metadata from Server #" + serverId + "!");
+    void insertMessage(int roomId) {
+        information("Received Message #" + roomId + " metadata from server!");
     }
 
     void sendMessage(int roomId) {
@@ -106,24 +106,24 @@ class ServerLogger {
         information("Server #" + serverId + " information has been updated!");
     }
 
-    void userDisconnected(final String userToken) {
-        information("User #" + userToken + " has logged out");
+    void userDisconnected(final String userEmail) {
+        information(userEmail + " has logged out");
     }
 
     void createRoom(final String userToken, final String roomName) {
-        information("User #" + userToken + " has created Room " + roomName + ".");
+        information(userToken + " has created Room " + roomName + ".");
     }
 
-    void joinRoom(final String userToken, int roomId) {
-        information("User #" + userToken + " has joined Room #" + roomId + ".");
+    void joinRoom(final String userEmail, int roomId) {
+        information(userEmail + " has joined Room #" + roomId + ".");
     }
 
     void deleteRoom(int roomId) {
         warning("Room #" + roomId + " has been deleted due to inactivity!");
     }
 
-    void leaveRoom(final String userToken, int roomId) {
-        information("User #" + userToken + " has left Room #" + roomId + ".");
+    void leaveRoom(final String userEmail, int roomId) {
+        information(userEmail + " has left Room #" + roomId + ".");
     }
 
     private void warning(final String paramMessage) {

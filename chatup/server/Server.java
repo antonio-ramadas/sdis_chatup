@@ -107,7 +107,7 @@ public abstract class Server {
         throw new UnsupportedOperationException("DeleteServer");
     }
 
-    public ServerResponse userLogin(final String userEmail, final String userToken) {
+    public ServerResponse userLogin(final String userToken) {
         throw new UnsupportedOperationException("UserLogin");
     }
 
@@ -149,5 +149,19 @@ public abstract class Server {
 
     public ServerResponse sendMessage(int roomId, String userToken, String messageBody) {
         throw new UnsupportedOperationException("SendMessage");
+    }
+
+    public String getEmail(String userToken) {
+
+        synchronized (usersLock) {
+
+            final String userEmail = users.get(userToken);
+
+            if (userEmail == null) {
+                return userToken;
+            }
+
+            return userEmail;
+        }
     }
 }
