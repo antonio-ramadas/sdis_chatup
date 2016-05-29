@@ -119,7 +119,7 @@ public class PrimaryServer extends AbstractServer {
         // 6) Apaga todas os servidores inactivos nas últimas 24 horas
         //------------------------------------------------------------
 
-     //   purgeServers();
+        purgeServers();
 
         //-------------------------------------------------------
         // 7) Apaga todas as salas inactivas nas últimas 24 horas
@@ -718,9 +718,13 @@ public class PrimaryServer extends AbstractServer {
             final Map.Entry<Integer, RoomInfo> currentEntry = roomsIterator.next();
             final RoomInfo selectedRoom = currentEntry.getValue();
 
+            System.out.println(selectedRoom.getTimestamp());
+
             if (!selectedRoom.isEmpty() || selectedRoom.getTimestamp() > currentTimestamp) {
                 continue;
             }
+
+
 
             int roomId = currentEntry.getKey();
 
@@ -758,14 +762,14 @@ public class PrimaryServer extends AbstractServer {
             // 3) Registar remoção desse servidor na base de dados
             //----------------------------------------------------
 
+            roomsIterator.remove();
             if (serverDatabase.deleteRoom(roomId)) {
-                rooms.remove(roomId);
+
             }
             else {
                 return ServerResponse.DatabaseError;
             }
 
-            roomsIterator.remove();
         }
 
         return ServerResponse.SuccessResponse;

@@ -179,7 +179,7 @@ public class SecondaryServer extends AbstractServer {
                 continue;
             }
 
-            if (serverInfo.isOnline() /*&& serverInfo.getTimestamp() > mostRecentTimestamp*/) { // TODO:
+            if (serverInfo.isOnline() && serverInfo.getTimestamp() > mostRecentTimestamp) { // TODO
                 mostRecentServer = serverId;
                 mostRecentTimestamp = serverInfo.getTimestamp();
             }

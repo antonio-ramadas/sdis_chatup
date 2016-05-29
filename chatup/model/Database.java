@@ -193,9 +193,10 @@ public class Database {
             while (rs.next()) {
 
                 final RoomInfo newRoom = new RoomInfo(
-                    rs.getString(RoomName),
-                    rs.getString(RoomPassword),
-                    rs.getString(RoomOwner)
+                        rs.getString(RoomName),
+                        rs.getString(RoomPassword),
+                        rs.getLong(ServerTimestamp),
+                        rs.getString(RoomOwner)
                 );
 
                 myRooms.put(rs.getInt(RoomId), newRoom);

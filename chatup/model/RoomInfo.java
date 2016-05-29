@@ -22,6 +22,15 @@ public class RoomInfo implements Serializable {
         roomServers = new HashSet<>();
     }
 
+    public RoomInfo(final String paramName, final String paramPassword, final long timestamp, final String paramOwner) {
+        roomName = paramName;
+        roomOwner = paramOwner;
+        roomPassword = paramPassword;
+        roomTimestamp = timestamp;
+        roomUsers = new HashSet<>();
+        roomServers = new HashSet<>();
+    }
+
     private long roomTimestamp;
 
     public boolean registerServer(int serverId) {
